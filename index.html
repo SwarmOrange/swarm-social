@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel='icon' href='./favicon.ico' type='image/x-icon'/>
+</head>
+<body>
+
+<script type="text/javascript" src="node_modules/jquery/dist/jquery.js"></script>
+<script type="text/javascript" src="js/sapi.js"></script>
+<script type="text/javascript" src="js/bloglogic.js"></script>
+
+<script>
+
+    function onPostButtonClick() {
+        attachFiles(updatePostHtml);
+    }
+
+</script>
+
+<div align='center'>
+    <h1>Swarm blogs</h1>
+    <p>My personal blog.</p>
+    <p id="demo"></p>
+</div>
+
+
+<div align='left'>
+    <p id="id_pageHash" hidden></p>
+    <p id="id_pagePosts" hidden></p>
+</div>
+
+<div align='center'>
+    <textarea rows="4" cols="100" id="id_mainTextArea"> </textarea>
+    <br/>
+
+    <!--Upload Form-->
+    <input id="id_uploadFile" type="file" multiple/>
+    <button id="demoSend" onclick="onPostButtonClick();">Post</button>
+</div>
+<br/>
+
+</body>
+</html>
