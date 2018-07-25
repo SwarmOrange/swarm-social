@@ -1,0 +1,1 @@
+window.SwarmApi = require('./SwarmApi');

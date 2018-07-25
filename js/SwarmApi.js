@@ -1,9 +1,23 @@
-class swarmAPI {
-
-    constructor() {
+class SwarmApi {
+    constructor(apiUrl, applicationHash) {
+        this.isWeb = typeof window !== undefined;
+        this.axios = require('axios');
+        this.applicationHash = applicationHash;
+        // todo check is generates correct url when web and empty url
+        this.apiUrl = apiUrl || (this.isWeb ? location.protocol + "//" + location.host : "https://swarm-gateways.net");
         this.c_hashLength = 64;
-        this.c_host = location.protocol + "//" + location.host;
-        this.resetPageHash();
+        //this.c_host = location.protocol + "//" + location.host;
+        //this.resetPageHash();
+    }
+
+    get(file, swarmProtocol) {
+        swarmProtocol = swarmProtocol || "bzz:";
+        let url = [this.apiUrl, swarmProtocol, this.applicationHash, file].filter(function (n) {
+            return n !== ""
+        }).join("/");
+        console.log(url);
+
+        return this.axios.get(url);
     }
 
     getFile(filename, onSuccess) {
@@ -106,3 +120,5 @@ class swarmAPI {
         //alert("Error updating page hash! " + hash);
     }
 }
+
+module.exports = SwarmApi;

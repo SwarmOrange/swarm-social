@@ -24,7 +24,7 @@ function loadPosts(number) {
 
 window.onload = function () {
     gData = new Object;
-    sApi = new swarmAPI();
+    sApi = new SwarmApi();
     sApi.getFile("/data/info.txt", function (data) {
         var obj = JSON.parse(data);
         loadPosts(obj.count); // set gData

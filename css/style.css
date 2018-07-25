@@ -1,0 +1,9 @@
+.posts {
+    margin-top: 8px;
+}
+
+.wall-post {
+    border: 1px solid #e1e1e1;
+    margin-bottom: 8px;
+    padding: 8px;
+}

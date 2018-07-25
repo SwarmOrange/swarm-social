@@ -1,43 +1,60 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <link rel='icon' href='./favicon.ico' type='image/x-icon'/>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>SWARM Post</title>
+
+    <link href="node_modules/bootswatch/dist/cosmo/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
 
-<script type="text/javascript" src="node_modules/jquery/dist/jquery.js"></script>
-<script type="text/javascript" src="js/sapi.js"></script>
-<script type="text/javascript" src="js/bloglogic.js"></script>
+<div class="container" style="margin-top: 30px">
+    <p>* Users navigation here. Show current user hash. Enter other hash</p>
+    <div class="row">
+        <div class="col-sm-4">
+            <img src="https://pp.userapi.com/c840526/v840526807/b2fe/ipR98IsVdx4.jpg?ava=1" alt="" style="width: 100%">
+        </div>
+        <div class="col-sm-8">
+            <h1><span id="firstName">...</span> <span id="lastName">...</span></h1>
+            <h3>Birth: <span id="birthDate">...</span></h3>
+            <h3>Location: <span id="locationName"></span></h3>
+            <h3>About: <span id="about"></span></h3>
+        </div>
+    </div>
 
-<script>
+    <hr>
 
-    function onPostButtonClick() {
-        attachFiles(updatePostHtml);
-    }
+    <form>
+        <div class="form-group">
+            <!--<label for="exampleFormControlTextarea1">Example textarea</label>-->
+            <textarea class="form-control" id="postContent" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
+    </form>
 
-</script>
+    <div class="posts">
+        <div class="wall-post col-sm-12">
+            <p>cool post</p>
+        </div>
 
-<div align='center'>
-    <h1>Swarm blogs</h1>
-    <p>My personal blog.</p>
-    <p id="demo"></p>
+        <div class="wall-post col-sm-12">
+            <p>bad post</p>
+        </div>
+    </div>
+
 </div>
 
 
-<div align='left'>
-    <p id="id_pageHash" hidden></p>
-    <p id="id_pagePosts" hidden></p>
-</div>
-
-<div align='center'>
-    <textarea rows="4" cols="100" id="id_mainTextArea"> </textarea>
-    <br/>
-
-    <!--Upload Form-->
-    <input id="id_uploadFile" type="file" multiple/>
-    <button id="demoSend" onclick="onPostButtonClick();">Post</button>
-</div>
-<br/>
-
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="js/dist/web.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
