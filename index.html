@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="favicon.ico">
+    <link rel="icon" href="favicon.png">
 
     <title>SWARM Post</title>
 
@@ -14,29 +14,91 @@
 </head>
 <body>
 
+<header>
+    <div class="collapse bg-dark" id="navbarHeader">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-8 col-md-7 py-4">
+                    <h4 class="text-white">Navigate to user page</h4>
+                    <form>
+
+                        <div class="form-group">
+                            <label for="navigateUserHash" class="text-muted">Paste here SWARM user hash. If user
+                                registered you can see his page</label>
+                            <input type="text" class="form-control" id="navigateUserHash" placeholder="User hash">
+                            <!--<small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>-->
+                        </div>
+
+                        <button type="submit" class="btn btn-primary go-user-hash">Go</button>
+                    </form>
+                </div>
+                <!--<div class="col-sm-8 col-md-7 py-4">
+                    <h4 class="text-white">About</h4>
+                    <p class="text-muted">Add some information about the album below, the author, or any other background context. Make it a few sentences long so folks can pick up some informative tidbits. Then, link them off to some social networking sites or contact information.</p>
+                </div>-->
+                <!--<div class="col-sm-4 offset-md-1 py-4">
+                    <h4 class="text-white">Contact</h4>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white">Follow on Twitter</a></li>
+                        <li><a href="#" class="text-white">Like on Facebook</a></li>
+                        <li><a href="#" class="text-white">Email me</a></li>
+                    </ul>
+                </div>-->
+            </div>
+        </div>
+    </div>
+    <div class="navbar navbar-dark bg-dark box-shadow">
+        <div class="container d-flex justify-content-between">
+            <a href="#" class="navbar-brand d-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <strong>SWARM Post</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"
+                    aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </div>
+</header>
+
 <div class="container" style="margin-top: 30px">
     <p>* Users navigation here. Show current user hash. Enter other hash</p>
     <div class="row">
         <div class="col-sm-4">
-            <img src="https://pp.userapi.com/c840526/v840526807/b2fe/ipR98IsVdx4.jpg?ava=1" alt="" style="width: 100%">
+            <ul class="main-blocks">
+                <li>
+                    <img id="bigAvatar" src="img/no-photo.png" alt="">
+                </li>
+                <!--<li>
+                    <p>I follow</p>
+                </li>-->
+            </ul>
         </div>
         <div class="col-sm-8">
-            <h1><span id="firstName">...</span> <span id="lastName">...</span></h1>
-            <h3>Birth: <span id="birthDate">...</span></h3>
-            <h3>Location: <span id="locationName"></span></h3>
-            <h3>About: <span id="about"></span></h3>
+            <ul class="main-blocks">
+                <li>
+                    <h1><span id="firstName">...</span> <span id="lastName">...</span></h1>
+                    <h3>Birth: <span id="birthDate">...</span></h3>
+                    <h3>Location: <span id="locationName"></span></h3>
+                    <h3>About: <span id="about"></span></h3>
+                    <h3>LastPostId: <span id="lastPostId"></span></h3>
+                </li>
+                <li>
+                    <form>
+                        <div class="form-group">
+                            <!--<label for="exampleFormControlTextarea1">Example textarea</label>-->
+                            <textarea class="form-control" id="postContent" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
+                    </form>
+                </li>
+            </ul>
         </div>
     </div>
-
-    <hr>
-
-    <form>
-        <div class="form-group">
-            <!--<label for="exampleFormControlTextarea1">Example textarea</label>-->
-            <textarea class="form-control" id="postContent" rows="3"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
-    </form>
 
     <div class="posts">
         <div class="wall-post col-sm-12">
@@ -48,6 +110,7 @@
         </div>
     </div>
 
+
 </div>
 
 
@@ -55,6 +118,7 @@
 <script src="node_modules/jquery/dist/jquery.min.js"></script>
 <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="js/dist/web.js"></script>
+<script src="js/Blog.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

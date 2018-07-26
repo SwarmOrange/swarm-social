@@ -10,14 +10,41 @@ class SwarmApi {
         //this.resetPageHash();
     }
 
-    get(file, swarmProtocol) {
+    request(method, fileName, userHash, swarmProtocol, data, fileType, responseType) {
         swarmProtocol = swarmProtocol || "bzz:";
-        let url = [this.apiUrl, swarmProtocol, this.applicationHash, file].filter(function (n) {
+        userHash = userHash || this.applicationHash;
+        data = data || {};
+        fileType = fileType || "application/text";
+        //responseType = responseType || "json";
+        let headers = {'Content-type': fileType};
+        let url = [this.apiUrl, swarmProtocol, userHash, fileName].filter(function (n) {
             return n !== ""
         }).join("/");
         console.log(url);
 
-        return this.axios.get(url);
+        return this.axios({
+            url: url,
+            method: method,
+            data: data,
+            headers: headers,
+            //responseType: responseType
+        });
+    }
+
+    get(file, userHash, swarmProtocol) {
+        /*swarmProtocol = swarmProtocol || "bzz:";
+        userHash = userHash || this.applicationHash;
+        let url = [this.apiUrl, swarmProtocol, userHash, file].filter(function (n) {
+            return n !== ""
+        }).join("/");
+        console.log(url);
+
+        return this.axios.get(url);*/
+        return this.request("get", file, userHash, swarmProtocol)
+    }
+
+    post(fileName, data, fileType, userHash, swarmProtocol) {
+        return this.request("post", fileName, userHash, swarmProtocol, data, fileType);
     }
 
     getFile(filename, onSuccess) {
