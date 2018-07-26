@@ -2,9 +2,12 @@ let swarm;
 let blog;
 $(document).ready(function () {
     // hash - user id
-    // chernish - b76381c89954d0d54565655886faf58bb12ab5a7900330ac61dcb832a33c1be6
+    // chernish - 6f364876a50f1b4438faf5281df4af4ac04aafff8b688fe90ff503b9234e2e71
     //swarm = new SwarmApi("http://127.0.0.1:8500", "202a740db9d1442099a906bb69d2660422949c3244da4797a0aacf13c754dc35");
-    swarm = new SwarmApi("http://127.0.0.1:8500", localStorage.getItem('applicationHash'));
+    console.log('current hash');
+    console.log(localStorage.getItem('applicationHash'));
+    //swarm = new SwarmApi("http://127.0.0.1:8500", localStorage.getItem('applicationHash'));
+    swarm = new SwarmApi("https://swarm-gateways.net", localStorage.getItem('applicationHash'));
     blog = new Blog(swarm);
     if (swarm.applicationHash) {
         blog.getMyProfile()
@@ -70,6 +73,8 @@ function init() {
                 console.log(response.data);
                 updateInfo(response.data);
                 $('#userInfo').show();
+                $('#mainMenu').click();
+
             })
             .catch(function (error) {
                 // handle error
