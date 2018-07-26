@@ -49,7 +49,7 @@
     </div>
     <div class="navbar navbar-dark bg-dark box-shadow">
         <div class="container d-flex justify-content-between">
-            <a href="#" class="navbar-brand d-flex align-items-center">
+            <a href="./index.html" class="navbar-brand d-flex align-items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
@@ -57,7 +57,7 @@
                 </svg>
                 <strong>SWARM Post</strong>
             </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"
+            <button id="mainMenu" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"
                     aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -65,8 +65,7 @@
     </div>
 </header>
 
-<div class="container" style="margin-top: 30px">
-    <p>* Users navigation here. Show current user hash. Enter other hash</p>
+<div id="userInfo" class="container" style="margin-top: 30px">
     <div class="row">
         <div class="col-sm-4">
             <ul class="main-blocks">
@@ -81,11 +80,15 @@
         <div class="col-sm-8">
             <ul class="main-blocks">
                 <li>
-                    <h1><span id="firstName">...</span> <span id="lastName">...</span></h1>
+                    <h1><span id="firstName">...</span> <span id="lastName">...</span> <a href="#"
+                                                                                          class="edit-page-info"
+                                                                                          data-toggle="modal"
+                                                                                          data-target="#editInfoModal"><img
+                            class="project-icon" src="img/edit.png" alt=""></a></h1>
                     <h3>Birth: <span id="birthDate">...</span></h3>
                     <h3>Location: <span id="locationName"></span></h3>
                     <h3>About: <span id="about"></span></h3>
-                    <h3>LastPostId: <span id="lastPostId"></span></h3>
+                    <!--<h3>LastPostId: <span id="lastPostId"></span></h3>-->
                 </li>
                 <li>
                     <form>
@@ -100,18 +103,70 @@
         </div>
     </div>
 
-    <div class="posts">
-        <div class="wall-post col-sm-12">
+    <div id="userPosts" class="posts">
+        <!--<div class="wall-post col-sm-12">
             <p>cool post</p>
         </div>
 
         <div class="wall-post col-sm-12">
             <p>bad post</p>
+        </div>-->
+    </div>
+</div>
+
+<div class="templates" style="display: none">
+    <div id="userPost" class="wall-post col-sm-12" style="display: none">
+
+    </div>
+</div>
+
+<!-- Edit Info Modal -->
+<div class="modal fade" id="editInfoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit info</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
+                    <input type="text" class="form-control" id="firstNameEdit" placeholder="First name">
+                </div>
+
+                <div class="form-group">
+                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
+                    <input type="text" class="form-control" id="lastNameEdit" placeholder="Last name">
+                </div>
+
+                <div class="form-group">
+                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
+                    <input type="text" class="form-control" id="birthDateEdit" placeholder="Birth date">
+                </div>
+
+                <div class="form-group">
+                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
+                    <input type="text" class="form-control" id="locationEdit" placeholder="Location">
+                </div>
+
+                <div class="form-group">
+                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
+                    <textarea class="form-control" id="aboutEdit" rows="3" placeholder="About"></textarea>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary save-info-changes">Save changes</button>
+            </div>
         </div>
     </div>
-
-
 </div>
+
 
 
 <!-- Placed at the end of the document so the pages load faster -->

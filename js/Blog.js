@@ -11,6 +11,10 @@ class Blog {
         this.myProfile = data;
     }
 
+    saveProfile(data, userHash) {
+        return this.swarm.post("profile.json", JSON.stringify(data), 'application/json', userHash);
+    }
+
     getProfile(userHash) {
         return this.swarm.get('profile.json', userHash);
     }
@@ -26,9 +30,10 @@ class Blog {
     createPost(id, text, attachments) {
         let self = this;
         // structure
-        // /post/ID/info.json - {"description":"my super post", "attachments":[]}
+        // /post/ID/info.json - {"id":id, "description":"my super post", "attachments":[]}
         attachments = attachments || [];
         let info = {
+            id: id,
             description: text,
             attachments: attachments
         };
@@ -39,7 +44,13 @@ class Blog {
                 console.log(response.data);
                 self.myProfile.last_post_id = id;
 
+                // todo change with saveProfile
                 return self.sendRawFile("profile.json", JSON.stringify(self.myProfile), 'application/json', response.data);
             });
+    }
+
+    getPost(id, userHash) {
+        return this.swarm.get('post/' + id + '/info.json', userHash);
+
     }
 }
