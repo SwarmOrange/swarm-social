@@ -74,6 +74,7 @@ function init() {
                 updateInfo(response.data);
                 $('#userInfo').show();
                 $('#mainMenu').click();
+                location.reload();
 
             })
             .catch(function (error) {
