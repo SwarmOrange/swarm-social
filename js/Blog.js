@@ -1,6 +1,7 @@
 class Blog {
     constructor(swarm) {
         this.swarm = swarm;
+        this.version = 1;
     }
 
     getMyProfile() {
@@ -12,6 +13,7 @@ class Blog {
     }
 
     saveProfile(data, userHash) {
+        data.version = this.version;
         return this.swarm.post("profile.json", JSON.stringify(data), 'application/json', userHash);
     }
 
@@ -24,7 +26,28 @@ class Blog {
     }
 
     uploadFile() {
+        // structure
+        // file/ID/info.json
+        // file/ID/content.[extension]
+    }
 
+    uploadAvatar(fileContent) {
+        // structure
+        // file/avatar/original.jpg
+        let self = this;
+        let url = "file/avatar/original.jpg";
+
+        return this.sendRawFile(url, fileContent, 'image/jpeg')
+            .then(function (response) {
+                console.log('avatar uploaded');
+                console.log(response.data);
+                swarm.applicationHash = response.data;
+                self.myProfile.photo = {
+                    original: url
+                };
+
+                return self.saveProfile(self.myProfile);
+            });
     }
 
     createPost(id, text, attachments) {
@@ -51,6 +74,5 @@ class Blog {
 
     getPost(id, userHash) {
         return this.swarm.get('post/' + id + '/info.json', userHash);
-
     }
 }

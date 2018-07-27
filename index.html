@@ -10,6 +10,7 @@
     <title>SWARM Post</title>
 
     <link href="node_modules/bootswatch/dist/cosmo/bootstrap.min.css" rel="stylesheet">
+    <link href="node_modules/cropperjs/dist/cropper.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -57,7 +58,8 @@
                 </svg>
                 <strong>SWARM Post</strong>
             </a>
-            <button id="mainMenu" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"
+            <button id="mainMenu" class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarHeader"
                     aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -70,7 +72,15 @@
         <div class="col-sm-4">
             <ul class="main-blocks">
                 <li>
-                    <img id="bigAvatar" src="img/no-photo.png" alt="">
+                    <p>
+                        <img id="bigAvatar" src="img/no-photo.png" alt="">
+                    </p>
+                    <p>
+                        <button id="uploadAvatarButton" type="button" class="btn btn-success" data-toggle="modal"
+                                data-target="#uploadAvatarModal" style="width: 100%">Upload avatar
+                        </button>
+                    </p>
+
                 </li>
                 <!--<li>
                     <p>I follow</p>
@@ -167,13 +177,43 @@
     </div>
 </div>
 
+<!-- Edit Info Modal -->
+<div class="modal fade" id="uploadAvatarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="">Upload avatar</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <img id="avatarUpload" src="img/no-photo.png">
+
+                </p>
+                <p>
+                    <input id="file-input" type="file">
+                </p>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary save-avatar">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="node_modules/cropperjs/dist/cropper.min.js"></script>
 <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="js/dist/web.js"></script>
 <script src="js/Blog.js"></script>
 <script src="js/main.js"></script>
+<script src="js/anal.js"></script>
 </body>
 </html>

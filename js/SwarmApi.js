@@ -32,19 +32,19 @@ class SwarmApi {
     }
 
     get(file, userHash, swarmProtocol) {
-        /*swarmProtocol = swarmProtocol || "bzz:";
-        userHash = userHash || this.applicationHash;
-        let url = [this.apiUrl, swarmProtocol, userHash, file].filter(function (n) {
-            return n !== ""
-        }).join("/");
-        console.log(url);
-
-        return this.axios.get(url);*/
         return this.request("get", file, userHash, swarmProtocol)
     }
 
     post(fileName, data, fileType, userHash, swarmProtocol) {
         return this.request("post", fileName, userHash, swarmProtocol, data, fileType);
+    }
+
+    getFullUrl(urlPart, userHash, swarmProtocol) {
+        userHash = userHash || this.applicationHash;
+        swarmProtocol = swarmProtocol || "bzz:";
+        return [this.apiUrl, swarmProtocol, userHash, urlPart].filter(function (n) {
+            return n !== ""
+        }).join("/");
     }
 
     getFile(filename, onSuccess) {
