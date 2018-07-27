@@ -7,7 +7,7 @@ $(document).ready(function () {
     //swarm = new SwarmApi("http://127.0.0.1:8500", "202a740db9d1442099a906bb69d2660422949c3244da4797a0aacf13c754dc35");
     console.log('current hash');
     console.log(localStorage.getItem('applicationHash'));
-    swarm = new SwarmApi("http://127.0.0.1:8500", localStorage.getItem('applicationHash'));
+    swarm = new SwarmApi(window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500", localStorage.getItem('applicationHash'));
     //swarm = new SwarmApi("https://swarm-gateways.net", localStorage.getItem('applicationHash'));
     blog = new Blog(swarm);
     if (swarm.applicationHash) {
