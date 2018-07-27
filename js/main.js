@@ -194,6 +194,17 @@ function init() {
             alert('Please, enter url');
         }
     });
+
+    $('#userPosts').on('click', '.delete-post', function (e) {
+        e.preventDefault();
+        let id = $(this).attr('data-id');
+        if (confirm('Really delete?')) {
+            blog.deletePost(id).then(function (response) {
+                localStorage.setItem('applicationHash', response.data);
+                location.reload();
+            });
+        }
+    });
 }
 
 function youtube_parser(url) {
@@ -220,12 +231,21 @@ function updateInfo(data) {
         let userPostTemplate = $('#userPost');
         let userPosts = $('#userPosts');
         for (let i = data.last_post_id; i > 0; i--) {
-            userPosts.append(userPostTemplate.clone().attr('id', 'userPost' + i).attr('style', '').attr('data-id', i).html('Loading...'));
+            let newPost = userPostTemplate.clone().attr('id', 'userPost' + i).attr('style', '').attr('data-id', i);
+            newPost.find('.description').text('Loading');
+            userPosts.append(newPost);
             blog.getPost(i, swarm.applicationHash).then(function (response) {
                 let data = response.data;
                 console.log(data);
                 let userPost = $('#userPost' + data.id);
-                userPost.text(data.description);
+                if (data.is_deleted) {
+                    userPost.remove();
+
+                    return;
+                }
+
+                userPost.find('.description').text(data.description);
+                userPost.find('.delete-post').attr('data-id', data.id);
                 if (data.attachments && data.attachments.length) {
                     let youtubeAttachment = $('#wallYoutubeAttachment');
                     data.attachments.forEach(function (v) {

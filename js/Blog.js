@@ -75,4 +75,11 @@ class Blog {
     getPost(id, userHash) {
         return this.swarm.get('post/' + id + '/info.json', userHash);
     }
+
+    deletePost(id) {
+        return this.swarm.post("post/" + id + "/info.json", JSON.stringify({
+            id: id,
+            is_deleted: true
+        }), 'application/json');
+    }
 }

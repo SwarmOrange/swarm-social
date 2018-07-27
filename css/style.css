@@ -42,3 +42,7 @@ img {
 .wall-attachment {
     margin-top: 8px;
 }
+
+.delete-post img {
+    width: 10px;
+}
