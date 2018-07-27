@@ -26,3 +26,19 @@
 img {
     max-width: 100%;
 }
+
+.attach-button {
+    margin-left: 8px;
+}
+
+.attach-button img {
+    width: 30px;
+}
+
+#attached-content {
+    margin-bottom: 8px;
+}
+
+.wall-attachment {
+    margin-top: 8px;
+}

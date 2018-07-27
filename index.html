@@ -106,7 +106,28 @@
                             <!--<label for="exampleFormControlTextarea1">Example textarea</label>-->
                             <textarea class="form-control" id="postContent" rows="3"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
+
+                        <div id="attached-content">
+
+                        </div>
+
+                        <div style="height: 30px">
+                            <p class="float-left">
+                                <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
+
+                            </p>
+
+                            <p class="float-right">
+                                <a href="#" class="attach-button attach-photo"><img src="img/photo.png"
+                                                                                    alt=""></a>
+                                <a href="#" class="attach-button attach-video"><img src="img/video.png"
+                                                                                    alt=""></a>
+                                <a href="#" class="attach-button attach-youtube" data-toggle="modal"
+                                   data-target="#attachYoutubeModal"><img src="img/youtube.png"
+                                                                          alt=""></a>
+                            </p>
+
+                        </div>
                     </form>
                 </li>
             </ul>
@@ -114,18 +135,18 @@
     </div>
 
     <div id="userPosts" class="posts">
-        <!--<div class="wall-post col-sm-12">
-            <p>cool post</p>
-        </div>
 
-        <div class="wall-post col-sm-12">
-            <p>bad post</p>
-        </div>-->
     </div>
 </div>
 
 <div class="templates" style="display: none">
     <div id="userPost" class="wall-post col-sm-12" style="display: none">
+
+    </div>
+    <div id="postAttachment" class="post-attachment" style="display: none">
+
+    </div>
+    <div id="wallYoutubeAttachment" class="wall-attachment" style="display: none">
 
     </div>
 </div>
@@ -177,13 +198,13 @@
     </div>
 </div>
 
-<!-- Edit Info Modal -->
+<!-- Upload Avatar Modal -->
 <div class="modal fade" id="uploadAvatarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="">Upload avatar</h5>
+                <h5 class="modal-title">Upload avatar</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -201,6 +222,30 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary save-avatar">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attach Youtube Modal -->
+<div class="modal fade" id="attachYoutubeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Attach Youtube Video</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="youtubeUrl" placeholder="Youtube Video URL">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary add-youtube-video">Add</button>
             </div>
         </div>
     </div>

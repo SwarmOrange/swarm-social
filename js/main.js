@@ -40,8 +40,18 @@ function init() {
         let postContentElement = $('#postContent');
         let text = postContentElement.val();
         console.log(text);
+        let attachments = [];
+        $('.post-attachment').each(function (k, v) {
+            let type = $(v).attr('data-type');
+            let url = $(v).attr('data-url');
+            attachments.push({
+                type: type,
+                url: url
+            });
+        });
+        console.log(attachments);
         // todo block post button and create wait animation
-        blog.createPost(blog.myProfile.last_post_id + 1, text)
+        blog.createPost(blog.myProfile.last_post_id + 1, text, attachments)
             .then(function (response) {
                 swarm.applicationHash = response.data;
                 console.log(response.data);
@@ -162,6 +172,34 @@ function init() {
             alert('Select photo before save');
         }
     });
+
+    $('.attach-photo').click(function (e) {
+        e.preventDefault();
+        alert('not implemented');
+    });
+
+    $('.attach-video').click(function (e) {
+        e.preventDefault();
+        alert('not implemented');
+    });
+
+    $('.add-youtube-video').click(function (e) {
+        //e.preventDefault();
+        let url = $('#youtubeUrl').val();
+        if (url) {
+            $('#attachYoutubeModal').modal('hide');
+            let postAttachmentTemplate = $('#postAttachment');
+            $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', 'youtube').attr('data-url', url).html('<a target="_blank" href="' + url + '">' + url + '</a>'));
+        } else {
+            alert('Please, enter url');
+        }
+    });
+}
+
+function youtube_parser(url) {
+    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+    var match = url.match(regExp);
+    return (match && match[7].length == 11) ? match[7] : false;
 }
 
 function updateInfo(data) {
@@ -185,7 +223,21 @@ function updateInfo(data) {
             userPosts.append(userPostTemplate.clone().attr('id', 'userPost' + i).attr('style', '').attr('data-id', i).html('Loading...'));
             blog.getPost(i, swarm.applicationHash).then(function (response) {
                 let data = response.data;
-                $('#userPost' + data.id).text(data.description);
+                console.log(data);
+                let userPost = $('#userPost' + data.id);
+                userPost.text(data.description);
+                if (data.attachments && data.attachments.length) {
+                    let youtubeAttachment = $('#wallYoutubeAttachment');
+                    data.attachments.forEach(function (v) {
+                        if (v.type === "youtube") {
+                            let videoId = youtube_parser(v.url);
+                            userPost.append(youtubeAttachment.attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
+                                '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
+                                '</div>'));
+                        }
+                    });
+
+                }
             });
         }
     }
