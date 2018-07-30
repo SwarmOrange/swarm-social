@@ -146,6 +146,28 @@ function init() {
         }
     });
 
+    $('#input-attach-file').on('change', function () {
+        if (this.files && this.files[0]) {
+            let fileType = $(this).attr('data-type');
+            let contentType = this.files[0].type;
+            let fileName = this.files[0].name;
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                blog.uploadFileForPost(blog.myProfile.last_post_id + 1, e.target.result, contentType, fileName).then(function (data) {
+                    let url = data.url;
+                    let fullUrl = data.fullUrl;
+                    console.log(data);
+                    let postAttachmentTemplate = $('#postAttachment').clone();
+                    $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', fileType).attr('data-url', url).html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
+                    swarm.applicationHash = data.response.data;
+
+                });
+            };
+            console.log(this.files[0]);
+            reader.readAsArrayBuffer(this.files[0]);
+        }
+    });
+
     $('.save-avatar').click(function () {
         if (cropper) {
             let canvas = cropper.getCroppedCanvas();
@@ -175,12 +197,20 @@ function init() {
 
     $('.attach-photo').click(function (e) {
         e.preventDefault();
-        alert('not implemented');
+        //alert('not implemented');
+        let input = $('#input-attach-file');
+        input.attr('data-type', 'photo');
+        input.attr('accept', 'image/*');
+        input.click();
     });
 
     $('.attach-video').click(function (e) {
         e.preventDefault();
-        alert('not implemented');
+        //alert('not implemented');
+        let input = $('#input-attach-file');
+        input.attr('data-type', 'video');
+        input.attr('accept', 'video/*');
+        input.click();
     });
 
     $('.add-youtube-video').click(function (e) {
@@ -188,7 +218,7 @@ function init() {
         let url = $('#youtubeUrl').val();
         if (url) {
             $('#attachYoutubeModal').modal('hide');
-            let postAttachmentTemplate = $('#postAttachment');
+            let postAttachmentTemplate = $('#postAttachment').clone();
             $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', 'youtube').attr('data-url', url).html('<a target="_blank" href="' + url + '">' + url + '</a>'));
         } else {
             alert('Please, enter url');
@@ -226,7 +256,6 @@ function updateInfo(data) {
     }
 
     $('#about').text(data.about);
-    //$('#lastPostId').text(data.last_post_id);
     if (data.last_post_id > 0) {
         let userPostTemplate = $('#userPost');
         let userPosts = $('#userPosts');
@@ -248,15 +277,20 @@ function updateInfo(data) {
                 userPost.find('.delete-post').attr('data-id', data.id);
                 if (data.attachments && data.attachments.length) {
                     let youtubeAttachment = $('#wallYoutubeAttachment');
+                    let photoAttachment = $('#photoAttachment');
+                    let videoAttachment = $('#videoAttachment');
                     data.attachments.forEach(function (v) {
                         if (v.type === "youtube") {
                             let videoId = youtube_parser(v.url);
                             userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
                                 '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
                                 '</div>'));
+                        } else if (v.type === "photo") {
+                            userPost.append(photoAttachment.clone().attr('style', '').html('<img src="' + swarm.getFullUrl(v.url) + '">'));
+                        } else if (v.type === "video") {
+                            userPost.append(photoAttachment.clone().attr('style', '').html('<video width="100%" controls><source src="' + swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
                         }
                     });
-
                 }
             });
         }

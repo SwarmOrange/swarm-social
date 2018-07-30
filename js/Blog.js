@@ -25,10 +25,22 @@ class Blog {
         return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol);
     }
 
-    uploadFile() {
+    uploadFileForPost(id, fileContent, contentType, fileName) {
         // structure
-        // file/ID/info.json
-        // file/ID/content.[extension]
+        // post/ID/file/[timestamp].[extension]
+        let self = this;
+        let extension = fileName.split('.').pop();
+        let timestamp = +new Date();
+        let url = "post/" + id + "/file/" + timestamp + "." + extension;
+
+        return this.sendRawFile(url, fileContent, contentType).then(function (response) {
+                return {
+                    response: response,
+                    url: url,
+                    fullUrl: self.swarm.getFullUrl(url, response.data)
+                };
+            }
+        );
     }
 
     uploadAvatar(fileContent) {
