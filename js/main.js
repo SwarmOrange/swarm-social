@@ -38,6 +38,14 @@ $(document).ready(function () {
     init();
 });
 
+function reload() {
+    if (window.location.hash.length) {
+        window.location = window.location.href.substr(0, window.location.href.indexOf('#'));
+    } else {
+        location.reload();
+    }
+}
+
 function init() {
     $('.publish-post').click(function (e) {
         e.preventDefault();
@@ -62,7 +70,7 @@ function init() {
                 console.log(response.data);
                 postContentElement.val('');
                 localStorage.setItem('applicationHash', response.data);
-                location.reload();
+                reload();
             })
             .catch(function (error) {
                 console.log('Some error happen');
@@ -87,7 +95,7 @@ function init() {
                 updateInfo(response.data);
                 $('#userInfo').show();
                 $('#mainMenu').click();
-                location.reload();
+                reload();
 
             })
             .catch(function (error) {
@@ -124,7 +132,7 @@ function init() {
             localStorage.setItem('applicationHash', response.data);
 
             $('#editInfoModal').modal('hide');
-            location.reload();
+            reload();
         });
     });
 
@@ -189,7 +197,7 @@ function init() {
                         //swarm.applicationHash = response.data;
                         localStorage.setItem('applicationHash', response.data);
 
-                        location.reload();
+                        reload();
                     });
                 });
 
@@ -236,7 +244,7 @@ function init() {
         if (confirm('Really delete?')) {
             blog.deletePost(id).then(function (response) {
                 localStorage.setItem('applicationHash', response.data);
-                location.reload();
+                reload();
             });
         }
     });
