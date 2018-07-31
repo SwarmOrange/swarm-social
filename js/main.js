@@ -1,19 +1,19 @@
 let swarm;
 let blog;
 let cropper;
+let lastLoadedPost = 0;
 $(document).ready(function () {
     // hash - user id
     // chernish - 6f364876a50f1b4438faf5281df4af4ac04aafff8b688fe90ff503b9234e2e71
     //swarm = new SwarmApi("http://127.0.0.1:8500", "202a740db9d1442099a906bb69d2660422949c3244da4797a0aacf13c754dc35");
-    console.log('current hash');
     console.log('hash from local storage: ' + localStorage.getItem('applicationHash'));
     let hash = window.location.hash.substring(1);
     console.log('hash from window hash: ' + hash);
     let initHash = hash ? hash : localStorage.getItem('applicationHash');
     console.log('selected hash: ' + initHash);
     swarm = new SwarmApi(window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500", initHash);
-    //swarm = new SwarmApi("https://swarm-gateways.net", localStorage.getItem('applicationHash'));
     blog = new Blog(swarm);
+    console.log(swarm.applicationHash);
     if (swarm.applicationHash) {
         blog.getMyProfile()
             .then(function (response) {
@@ -54,6 +54,7 @@ function init() {
             });
         });
         console.log(attachments);
+        // todo check if exists content and files
         // todo block post button and create wait animation
         blog.createPost(blog.myProfile.last_post_id + 1, text, attachments)
             .then(function (response) {
@@ -239,6 +240,19 @@ function init() {
             });
         }
     });
+
+    $('.create-profile').click(function (e) {
+        e.preventDefault();
+
+        localStorage.setItem('applicationHash', '');
+        // todo how to create empty hash with one file?
+        //blog.saveProfile({});
+    });
+
+    $('.load-more').click(function (e) {
+        e.preventDefault();
+        loadPosts();
+    });
 }
 
 function youtube_parser(url) {
@@ -256,47 +270,63 @@ function updateInfo(data) {
     }
 
     if (data.photo && data.photo.original) {
-        $('#bigAvatar').attr('src', swarm.getFullUrl(data.photo.original));
+        let url = swarm.getFullUrl(data.photo.original);
+        $('#bigAvatar').attr('src', url);
     }
 
     $('#about').text(data.about);
     if (data.last_post_id > 0) {
-        let userPostTemplate = $('#userPost');
-        let userPosts = $('#userPosts');
-        for (let i = data.last_post_id; i > 0; i--) {
-            let newPost = userPostTemplate.clone().attr('id', 'userPost' + i).attr('style', '').attr('data-id', i);
-            newPost.find('.description').text('Loading');
-            userPosts.append(newPost);
-            blog.getPost(i, swarm.applicationHash).then(function (response) {
-                let data = response.data;
-                console.log(data);
-                let userPost = $('#userPost' + data.id);
-                if (data.is_deleted) {
-                    userPost.remove();
+        loadPosts();
+    }
+}
 
-                    return;
-                }
+function loadPosts() {
+    let userPostTemplate = $('#userPost');
+    let userPosts = $('#userPosts');
+    let maxReceivedPosts = 10;
+    let data = blog.myProfile;
+    let meetPostId = data.last_post_id - lastLoadedPost;
+    for (let i = meetPostId; i > meetPostId - maxReceivedPosts && i > 0; i--) {
+        let newPost = userPostTemplate.clone().attr('id', 'userPost' + i).attr('style', '').attr('data-id', i);
+        newPost.find('.description').text('Loading');
+        userPosts.append(newPost);
+        lastLoadedPost++;
 
-                userPost.find('.description').text(data.description);
-                userPost.find('.delete-post').attr('data-id', data.id);
-                if (data.attachments && data.attachments.length) {
-                    let youtubeAttachment = $('#wallYoutubeAttachment');
-                    let photoAttachment = $('#photoAttachment');
-                    let videoAttachment = $('#videoAttachment');
-                    data.attachments.forEach(function (v) {
-                        if (v.type === "youtube") {
-                            let videoId = youtube_parser(v.url);
-                            userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
-                                '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
-                                '</div>'));
-                        } else if (v.type === "photo") {
-                            userPost.append(photoAttachment.clone().attr('style', '').html('<img src="' + swarm.getFullUrl(v.url) + '">'));
-                        } else if (v.type === "video") {
-                            userPost.append(photoAttachment.clone().attr('style', '').html('<video width="100%" controls><source src="' + swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
-                        }
-                    });
-                }
-            });
+        if (lastLoadedPost >= data.last_post_id) {
+            $('#loadMore').hide();
+        } else {
+            $('#loadMore').show();
         }
+
+        blog.getPost(i, swarm.applicationHash).then(function (response) {
+            let data = response.data;
+            console.log(data);
+            let userPost = $('#userPost' + data.id);
+            if (data.is_deleted) {
+                userPost.remove();
+
+                return;
+            }
+
+            userPost.find('.description').text(data.description);
+            userPost.find('.delete-post').attr('data-id', data.id);
+            if (data.attachments && data.attachments.length) {
+                let youtubeAttachment = $('#wallYoutubeAttachment');
+                let photoAttachment = $('#photoAttachment');
+                let videoAttachment = $('#videoAttachment');
+                data.attachments.forEach(function (v) {
+                    if (v.type === "youtube") {
+                        let videoId = youtube_parser(v.url);
+                        userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
+                            '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
+                            '</div>'));
+                    } else if (v.type === "photo") {
+                        userPost.append(photoAttachment.clone().attr('style', '').html('<img src="' + swarm.getFullUrl(v.url) + '">'));
+                    } else if (v.type === "video") {
+                        userPost.append(photoAttachment.clone().attr('style', '').html('<video width="100%" controls><source src="' + swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
+                    }
+                });
+            }
+        });
     }
 }

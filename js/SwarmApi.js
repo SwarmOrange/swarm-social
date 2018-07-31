@@ -12,7 +12,12 @@ class SwarmApi {
 
     request(method, fileName, userHash, swarmProtocol, data, fileType, responseType) {
         swarmProtocol = swarmProtocol || "bzz:";
-        userHash = userHash || this.applicationHash;
+        if (typeof userHash == null) {
+            userHash = "";
+        } else {
+            userHash = userHash || this.applicationHash;
+        }
+
         data = data || {};
         fileType = fileType || "application/text";
         //responseType = responseType || "json";
