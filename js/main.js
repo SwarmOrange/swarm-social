@@ -2,10 +2,9 @@ let swarm;
 let blog;
 let cropper;
 let lastLoadedPost = 0;
+
 $(document).ready(function () {
     // hash - user id
-    // chernish - 6f364876a50f1b4438faf5281df4af4ac04aafff8b688fe90ff503b9234e2e71
-    //swarm = new SwarmApi("http://127.0.0.1:8500", "202a740db9d1442099a906bb69d2660422949c3244da4797a0aacf13c754dc35");
     console.log('hash from local storage: ' + localStorage.getItem('applicationHash'));
     let hash = window.location.hash.substring(1);
     console.log('hash from window hash: ' + hash);
@@ -47,6 +46,7 @@ function reload() {
 }
 
 function init() {
+
     $('.publish-post').click(function (e) {
         e.preventDefault();
         let postContentElement = $('#postContent');
@@ -96,11 +96,10 @@ function init() {
                 $('#userInfo').show();
                 $('#mainMenu').click();
                 reload();
-
             })
             .catch(function (error) {
                 // handle error
-                //console.log(error);
+                console.log(error);
                 console.log('Some error happen');
             })
             .then(function () {
@@ -261,6 +260,7 @@ function init() {
         e.preventDefault();
         loadPosts();
     });
+
 }
 
 function youtube_parser(url) {
@@ -270,6 +270,7 @@ function youtube_parser(url) {
 }
 
 function updateInfo(data) {
+    blog.myProfile = data;
     $('#firstName').text(data.first_name);
     $('#lastName').text(data.last_name);
     $('#birthDate').text(data.birth_date);
