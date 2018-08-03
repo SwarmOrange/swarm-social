@@ -32,6 +32,9 @@ class SwarmApi {
             method: method,
             data: data,
             headers: headers,
+            onUploadProgress:function(progressEvent){
+                console.log(progressEvent);
+            }
             //responseType: responseType
         });
     }

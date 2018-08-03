@@ -175,7 +175,7 @@ function init() {
 
                 });
             };
-            console.log(this.files[0]);
+            //console.log(this.files[0]);
             reader.readAsArrayBuffer(this.files[0]);
         }
     });
