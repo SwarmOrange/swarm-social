@@ -21,11 +21,11 @@ class Blog {
         return this.swarm.get('profile.json', userHash);
     }
 
-    sendRawFile(fileName, data, fileType, userHash, swarmProtocol) {
-        return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol);
+    sendRawFile(fileName, data, fileType, userHash, swarmProtocol, onProgress) {
+        return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol, onProgress);
     }
 
-    uploadFileForPost(id, fileContent, contentType, fileName) {
+    uploadFileForPost(id, fileContent, contentType, fileName, onUploadProgress) {
         // structure
         // post/ID/file/[timestamp].[extension]
         let self = this;
@@ -33,7 +33,7 @@ class Blog {
         let timestamp = +new Date();
         let url = "post/" + id + "/file/" + timestamp + "." + extension;
 
-        return this.sendRawFile(url, fileContent, contentType).then(function (response) {
+        return this.sendRawFile(url, fileContent, contentType, null, null, onUploadProgress).then(function (response) {
                 return {
                     response: response,
                     url: url,

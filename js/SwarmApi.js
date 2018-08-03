@@ -10,7 +10,7 @@ class SwarmApi {
         //this.resetPageHash();
     }
 
-    request(method, fileName, userHash, swarmProtocol, data, fileType, responseType) {
+    request(method, fileName, userHash, swarmProtocol, data, fileType, responseType, onUploadProgress) {
         swarmProtocol = swarmProtocol || "bzz:";
         if (typeof userHash == null) {
             userHash = "";
@@ -32,9 +32,7 @@ class SwarmApi {
             method: method,
             data: data,
             headers: headers,
-            onUploadProgress:function(progressEvent){
-                console.log(progressEvent);
-            }
+            onUploadProgress: onUploadProgress
             //responseType: responseType
         });
     }
@@ -43,8 +41,8 @@ class SwarmApi {
         return this.request("get", file, userHash, swarmProtocol)
     }
 
-    post(fileName, data, fileType, userHash, swarmProtocol) {
-        return this.request("post", fileName, userHash, swarmProtocol, data, fileType);
+    post(fileName, data, fileType, userHash, swarmProtocol, onUploadProgress) {
+        return this.request("post", fileName, userHash, swarmProtocol, data, fileType, null, onUploadProgress);
     }
 
     getFullUrl(urlPart, userHash, swarmProtocol) {

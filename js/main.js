@@ -10,7 +10,8 @@ $(document).ready(function () {
     console.log('hash from window hash: ' + hash);
     let initHash = hash ? hash : localStorage.getItem('applicationHash');
     console.log('selected hash: ' + initHash);
-    swarm = new SwarmApi(window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500", initHash);
+    //swarm = new SwarmApi(window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500", initHash);
+    swarm = new SwarmApi("https://swarm-gateways.net", initHash);
     blog = new Blog(swarm);
     console.log(swarm.applicationHash);
     if (swarm.applicationHash) {
@@ -160,19 +161,30 @@ function init() {
 
     $('#input-attach-file').on('change', function () {
         if (this.files && this.files[0]) {
+            let progressPanel = $('#progressPanel');
+            let postProgress = $('#postProgress');
+            progressPanel.show();
             let fileType = $(this).attr('data-type');
             let contentType = this.files[0].type;
             let fileName = this.files[0].name;
+            let setProgress = function (val) {
+                postProgress.css('width', val + '%').attr('aria-valuenow', val);
+            };
             let reader = new FileReader();
             reader.onload = function (e) {
-                blog.uploadFileForPost(blog.myProfile.last_post_id + 1, e.target.result, contentType, fileName).then(function (data) {
+                blog.uploadFileForPost(blog.myProfile.last_post_id + 1, e.target.result, contentType, fileName, function (progress) {
+                    let onePercent = progress.total / 100;
+                    let currentPercent = progress.loaded / onePercent;
+                    setProgress(currentPercent);
+                }).then(function (data) {
                     let url = data.url;
                     let fullUrl = data.fullUrl;
                     console.log(data);
                     let postAttachmentTemplate = $('#postAttachment').clone();
                     $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', fileType).attr('data-url', url).html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
                     swarm.applicationHash = data.response.data;
-
+                    progressPanel.hide();
+                    setProgress(0);
                 });
             };
             //console.log(this.files[0]);
