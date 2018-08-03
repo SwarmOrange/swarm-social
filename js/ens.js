@@ -24,6 +24,7 @@ function initEns() {
     web3.version.getNetwork(function (error, result) {
         if (error) {
             console.error(error);
+            $('.update-ens').hide();
 
             return;
         }
