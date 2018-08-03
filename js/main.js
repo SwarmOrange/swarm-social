@@ -323,10 +323,16 @@ function init() {
 function goToHash(userHash) {
     swarm.applicationHash = userHash;
     localStorage.setItem('applicationHash', userHash);
+    showUploadModal();
     // todo check it before load
     console.log(userHash);
     return blog.getProfile(userHash)
         .then(function (response) {
+            console.log('ok, hide');
+            setTimeout(function () {
+                $('#loadModal').modal('hide');
+            }, 1000);
+
             console.log(response.data);
             updateInfo(response.data);
         })
