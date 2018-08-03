@@ -107,7 +107,7 @@
                         <button type="submit" class="btn btn-primary mb-2 update-ens">Update ENS</button>
                     </p>
                 </li>
-                <li>
+                <li id="postBlock">
                     <form>
                         <div class="form-group">
                             <textarea class="form-control" id="postContent" rows="3"></textarea>
@@ -117,7 +117,7 @@
 
                         </div>
 
-                        <div style="height: 30px">
+                        <div id="postOrAttach" style="height: 30px">
                             <p class="float-left">
                                 <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
 
@@ -322,6 +322,26 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Modal -->
+<div class="modal fade" id="loadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Uploading data to SWARM</h5>
+            </div>
+            <div id="loadContent" class="modal-body">
+                <div class="col-sm-4 offset-sm-4">
+                    <div class="loader-animation"></div>
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
         </div>
     </div>
 </div>

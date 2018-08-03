@@ -36,6 +36,24 @@ $(document).ready(function () {
     }
 
     init();
+    /*window.onbeforeunload = function (e) {
+        if (false) {
+            e = e || window.event;
+
+            // For IE and Firefox prior to version 4
+            if (e) {
+                e.returnValue = 'Sure?';
+            }
+
+            // For Safari
+            return 'Sure?';
+        }
+
+    };*/
+    /*$('#loadModal').modal({
+        backdrop: 'static',
+        show: true
+    });*/
 });
 
 function reload() {
@@ -46,25 +64,41 @@ function reload() {
     }
 }
 
+function showUploadModal() {
+    $('#loadModal').modal({
+        backdrop: 'static',
+        show: true
+    });
+}
+
 function init() {
 
     $('.publish-post').click(function (e) {
         e.preventDefault();
         let postContentElement = $('#postContent');
         let text = postContentElement.val();
-        console.log(text);
         let attachments = [];
         $('.post-attachment').each(function (k, v) {
             let type = $(v).attr('data-type');
             let url = $(v).attr('data-url');
-            attachments.push({
-                type: type,
-                url: url
-            });
+            if (type && url) {
+                attachments.push({
+                    type: type,
+                    url: url
+                });
+            }
         });
+        console.log(text);
         console.log(attachments);
-        // todo check if exists content and files
+        let isContentExists = text.length || attachments.length;
+        if (!isContentExists) {
+            alert('Please, write text or add attachments');
+            return;
+        }
+
         // todo block post button and create wait animation
+        //$('#postBlock').addClass("disabled-content");
+        showUploadModal();
         blog.createPost(blog.myProfile.last_post_id + 1, text, attachments)
             .then(function (response) {
                 swarm.applicationHash = response.data;
@@ -126,12 +160,12 @@ function init() {
         info.location.name = $('#locationEdit').val();
         info.about = $('#aboutEdit').val();
 
-        // todo show wait animation
+        $('#editInfoModal').modal('hide');
+        showUploadModal();
         blog.saveProfile(info).then(function (response) {
             console.log(response.data);
             localStorage.setItem('applicationHash', response.data);
 
-            $('#editInfoModal').modal('hide');
             reload();
         });
     });
@@ -161,6 +195,8 @@ function init() {
 
     $('#input-attach-file').on('change', function () {
         if (this.files && this.files[0]) {
+            $('#postOrAttach').addClass("disabled-content");
+
             let progressPanel = $('#progressPanel');
             let postProgress = $('#postProgress');
             progressPanel.show();
@@ -185,6 +221,7 @@ function init() {
                     swarm.applicationHash = data.response.data;
                     progressPanel.hide();
                     setProgress(0);
+                    $('#postOrAttach').removeClass("disabled-content");
                 });
             };
             //console.log(this.files[0]);
