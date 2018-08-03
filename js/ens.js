@@ -11,7 +11,6 @@ $(document).ready(function () {
 });
 
 function initEns() {
-    console.log(web3);
     if (typeof web3 !== 'undefined') {
         window.web3 = new Web3(web3.currentProvider);
         console.log('current provider');
@@ -20,6 +19,7 @@ function initEns() {
         window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
     }
 
+    console.log(web3);
     ens = new EthereumENS(window.web3.currentProvider);
     web3.version.getNetwork(function (error, result) {
         if (error) {
