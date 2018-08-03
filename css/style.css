@@ -69,3 +69,8 @@ img {
         transform: rotate(360deg);
     }
 }
+
+#iFollowUsers li {
+    border: 0;
+    padding: 0;
+}

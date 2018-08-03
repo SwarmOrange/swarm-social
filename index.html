@@ -87,9 +87,14 @@
                     </p>
 
                 </li>
-                <!--<li>
-                    <p>I follow</p>
-                </li>-->
+                <li>
+                    <p>I follow <a href="#" data-toggle="modal"
+                                   data-target="#addFollowerModal"><img src="img/add.png" alt=""
+                                                                        style="width: 20px"></a></p>
+                    <ul id="iFollowUsers" class="list-inline">
+
+                    </ul>
+                </li>
             </ul>
         </div>
         <div class="col-sm-8">
@@ -272,7 +277,30 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary add-youtube-video">Add</button>
-                <button type="button" class="btn btn-primary add-youtube-video">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Follower Modal -->
+<div class="modal fade" id="addFollowerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add follower</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="followerHash" placeholder="Follower SWARM hash">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary add-follower">Add</button>
             </div>
         </div>
     </div>

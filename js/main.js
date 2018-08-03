@@ -10,8 +10,8 @@ $(document).ready(function () {
     console.log('hash from window hash: ' + hash);
     let initHash = hash ? hash : localStorage.getItem('applicationHash');
     console.log('selected hash: ' + initHash);
-    //swarm = new SwarmApi(window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500", initHash);
-    swarm = new SwarmApi("https://swarm-gateways.net", initHash);
+    swarm = new SwarmApi(window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500", initHash);
+    //swarm = new SwarmApi("https://swarm-gateways.net", initHash);
     blog = new Blog(swarm);
     console.log(swarm.applicationHash);
     if (swarm.applicationHash) {
@@ -24,7 +24,7 @@ $(document).ready(function () {
                 updateInfo(data)
             })
             .catch(function (error) {
-                //console.log(error);
+                console.log(error);
                 console.log('Some error happen');
             })
             .then(function () {
@@ -119,27 +119,11 @@ function init() {
         e.preventDefault();
 
         let userHash = $('#navigateUserHash').val();
-        swarm.applicationHash = userHash;
-        localStorage.setItem('applicationHash', userHash);
-        // todo check it before load
-        console.log(userHash);
-        blog.getProfile(userHash)
-            .then(function (response) {
-                // handle success
-                console.log(response.data);
-                updateInfo(response.data);
-                $('#userInfo').show();
-                $('#mainMenu').click();
-                reload();
-            })
-            .catch(function (error) {
-                // handle error
-                console.log(error);
-                console.log('Some error happen');
-            })
-            .then(function () {
-                // always executed
-            });
+        goToHash(userHash).then(function (response) {
+            $('#userInfo').show();
+            $('#mainMenu').click();
+            //reload();
+        })
     });
 
     $('.edit-page-info').click(function (e) {
@@ -310,6 +294,47 @@ function init() {
         loadPosts();
     });
 
+
+    $('.add-follower').click(function (e) {
+        //e.preventDefault();
+        let swarmHash = $('#followerHash').val();
+        console.log(swarmHash);
+        if (swarmHash) {
+            $('#addFollowerModal').modal('hide');
+            blog.addIFollow(swarmHash).then(function (response) {
+                localStorage.setItem('applicationHash', response.data);
+                reload();
+            });
+        } else {
+            alert('Please, enter SWARM hash');
+        }
+    });
+
+    $('#iFollowUsers').on('click', '.load-profile', function (e) {
+        e.preventDefault();
+        let swarmProfileHash = $(this).attr('data-profile-id');
+        // todo go to profile
+        goToHash(swarmProfileHash).then(function (response) {
+            //reload();
+        });
+    });
+}
+
+function goToHash(userHash) {
+    swarm.applicationHash = userHash;
+    localStorage.setItem('applicationHash', userHash);
+    // todo check it before load
+    console.log(userHash);
+    return blog.getProfile(userHash)
+        .then(function (response) {
+            console.log(response.data);
+            updateInfo(response.data);
+        })
+        .catch(function (error) {
+            // handle error
+            console.log(error);
+            console.log('Some error happen');
+        })
 }
 
 function youtube_parser(url) {
@@ -333,8 +358,25 @@ function updateInfo(data) {
     }
 
     $('#about').text(data.about);
+    lastLoadedPost = 0;
+    $('#userPosts').html('');
+    $('#iFollowUsers').html('');
     if (data.last_post_id > 0) {
         loadPosts();
+    } else {
+        $('#loadMore').hide();
+    }
+
+    loadIFollow();
+}
+
+function loadIFollow() {
+    let data = blog.myProfile;
+    let iFollowBlock = $('#iFollowUsers');
+    if ('i_follow' in data && data.i_follow.length) {
+        data.i_follow.forEach(function (v) {
+            iFollowBlock.append('<li class="list-inline-item"><a href="#" class="load-profile" data-profile-id="' + v + '"><img src="' + swarm.getFullUrl('file/avatar/original.jpg', v) + '" style="width: 50px"></a></li>');
+        });
     }
 }
 

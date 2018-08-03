@@ -21,6 +21,16 @@ class Blog {
         return this.swarm.get('profile.json', userHash);
     }
 
+    addIFollow(swarmProfileHash) {
+        if ('i_follow' in this.myProfile) {
+            this.myProfile.i_follow.push(swarmProfileHash)
+        } else {
+            this.myProfile.i_follow = [swarmProfileHash];
+        }
+
+        return this.saveProfile(this.myProfile);
+    }
+
     sendRawFile(fileName, data, fileType, userHash, swarmProtocol, onProgress) {
         return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol, onProgress);
     }
