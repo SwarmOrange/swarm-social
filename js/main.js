@@ -221,9 +221,9 @@ function init() {
                 const reader = new FileReader();
                 reader.addEventListener('loadend', () => {
                     const arrayBuffer = reader.result;
+                    $('#uploadAvatarModal').modal('hide');
                     showUploadModal();
                     blog.uploadAvatar(arrayBuffer).then(function (response) {
-                        $('#uploadAvatarModal').modal('hide');
                         console.log('avatar handled');
                         console.log(response.data);
                         //swarm.applicationHash = response.data;
