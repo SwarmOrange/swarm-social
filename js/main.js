@@ -221,7 +221,7 @@ function init() {
                 const reader = new FileReader();
                 reader.addEventListener('loadend', () => {
                     const arrayBuffer = reader.result;
-                    // todo show upload animation
+                    showUploadModal();
                     blog.uploadAvatar(arrayBuffer).then(function (response) {
                         $('#uploadAvatarModal').modal('hide');
                         console.log('avatar handled');
