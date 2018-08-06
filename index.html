@@ -87,9 +87,26 @@
 
                 </li>
                 <li>
-                    <p>I follow <a href="#" data-toggle="modal"
-                                   data-target="#addFollowerModal"><img src="img/add.png" alt=""
-                                                                        style="width: 20px"></a></p>
+                    <p class="float-left">Photo albums</p>
+                    <p class="float-right">
+                        <a href="#" data-toggle="modal"
+                           data-target="#addPhotoAlbumsModal">
+                            <img src="img/add.png" alt="" style="width: 20px"></a>
+                    </p>
+                    <div class="clear-both"></div>
+                    <ul id="photoAlbums" class="list-inline">
+
+                    </ul>
+                </li>
+                <li>
+                    <p class="float-left">I follow</p>
+                    <p class="float-right">
+                        <a href="#" data-toggle="modal" data-target="#addFollowerModal">
+                            <img src="img/add.png" alt="" style="width: 20px">
+                        </a>
+                    </p>
+                    <div class="clear-both"></div>
+
                     <ul id="iFollowUsers" class="list-inline">
 
                     </ul>
@@ -141,7 +158,7 @@
 
                         </div>
                         <div id="progressPanel" style="display:none;">
-                            <div style="clear: both"></div>
+                            <div class="clear-both"></div>
                             <div class="progress" style="height: 20px;">
                                 <div id="postProgress" class="progress-bar progress-bar-striped" role="progressbar"
                                      style="width: 0%"
