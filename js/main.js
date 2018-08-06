@@ -3,7 +3,6 @@ let blog;
 let cropper;
 let lastLoadedPost = 0;
 
-
 $(document).ready(function () {
     // hash - user id
     //console.log('hash from local storage: ' + localStorage.getItem('applicationHash'));
@@ -16,7 +15,7 @@ $(document).ready(function () {
     blog = new Blog(swarm);
     let isValid = (hash || blog.uploadedSwarmHash).length > 0;
     if (!isValid) {
-        alert('Yo cant access this site');
+        alert('Yo can\'t access this site. Add #SWARM_HASH to url and update page.');
         return;
     }
 
@@ -35,7 +34,7 @@ $(document).ready(function () {
 });
 
 function updateProfile() {
-    blog.getMyProfile()
+    return blog.getMyProfile()
         .then(function (response) {
             let data = response.data;
             console.log(data);
@@ -75,7 +74,7 @@ function onAfterHashChange(newHash) {
     localStorage.setItem('applicationHash', newHash);
     //reload();
     window.location.hash = newHash;
-    updateProfile();
+    return updateProfile();
 }
 
 function init() {
@@ -124,11 +123,15 @@ function init() {
         e.preventDefault();
 
         let userHash = $('#navigateUserHash').val();
-        goToHash(userHash).then(function (response) {
+        /*goToHash(userHash).then(function (response) {
             $('#userInfo').show();
             $('#mainMenu').click();
             //reload();
-        })
+        })*/
+        onAfterHashChange(userHash).then(function () {
+            $('#userInfo').show();
+            $('#mainMenu').click();
+        });
     });
 
     $('.edit-page-info').click(function (e) {
@@ -329,9 +332,10 @@ function init() {
 }
 
 function goToHash(userHash) {
-    swarm.applicationHash = userHash;
-    localStorage.setItem('applicationHash', userHash);
-    showUploadModal();
+    //swarm.applicationHash = userHash;
+    //localStorage.setItem('applicationHash', userHash);
+    onAfterHashChange(userHash);
+    /*showUploadModal();
     // todo check it before load
     console.log(userHash);
     return blog.getProfile(userHash)
@@ -348,7 +352,7 @@ function goToHash(userHash) {
             // handle error
             console.log(error);
             console.log('Some error happen');
-        })
+        })*/
 }
 
 function youtube_parser(url) {
