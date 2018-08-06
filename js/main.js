@@ -306,18 +306,22 @@ function init() {
 
 
     $('.add-follower').click(function (e) {
-        //e.preventDefault();
-        let swarmHash = $('#followerHash').val();
+        e.preventDefault();
+        let followerHash = $('#followerHash');
+        let swarmHash = followerHash.val();
         console.log(swarmHash);
-        if (swarmHash) {
+        if (Blog.isCorrectSwarmHash(swarmHash)) {
             $('#addFollowerModal').modal('hide');
-            blog.addIFollow(swarmHash).then(function (response) {
-                //localStorage.setItem('applicationHash', response.data);
-                //reload();
-                onAfterHashChange(response.data);
-            });
+            followerHash.val('');
+            try {
+                blog.addIFollow(swarmHash).then(function (response) {
+                    onAfterHashChange(response.data);
+                });
+            } catch (e) {
+                alert(e);
+            }
         } else {
-            alert('Please, enter SWARM hash');
+            alert('Please, enter correct SWARM hash');
         }
     });
 

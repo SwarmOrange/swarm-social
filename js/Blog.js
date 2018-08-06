@@ -57,7 +57,11 @@ class Blog {
 
     addIFollow(swarmProfileHash) {
         if ('i_follow' in this.myProfile) {
-            this.myProfile.i_follow.push(swarmProfileHash)
+            if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
+                throw "Hash already exists";
+            }
+
+            this.myProfile.i_follow.push(swarmProfileHash);
         } else {
             this.myProfile.i_follow = [swarmProfileHash];
         }
