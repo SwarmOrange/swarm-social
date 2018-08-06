@@ -23,6 +23,9 @@
     "cropperjs": "^1.4.1",
     "ethereum-ens": "^0.7.4",
     "gm": "^1.23.1",
-    "jquery": "^3.3.1"
-  }
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.4",
+    "uglifycss": "0.0.29"
+  },
+  "devDependencies": {}
 }

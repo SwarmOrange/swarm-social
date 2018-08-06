@@ -1,0 +1,14 @@
+{
+  "first_name": "SWARM",
+  "last_name": "User",
+  "birth_date": "24/07/2018",
+  "location": {
+    "coordinates": {},
+    "name": "Belarus, Minsk"
+  },
+  "photo": {
+    "original": "file/avatar/original.jpg"
+  },
+  "about": "My SWARM page. You can edit this information",
+  "last_post_id": 0
+}
