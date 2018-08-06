@@ -5,13 +5,13 @@ Decentralised social network based on SWARM.
 Download project and run command to upload to local SWARM node:
 
 ```
-swarm --recursive up ./swarm-social
+swarm --recursive --defaultpath index.html up ./swarm-social
 ```
 
 ...upload to remote server:
 
 ```
-swarm --recursive --bzzapi http://swarm-gateways.net/ up ./swarm-social
+swarm --recursive --defaultpath index.html --bzzapi http://swarm-gateways.net/ up ./swarm-social
 ```
 
 After success uploading you receive SWARM hash. Replace {SWARM_HASH} with your hash:
