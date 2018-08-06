@@ -66,18 +66,12 @@ function isCorrectDomain(domain) {
     return domain && domain.length >= minDomainLength;
 }
 
-function isCorrectSwarmHash(hash) {
-    var hashLength = 64;
-
-    return hash && hash.length === hashLength;
-}
-
 function saveDomainHash() {
     let ensDomain = $('#ensDomain').val();
     let swarmHash = $('#currentHash').val();
     console.log([ensDomain, swarmHash]);
 
-    if (!isCorrectDomain(ensDomain) || !isCorrectSwarmHash(swarmHash)) {
+    if (!isCorrectDomain(ensDomain) || !blog.isCorrectSwarmHash(swarmHash)) {
         alert('Incorrect domain or hash');
 
         return;
@@ -95,6 +89,7 @@ function saveDomainHash() {
             }
 
             var shortResult = result.substring(0, 50) + '...';
+            blog.replaceUrlSwarmHash(swarmHash);
             alert('Transaction complete. View transaction on Etherscan: <a href="https://' + subdomain + 'etherscan.io/tx/' + result + '" target="_blank">' + shortResult + '</a>');
         }).catch(function (r) {
             alert('Transaction rejected');

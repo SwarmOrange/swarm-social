@@ -3,58 +3,57 @@ let blog;
 let cropper;
 let lastLoadedPost = 0;
 
+
 $(document).ready(function () {
     // hash - user id
-    console.log('hash from local storage: ' + localStorage.getItem('applicationHash'));
+    //console.log('hash from local storage: ' + localStorage.getItem('applicationHash'));
     let hash = window.location.hash.substring(1);
     console.log('hash from window hash: ' + hash);
-    let initHash = hash ? hash : localStorage.getItem('applicationHash');
-    console.log('selected hash: ' + initHash);
-    swarm = new SwarmApi(window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500", initHash);
+    //let initHash = hash ? hash : localStorage.getItem('applicationHash');
+
+    swarm = new SwarmApi(window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500", "");
     //swarm = new SwarmApi("https://swarm-gateways.net", initHash);
     blog = new Blog(swarm);
+    let isValid = (hash || blog.uploadedSwarmHash).length > 0;
+    if (!isValid) {
+        alert('Yo cant access this site');
+        return;
+    }
+
+    let initHash = hash ? hash : blog.uploadedSwarmHash;
+    console.log('selected hash: ' + initHash);
+    swarm.applicationHash = initHash;
     console.log(swarm.applicationHash);
     if (swarm.applicationHash) {
-        blog.getMyProfile()
-            .then(function (response) {
-                let data = response.data;
-                console.log(data);
-                // todo autoset profile after update?
-                blog.setMyProfile(data);
-                updateInfo(data)
-            })
-            .catch(function (error) {
-                console.log(error);
-                console.log('Some error happen');
-            })
-            .then(function () {
-                // always executed
-            });
+        updateProfile();
     } else {
         $('#userInfo').hide();
         $('#mainMenu').click();
     }
 
     init();
-    /*window.onbeforeunload = function (e) {
-        if (false) {
-            e = e || window.event;
-
-            // For IE and Firefox prior to version 4
-            if (e) {
-                e.returnValue = 'Sure?';
-            }
-
-            // For Safari
-            return 'Sure?';
-        }
-
-    };*/
-    /*$('#loadModal').modal({
-        backdrop: 'static',
-        show: true
-    });*/
 });
+
+function updateProfile() {
+    blog.getMyProfile()
+        .then(function (response) {
+            let data = response.data;
+            console.log(data);
+            // todo autoset profile after update?
+            blog.setMyProfile(data);
+            updateInfo(data);
+            setTimeout(function () {
+                $('#loadModal').modal('hide');
+            }, 1000);
+        })
+        .catch(function (error) {
+            console.log(error);
+            console.log('Some error happen');
+        })
+        .then(function () {
+            // always executed
+        });
+}
 
 function reload() {
     if (window.location.hash.length) {
@@ -71,8 +70,15 @@ function showUploadModal() {
     });
 }
 
-function init() {
+function onAfterHashChange(newHash) {
+    swarm.applicationHash = newHash;
+    localStorage.setItem('applicationHash', newHash);
+    //reload();
+    window.location.hash = newHash;
+    updateProfile();
+}
 
+function init() {
     $('.publish-post').click(function (e) {
         e.preventDefault();
         let postContentElement = $('#postContent');
@@ -101,11 +107,10 @@ function init() {
         showUploadModal();
         blog.createPost(blog.myProfile.last_post_id + 1, text, attachments)
             .then(function (response) {
-                swarm.applicationHash = response.data;
                 console.log(response.data);
                 postContentElement.val('');
-                localStorage.setItem('applicationHash', response.data);
-                reload();
+                $('#attached-content').html('');
+                onAfterHashChange(response.data);
             })
             .catch(function (error) {
                 console.log('Some error happen');
@@ -148,9 +153,9 @@ function init() {
         showUploadModal();
         blog.saveProfile(info).then(function (response) {
             console.log(response.data);
-            localStorage.setItem('applicationHash', response.data);
-
-            reload();
+            //localStorage.setItem('applicationHash', response.data);
+            //reload();
+            onAfterHashChange(response.data);
         });
     });
 
@@ -202,7 +207,8 @@ function init() {
                     console.log(data);
                     let postAttachmentTemplate = $('#postAttachment').clone();
                     $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', fileType).attr('data-url', url).html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
-                    swarm.applicationHash = data.response.data;
+                    //swarm.applicationHash = data.response.data;
+                    onAfterHashChange(data.response.data);
                     progressPanel.hide();
                     setProgress(0);
                     $('#postOrAttach').removeClass("disabled-content");
@@ -224,12 +230,12 @@ function init() {
                     $('#uploadAvatarModal').modal('hide');
                     showUploadModal();
                     blog.uploadAvatar(arrayBuffer).then(function (response) {
-                        console.log('avatar handled');
+                        //console.log('avatar handled');
                         console.log(response.data);
                         //swarm.applicationHash = response.data;
-                        localStorage.setItem('applicationHash', response.data);
-
-                        reload();
+                        //localStorage.setItem('applicationHash', response.data);
+                        //reload();
+                        onAfterHashChange(response.data);
                     });
                 });
 
@@ -275,8 +281,9 @@ function init() {
         let id = $(this).attr('data-id');
         if (confirm('Really delete?')) {
             blog.deletePost(id).then(function (response) {
-                localStorage.setItem('applicationHash', response.data);
-                reload();
+                //localStorage.setItem('applicationHash', response.data);
+                //reload();
+                onAfterHashChange(response.data);
             });
         }
     });
@@ -302,8 +309,9 @@ function init() {
         if (swarmHash) {
             $('#addFollowerModal').modal('hide');
             blog.addIFollow(swarmHash).then(function (response) {
-                localStorage.setItem('applicationHash', response.data);
-                reload();
+                //localStorage.setItem('applicationHash', response.data);
+                //reload();
+                onAfterHashChange(response.data);
             });
         } else {
             alert('Please, enter SWARM hash');

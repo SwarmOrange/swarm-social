@@ -2,6 +2,40 @@ class Blog {
     constructor(swarm) {
         this.swarm = swarm;
         this.version = 1;
+        let elements = window.location.href.split('/').filter(word => word.length === 64 || word.length === 128);
+        this.uploadedToSwarm = elements.length > 0;
+        if (this.uploadedToSwarm) {
+            this.uploadedSwarmHash = elements[0];
+        } else {
+            this.uploadedSwarmHash = '';
+        }
+    }
+
+    replaceUrlSwarmHash(newHash) {
+        if (this.uploadedToSwarm) {
+            window.location.hash = '';
+        }
+
+        let newElements = [];
+        window.location.href.split('/').forEach(function (v) {
+            let item = v;
+            if (Blog.isCorrectSwarmHash(v)) {
+                item = newHash;
+            }
+
+            newElements.push(item);
+        });
+        let newUrl = newElements.join('/');
+        window.history.pushState({"swarmHash": newHash}, "", newUrl);
+
+        return newUrl;
+    }
+
+    static isCorrectSwarmHash(hash) {
+        let hashLength = 64;
+        let hashLengthEncrypted = 128;
+
+        return hash && (hash.length === hashLength || hash.length === hashLengthEncrypted);
     }
 
     getMyProfile() {
