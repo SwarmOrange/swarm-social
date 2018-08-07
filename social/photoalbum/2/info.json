@@ -6,15 +6,15 @@
   "photos": [
     {
       "file": "social/photoalbum/2/1.jpg",
-      "description": "One"
+      "description": "Paris 1"
     },
     {
       "file": "social/photoalbum/2/2.jpg",
-      "description": "Two"
+      "description": "Paris 2"
     },
     {
       "file": "social/photoalbum/2/3.jpg",
-      "description": "Three"
+      "description": "Paris 3"
     }
   ]
 }
