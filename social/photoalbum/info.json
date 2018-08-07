@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "name": "Animals",
+    "description": "Some animals for you",
+    "cover_file": "social/photoalbums/1/first.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Places",
+    "description": "Some places for you",
+    "cover_file": "social/photoalbums/1/first.jpg"
+  }
+]

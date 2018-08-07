@@ -87,18 +87,6 @@
 
                 </li>
                 <li>
-                    <p class="float-left">Photo albums</p>
-                    <p class="float-right">
-                        <a href="#" data-toggle="modal"
-                           data-target="#addPhotoAlbumsModal">
-                            <img src="img/add.png" alt="" style="width: 20px"></a>
-                    </p>
-                    <div class="clear-both"></div>
-                    <ul id="photoAlbums" class="list-inline">
-
-                    </ul>
-                </li>
-                <li>
                     <p class="float-left">I follow</p>
                     <p class="float-right">
                         <a href="#" data-toggle="modal" data-target="#addFollowerModal">
@@ -111,6 +99,20 @@
 
                     </ul>
                 </li>
+                <li>
+                    <p class="float-left">Photo albums</p>
+                    <p class="float-right">
+                        <a href="#" data-toggle="modal"
+                           data-target="#addPhotoAlbumsModal">
+                            <img src="img/add.png" alt="" style="width: 20px"></a>
+                    </p>
+                    <div class="clear-both"></div>
+
+                    <ul id="photoAlbums" class="list-inline">
+
+                    </ul>
+                </li>
+
             </ul>
         </div>
         <div class="col-sm-8">
@@ -167,15 +169,18 @@
                         </div>
                     </form>
                 </li>
+                <li style="border: 0; padding: 0">
+                    <div id="userPosts" class="posts">
+
+                    </div>
+                    <p id="loadMore" class="text-center" style="display: none"><a class="btn btn-primary load-more" href="#">Load
+                        more..</a></p>
+                </li>
             </ul>
         </div>
     </div>
 
-    <div id="userPosts" class="posts">
 
-    </div>
-    <p id="loadMore" class="text-center" style="display: none"><a class="btn btn-primary load-more" href="#">Load
-        more..</a></p>
 </div>
 
 <div class="templates" style="display: none">
@@ -382,6 +387,27 @@
                 <div class="col-sm-4 offset-sm-4">
                     <div class="loader-animation"></div>
                 </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!-- View Album Modal -->
+<div class="modal fade bd-example-modal-lg" id="viewAlbumModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">View Photo Album</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="viewAlbumContent" class="modal-body">
+
             </div>
             <!--<div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>

@@ -1,5 +1,6 @@
 class Blog {
     constructor(swarm) {
+        this.prefix = "social/";
         this.swarm = swarm;
         this.version = 1;
         let elements = window.location.href.split('/').filter(word => word.length === 64 || word.length === 128);
@@ -38,21 +39,21 @@ class Blog {
         return hash && (hash.length === hashLength || hash.length === hashLengthEncrypted);
     }
 
-    getMyProfile() {
-        return this.swarm.get('profile.json');
-    }
-
     setMyProfile(data) {
         this.myProfile = data;
     }
 
     saveProfile(data, userHash) {
         data.version = this.version;
-        return this.swarm.post("profile.json", JSON.stringify(data), 'application/json', userHash);
+        return this.swarm.post(this.prefix + "profile.json", JSON.stringify(data), 'application/json', userHash);
     }
 
     getProfile(userHash) {
-        return this.swarm.get('profile.json', userHash);
+        return this.swarm.get(this.prefix + 'profile.json', userHash);
+    }
+
+    getMyProfile() {
+        return this.getProfile(this.swarm.applicationHash);
     }
 
     addIFollow(swarmProfileHash) {
@@ -79,7 +80,7 @@ class Blog {
         let self = this;
         let extension = fileName.split('.').pop();
         let timestamp = +new Date();
-        let url = "post/" + id + "/file/" + timestamp + "." + extension;
+        let url = this.prefix + "post/" + id + "/file/" + timestamp + "." + extension;
 
         return this.sendRawFile(url, fileContent, contentType, null, null, onUploadProgress).then(function (response) {
                 return {
@@ -95,7 +96,7 @@ class Blog {
         // structure
         // file/avatar/original.jpg
         let self = this;
-        let url = "file/avatar/original.jpg";
+        let url = this.prefix + "file/avatar/original.jpg";
 
         return this.sendRawFile(url, fileContent, 'image/jpeg')
             .then(function (response) {
@@ -110,36 +111,65 @@ class Blog {
             });
     }
 
-    createPost(id, text, attachments) {
+    createPost(id, description, attachments) {
         let self = this;
         // structure
         // /post/ID/info.json - {"id":id, "description":"my super post", "attachments":[]}
         attachments = attachments || [];
         let info = {
             id: id,
-            description: text,
+            description: description,
             attachments: attachments
         };
 
-        return this.sendRawFile("post/" + id + "/info.json", JSON.stringify(info), 'application/json')
+        return this.sendRawFile(this.prefix + "post/" + id + "/info.json", JSON.stringify(info), 'application/json')
             .then(function (response) {
                 console.log('one');
                 console.log(response.data);
                 self.myProfile.last_post_id = id;
 
                 // todo change with saveProfile
-                return self.sendRawFile("profile.json", JSON.stringify(self.myProfile), 'application/json', response.data);
+                return self.sendRawFile(this.prefix + "profile.json", JSON.stringify(self.myProfile), 'application/json', response.data);
             });
     }
 
     getPost(id, userHash) {
-        return this.swarm.get('post/' + id + '/info.json', userHash);
+        return this.swarm.get(this.prefix + 'post/' + id + '/info.json', userHash);
     }
 
     deletePost(id) {
-        return this.swarm.post("post/" + id + "/info.json", JSON.stringify({
+        return this.swarm.post(this.prefix + "post/" + id + "/info.json", JSON.stringify({
             id: id,
             is_deleted: true
         }), 'application/json');
+    }
+
+    createPhotoAlbum(id, name, description, photos) {
+        let self = this;
+        // structure
+        // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
+        // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "photos":[{"file": "123123.jpg", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
+        photos = photos || [];
+        let info = {
+            id: id,
+            name: name,
+            description: description,
+            photos: photos
+        };
+
+        // todo save photoalubm/info.json
+        return this.sendRawFile(this.prefix + "photoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json')
+            .then(function (response) {
+                console.log('one');
+                console.log(response.data);
+                self.myProfile.last_photoalbum_id = id;
+
+                // todo change with saveProfile
+                return self.sendRawFile(this.prefix + "profile.json", JSON.stringify(self.myProfile), 'application/json', response.data);
+            });
+    }
+
+    getAlbumInfo(id) {
+        return this.swarm.get(this.prefix + 'photoalbum/' + id + '/info.json');
     }
 }

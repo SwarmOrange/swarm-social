@@ -3,6 +3,11 @@ let blog;
 let cropper;
 let lastLoadedPost = 0;
 
+$(document).on('click', '[data-toggle="lightbox"]', function (event) {
+    event.preventDefault();
+    $(this).ekkoLightbox();
+});
+
 $(document).ready(function () {
     // hash - user id
     //console.log('hash from local storage: ' + localStorage.getItem('applicationHash'));
@@ -103,7 +108,7 @@ function init() {
 
         // todo block post button and create wait animation
         //$('#postBlock').addClass("disabled-content");
-        showUploadModal();
+        //showUploadModal();
         blog.createPost(blog.myProfile.last_post_id + 1, text, attachments)
             .then(function (response) {
                 console.log(response.data);
@@ -333,6 +338,23 @@ function init() {
             //reload();
         });
     });
+
+    $('#photoAlbums').on('click', '.load-photoalbum', function (e) {
+        e.preventDefault();
+        let albumId = $(this).attr('data-album-id');
+        let viewAlbumContent = $('#viewAlbumContent');
+        $('#viewAlbumModal').modal('show');
+        viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+        blog.getAlbumInfo(albumId).then(function (response) {
+            let data = response.data;
+            console.log(data);
+            viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
+            data.photos.forEach(function (v) {
+                viewAlbumContent.append('<li class="list-inline-item"><a href="' + swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '"><img src="' + swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
+            });
+            viewAlbumContent.append('</ul>');
+        });
+    });
 }
 
 function goToHash(userHash) {
@@ -390,6 +412,18 @@ function updateInfo(data) {
     }
 
     loadIFollow();
+    loadPhotoAlbums();
+}
+
+function loadPhotoAlbums() {
+    let data = blog.myProfile;
+    if (data.last_photoalbum_id && data.last_photoalbum_id > 0) {
+        let photoAlbums = $('#photoAlbums');
+        photoAlbums.html('');
+        for (let i = data.last_photoalbum_id; i > 0; i--) {
+            photoAlbums.append('<li class="list-inline-item"><a href="#" class="load-photoalbum" data-album-id="' + i + '"><img src="' + swarm.getFullUrl('social/photoalbum/' + i + '/1.jpg') + '" style="width: 100%"></a></li>');
+        }
+    }
 }
 
 function loadIFollow() {

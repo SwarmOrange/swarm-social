@@ -70,11 +70,20 @@ img {
     }
 }
 
-#iFollowUsers li {
+#iFollowUsers li, #photoAlbums li {
     border: 0;
     padding: 0;
 }
 
+#photoAlbums li {
+    margin-right: 0;
+}
+
 .clear-both {
     clear: both;
+}
+
+.preview-album-photo {
+    max-width: 250px;
+    max-height: 250px;
 }
