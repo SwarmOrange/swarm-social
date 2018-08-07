@@ -84,6 +84,14 @@ img {
 }
 
 .preview-album-photo {
-    max-width: 250px;
-    max-height: 250px;
+    max-width: 245px;
+    max-height: 245px;
+}
+
+.photo-uploaded-insta {
+    opacity: 0.2;
+}
+
+#viewAlbumContent li {
+    margin-bottom: 8px;
 }

@@ -2,7 +2,7 @@
   "id": 2,
   "name": "Places",
   "description": "Some places for you",
-  "cover": "social/photoalbums/1/1.jpg",
+  "cover_file": "social/photoalbums/1/1.jpg",
   "photos": [
     {
       "file": "social/photoalbum/2/1.jpg",

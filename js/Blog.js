@@ -102,7 +102,7 @@ class Blog {
             .then(function (response) {
                 console.log('avatar uploaded');
                 console.log(response.data);
-                swarm.applicationHash = response.data;
+                self.swarm.applicationHash = response.data;
                 self.myProfile.photo = {
                     original: url
                 };
@@ -129,7 +129,7 @@ class Blog {
                 self.myProfile.last_post_id = id;
 
                 // todo change with saveProfile
-                return self.sendRawFile(this.prefix + "profile.json", JSON.stringify(self.myProfile), 'application/json', response.data);
+                return self.sendRawFile(self.prefix + "profile.json", JSON.stringify(self.myProfile), 'application/json', response.data);
             });
     }
 
@@ -150,26 +150,59 @@ class Blog {
         // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
         // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "photos":[{"file": "123123.jpg", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
         photos = photos || [];
+        let coverFile = photos.length ? photos[0].file : photos;
         let info = {
             id: id,
             name: name,
             description: description,
+            cover_file: coverFile,
             photos: photos
         };
 
-        // todo save photoalubm/info.json
         return this.sendRawFile(this.prefix + "photoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json')
             .then(function (response) {
-                console.log('one');
+                console.log('Photoalbom info.json');
                 console.log(response.data);
+                self.swarm.applicationHash = response.data;
                 self.myProfile.last_photoalbum_id = id;
 
-                // todo change with saveProfile
-                return self.sendRawFile(this.prefix + "profile.json", JSON.stringify(self.myProfile), 'application/json', response.data);
+                return self.getAlbumsInfo().then(function (response) {
+                    let data = response.data;
+
+                    data.push({
+                        id: id,
+                        name: name,
+                        description: description,
+                        cover_file: coverFile
+                    });
+                    console.log('ALBUM INFO: ');
+                    console.log(data);
+                    return self.sendRawFile(self.prefix + "photoalbum/info.json", JSON.stringify(data), 'application/json')
+                        .then(function (response) {
+                            console.log('one');
+                            console.log(response.data);
+                            self.myProfile.last_photoalbum_id = id;
+
+                            return self.saveProfile(self.myProfile);
+                        });
+                });
             });
+    }
+
+    uploadPhotoToAlbum(photoAlbumId, photoId, fileContent) {
+        //let timestamp = +new Date();
+        //let fileName = this.prefix + "photoalbum/" + photoAlbumId + "/" + timestamp + ".jpg";
+        let fileName = this.prefix + "photoalbum/" + photoAlbumId + "/" + photoId + ".jpg";
+        return this.sendRawFile(fileName, fileContent, 'image/jpeg').then(function (response) {
+            return {fileName: fileName, response: response.data};
+        });
     }
 
     getAlbumInfo(id) {
         return this.swarm.get(this.prefix + 'photoalbum/' + id + '/info.json');
+    }
+
+    getAlbumsInfo() {
+        return this.swarm.get(this.prefix + 'photoalbum/info.json');
     }
 }

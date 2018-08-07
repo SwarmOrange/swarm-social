@@ -102,9 +102,9 @@
                 <li>
                     <p class="float-left">Photo albums</p>
                     <p class="float-right">
-                        <a href="#" data-toggle="modal"
-                           data-target="#addPhotoAlbumsModal">
-                            <img src="img/add.png" alt="" style="width: 20px"></a>
+                        <a href="#" class="create-album">
+                            <img src="img/add.png" alt="" style="width: 20px">
+                        </a>
                     </p>
                     <div class="clear-both"></div>
 
@@ -173,7 +173,8 @@
                     <div id="userPosts" class="posts">
 
                     </div>
-                    <p id="loadMore" class="text-center" style="display: none"><a class="btn btn-primary load-more" href="#">Load
+                    <p id="loadMore" class="text-center" style="display: none"><a class="btn btn-primary load-more"
+                                                                                  href="#">Load
                         more..</a></p>
                 </li>
             </ul>
@@ -396,7 +397,8 @@
 </div>
 
 <!-- View Album Modal -->
-<div class="modal fade bd-example-modal-lg" id="viewAlbumModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+<div class="modal fade bd-example-modal-lg" id="viewAlbumModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -411,6 +413,44 @@
             </div>
             <!--<div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Album Modal -->
+<div class="modal fade bd-example-modal-lg" id="newAlbumModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create/Edit Album</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="newAlbumContent" class="modal-body">
+                <!--<p class="float-left">Hello </p><button type="button" class="btn btn-sm btn-primary add-photo-album float-right">Add photos</button>-->
+                <p>
+                    <button type="button" class="btn btn-primary show-insta-panel">Import photos from Instagram</button>
+                    <button type="button" class="btn btn-success upload-all-insta">Upload all</button>
+                </p>
+                <div class="import-insta-panel" style="display: none">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="instaNick" placeholder="Instagram nickname">
+                    </div>
+                    <button type="button" class="btn btn-primary import-instagram">Import</button>
+                    <button type="button" class="btn btn-secondary import-instagram-cancel">Cancel</button>
+                </div>
+                <div class="clear-both"></div>
+                <hr>
+                <div id="uploaded-photos">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary send-ens-transaction">Save</button>
             </div>-->
         </div>
     </div>

@@ -2,6 +2,9 @@ let swarm;
 let blog;
 let cropper;
 let lastLoadedPost = 0;
+let currentPhotoAlbum = 0;
+let currentPhotosForAlbum = [];
+let photoAlbumPhotoId = 0;
 
 $(document).on('click', '[data-toggle="lightbox"]', function (event) {
     event.preventDefault();
@@ -59,27 +62,22 @@ function updateProfile() {
         });
 }
 
-function reload() {
-    if (window.location.hash.length) {
-        window.location = window.location.href.substr(0, window.location.href.indexOf('#'));
-    } else {
-        location.reload();
-    }
-}
-
 function showUploadModal() {
-    $('#loadModal').modal({
+    /*$('#loadModal').modal({
         backdrop: 'static',
         show: true
-    });
+    });*/
 }
 
-function onAfterHashChange(newHash) {
+function onAfterHashChange(newHash, notUpdateProfile) {
     swarm.applicationHash = newHash;
     localStorage.setItem('applicationHash', newHash);
-    //reload();
     window.location.hash = newHash;
-    return updateProfile();
+    if (notUpdateProfile) {
+        return null;
+    } else {
+        return updateProfile();
+    }
 }
 
 function init() {
@@ -117,6 +115,7 @@ function init() {
                 onAfterHashChange(response.data);
             })
             .catch(function (error) {
+                console.log(error);
                 console.log('Some error happen');
             })
             .then(function () {
@@ -355,6 +354,115 @@ function init() {
             viewAlbumContent.append('</ul>');
         });
     });
+
+    $('.show-insta-panel').click(function (e) {
+        e.preventDefault();
+        $('.import-insta-panel').show('fast');
+    });
+
+    $('.import-instagram').click(function (e) {
+        e.preventDefault();
+        let instaNick = $('#instaNick').val();
+        if (!instaNick) {
+            alert('Incorrect nickname');
+
+            return;
+        }
+
+        $('.import-insta-panel').hide('fast');
+
+        let uploaderPhotos = $('#uploaded-photos');
+        uploaderPhotos.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+
+        swarm.axios.get('http://content-bot.tut.bike/insta/go.php?limit=100&login=' + instaNick).then(function (response) {
+            let data = response.data;
+            $('.upload-all-insta').show();
+            uploaderPhotos.html('');
+
+            if (data && data.length && typeof data === 'object') {
+
+            } else {
+                $('#newAlbumModal').modal('hide');
+                alert('Incorrect login or error while retrieving data');
+                return;
+            }
+
+            uploaderPhotos.html('<ul id="preview-insta-album" class="list-inline">');
+            data.forEach(function (v) {
+                uploaderPhotos.append('<li class="list-inline-item"><img data-type="insta-photo" style="max-width: 100px; max-height: 100px;" src="' + v.fullsize + '"></li>');
+            });
+            uploaderPhotos.append('</ul>');
+        }).catch(function (error) {
+            console.log(error);
+            console.log('Insta error');
+        });
+
+        $('#addFromInstaModal').modal('hide');
+        $('#newAlbumModal').modal('show');
+
+    });
+
+    $('.create-album').click(function (e) {
+        e.preventDefault();
+        $('#uploaded-photos').html('');
+        $('.upload-all-insta').hide();
+        $('#newAlbumModal').modal('show');
+    });
+
+    $('.upload-all-insta').click(function (e) {
+        e.preventDefault();
+        let photos = $('img[data-type=insta-photo]');
+        if (photos.length) {
+            currentPhotosForAlbum = [];
+            currentPhotoAlbum = blog.myProfile.last_photoalbum_id + 1;
+            photoAlbumPhotoId = 1;
+            uploadAllInstaPhotos();
+        } else {
+            alert('Photos not found');
+        }
+    });
+
+    $('.import-instagram-cancel').click(function () {
+        $('.import-insta-panel').hide('fast');
+    });
+}
+
+function uploadAllInstaPhotos() {
+    let photos = $('img[data-type=insta-photo]');
+    if (photos.length) {
+        let currentElement = $(photos[0]);
+        let src = currentElement.attr('src');
+        console.log(src);
+        swarm.axios.request({
+            url: src,
+            method: 'GET',
+            responseType: 'blob',
+        }).then(function (response) {
+            console.log('Photo downloaded');
+            //console.log(response.data);
+            currentElement.attr('data-type', '');
+            currentElement.addClass('photo-uploaded-insta');
+            console.log('album id ' + currentPhotoAlbum);
+            blog.uploadPhotoToAlbum(currentPhotoAlbum, photoAlbumPhotoId, response.data).then(function (data) {
+                console.log('Photo uploaded');
+                console.log(data);
+                currentPhotosForAlbum.push({
+                    file: data.fileName,
+                    description: ""
+                });
+                photoAlbumPhotoId++;
+                onAfterHashChange(data.response, true);
+                uploadAllInstaPhotos();
+            });
+        });
+    } else {
+        blog.createPhotoAlbum(currentPhotoAlbum, 'Insta', '', currentPhotosForAlbum).then(function (response) {
+            console.log('album created');
+            console.log(response.data);
+            onAfterHashChange(response.data);
+            $('#newAlbumModal').modal('hide');
+        });
+    }
 }
 
 function goToHash(userHash) {
@@ -431,7 +539,7 @@ function loadIFollow() {
     let iFollowBlock = $('#iFollowUsers');
     if ('i_follow' in data && data.i_follow.length) {
         data.i_follow.forEach(function (v) {
-            iFollowBlock.append('<li class="list-inline-item"><a href="#" class="load-profile" data-profile-id="' + v + '"><img src="' + swarm.getFullUrl('file/avatar/original.jpg', v) + '" style="width: 50px"></a></li>');
+            iFollowBlock.append('<li class="list-inline-item"><a href="' + swarm.getFullUrl('', v) + '" class="load-profile" data-profile-id="' + v + '"><img src="' + swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 50px"></a></li>');
         });
     }
 }
