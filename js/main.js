@@ -350,7 +350,7 @@ function init() {
             console.log(data);
             viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
             data.photos.forEach(function (v) {
-                viewAlbumContent.append('<li class="list-inline-item"><a href="' + swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '"><img src="' + swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
+                viewAlbumContent.append('<li class="list-inline-item"><a href="' + swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
             });
             viewAlbumContent.append('</ul>');
         });
