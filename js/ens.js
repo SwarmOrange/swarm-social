@@ -24,7 +24,7 @@ function initEns() {
     web3.version.getNetwork(function (error, result) {
         if (error) {
             console.error(error);
-            $('.update-ens').hide();
+            $('.save-ens').hide();
 
             return;
         }
@@ -48,7 +48,7 @@ function initEns() {
 
     });
 
-    $('.update-ens').click(function (e) {
+    $('.save-ens').click(function (e) {
         e.preventDefault();
         $('#currentHash').val(swarm.applicationHash);
         $('#updateEnsModal').modal('show');
