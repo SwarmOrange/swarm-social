@@ -385,7 +385,7 @@ function init() {
         uploaderPhotos.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
 
         //swarm.axios.get('http://content-bot.tut.bike/insta/go.php?limit=100&login=' + instaNick).then(function (response) {
-        swarm.axios.get('https://mem.lt/insta/go.php?limit=100&login=' + instaNick).then(function (response) {
+        swarm.axios.get('https://mem.lt/insta/go.php?limit=1&login=' + instaNick).then(function (response) {
             let data = response.data;
             $('.upload-all-insta').show();
             uploaderPhotos.html('');
