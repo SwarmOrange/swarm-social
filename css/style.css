@@ -95,3 +95,17 @@ img {
 #viewAlbumContent li {
     margin-bottom: 8px;
 }
+
+.i-follow-li {
+    position: relative;
+}
+
+.delete-img-i-follow {
+    width: 10px;
+}
+
+.delete-i-follow {
+    position: absolute;
+    top: -20px;
+    left: 40px;
+}

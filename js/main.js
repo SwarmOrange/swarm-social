@@ -338,6 +338,16 @@ function init() {
         });
     });
 
+    $('#iFollowUsers').on('click', '.delete-i-follow', function (e) {
+        e.preventDefault();
+        let id = $(this).attr('data-profile-id');
+        if (confirm('Really delete?')) {
+            blog.deleteIFollow(id).then(function (response) {
+                onAfterHashChange(response.data);
+            });
+        }
+    });
+
     $('#photoAlbums').on('click', '.load-photoalbum', function (e) {
         e.preventDefault();
         let albumId = $(this).attr('data-album-id');
@@ -542,7 +552,9 @@ function loadIFollow() {
     let iFollowBlock = $('#iFollowUsers');
     if ('i_follow' in data && data.i_follow.length) {
         data.i_follow.forEach(function (v) {
-            iFollowBlock.append('<li class="list-inline-item"><a href="' + swarm.getFullUrl('', v) + '" class="load-profile" data-profile-id="' + v + '"><img src="' + swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 50px"></a></li>');
+            iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
+                '<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
+                '<a href="' + swarm.getFullUrl('', v) + '" class="load-profile" data-profile-id="' + v + '"><img src="' + swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 50px"></a></li>');
         });
     }
 }

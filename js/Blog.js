@@ -70,6 +70,21 @@ class Blog {
         return this.saveProfile(this.myProfile);
     }
 
+    deleteIFollow(swarmProfileHash) {
+        if ('i_follow' in this.myProfile) {
+            if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
+                let index = this.myProfile.i_follow.indexOf(swarmProfileHash);
+                if (index > -1) {
+                    this.myProfile.i_follow.splice(index, 1);
+                }
+            }
+        } else {
+            this.myProfile.i_follow = [];
+        }
+
+        return this.saveProfile(this.myProfile);
+    }
+
     sendRawFile(fileName, data, fileType, userHash, swarmProtocol, onProgress) {
         return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol, onProgress);
     }
