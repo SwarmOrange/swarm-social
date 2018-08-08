@@ -414,6 +414,7 @@ function init() {
         e.preventDefault();
         let photos = $('img[data-type=insta-photo]');
         if (photos.length) {
+            $(this).hide();
             currentPhotosForAlbum = [];
             currentPhotoAlbum = blog.myProfile.last_photoalbum_id + 1;
             photoAlbumPhotoId = 1;
