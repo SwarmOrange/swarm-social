@@ -190,13 +190,14 @@ class Blog {
                         description: description,
                         cover_file: coverFile
                     });
-                    console.log('ALBUM INFO: ');
+                    console.log('album info');
                     console.log(data);
                     // todo use saveAlbumsInfo
                     return self.sendRawFile(self.prefix + "photoalbum/info.json", JSON.stringify(data), 'application/json')
                         .then(function (response) {
                             console.log('one');
                             console.log(response.data);
+                            self.swarm.applicationHash = response.data;
                             self.myProfile.last_photoalbum_id = id;
 
                             return self.saveProfile(self.myProfile);

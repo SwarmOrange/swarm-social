@@ -554,23 +554,16 @@ function loadPhotoAlbums() {
     if (data.last_photoalbum_id && data.last_photoalbum_id > 0) {
         let photoAlbums = $('#photoAlbums');
         photoAlbums.html('');
-        for (let i = data.last_photoalbum_id; i > 0; i--) {
-            // todo create empty album holders
-            swarm.axios.get(swarm.getFullUrl('social/photoalbum/' + i + '/1.jpg'), {
-                params: {
-                    albumId: i
-                }
-            }).then(function (response) {
-                // todo fill holders
-                let id = response.config.params.albumId;
+        blog.getAlbumsInfo().then(function (response) {
+            let data = response.data;
+            data.forEach(function (v) {
+                let id = v.id;
                 photoAlbums.append('<li class="list-inline-item">' +
                     '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img src="' + swarm.getFullUrl('social/photoalbum/' + id + '/1.jpg') + '" style="width: 100%"></a></li>');
 
-            }).catch(function (error) {
-                // todo remove holders
-                //console.log(error);
             });
-        }
+
+        });
     }
 }
 
