@@ -348,10 +348,23 @@ function init() {
         }
     });
 
+    $('.btn-delete-album').click(function (e) {
+        e.preventDefault();
+        let id = $(this).attr('data-album-id');
+        if (confirm('Really delete?')) {
+            $('#viewAlbumModal').modal('hide');
+
+            blog.deletePhotoAlbum(id).then(function (response) {
+                onAfterHashChange(response.data);
+            });
+        }
+    });
+
     $('#photoAlbums').on('click', '.load-photoalbum', function (e) {
         e.preventDefault();
         let albumId = $(this).attr('data-album-id');
         let viewAlbumContent = $('#viewAlbumContent');
+        $('.btn-delete-album').attr('data-album-id', albumId);
         $('#viewAlbumModal').modal('show');
         viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
         blog.getAlbumInfo(albumId).then(function (response) {
@@ -542,7 +555,21 @@ function loadPhotoAlbums() {
         let photoAlbums = $('#photoAlbums');
         photoAlbums.html('');
         for (let i = data.last_photoalbum_id; i > 0; i--) {
-            photoAlbums.append('<li class="list-inline-item"><a href="#" class="load-photoalbum" data-album-id="' + i + '"><img src="' + swarm.getFullUrl('social/photoalbum/' + i + '/1.jpg') + '" style="width: 100%"></a></li>');
+            // todo create empty album holders
+            swarm.axios.get(swarm.getFullUrl('social/photoalbum/' + i + '/1.jpg'), {
+                params: {
+                    albumId: i
+                }
+            }).then(function (response) {
+                // todo fill holders
+                let id = response.config.params.albumId;
+                photoAlbums.append('<li class="list-inline-item">' +
+                    '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img src="' + swarm.getFullUrl('social/photoalbum/' + id + '/1.jpg') + '" style="width: 100%"></a></li>');
+
+            }).catch(function (error) {
+                // todo remove holders
+                //console.log(error);
+            });
         }
     }
 }

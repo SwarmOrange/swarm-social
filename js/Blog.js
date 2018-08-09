@@ -192,6 +192,7 @@ class Blog {
                     });
                     console.log('ALBUM INFO: ');
                     console.log(data);
+                    // todo use saveAlbumsInfo
                     return self.sendRawFile(self.prefix + "photoalbum/info.json", JSON.stringify(data), 'application/json')
                         .then(function (response) {
                             console.log('one');
@@ -219,5 +220,31 @@ class Blog {
 
     getAlbumsInfo() {
         return this.swarm.get(this.prefix + 'photoalbum/info.json');
+    }
+
+    saveAlbumsInfo(data) {
+        return this.sendRawFile(this.prefix + "photoalbum/info.json", JSON.stringify(data), 'application/json');
+    }
+
+    deletePhotoAlbum(id) {
+        let self = this;
+        // todo delete all photos. Can we delete files from passed list?
+        // todo delete from photoalbum/info.json
+        return this.swarm.delete(this.prefix + 'photoalbum/' + id + '/1.jpg').then(function (response) {
+            self.swarm.applicationHash = response.data;
+            return self.getAlbumsInfo().then(function (response) {
+                let data = response.data;
+                let newAlbums = [];
+                if (data && Array.isArray(data) && data.length) {
+                    data.forEach(function (v) {
+                        if (v.id != id) {
+                            newAlbums.push(v);
+                        }
+                    });
+                }
+
+                return self.saveAlbumsInfo(newAlbums);
+            });
+        });
     }
 }

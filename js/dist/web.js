@@ -38,6 +38,10 @@ class SwarmApi {
         });
     }
 
+    delete(file, userHash, swarmProtocol) {
+        return this.request("delete", file, userHash, swarmProtocol)
+    }
+
     get(file, userHash, swarmProtocol) {
         return this.request("get", file, userHash, swarmProtocol)
     }
