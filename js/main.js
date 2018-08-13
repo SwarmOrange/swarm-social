@@ -15,6 +15,15 @@ $(document).ready(function () {
     // hash - user id
     //console.log('hash from local storage: ' + localStorage.getItem('applicationHash'));
     let hash = window.location.hash.substring(1);
+    if (hash) {
+        if (Blog.isCorrectSwarmHash(hash)) {
+
+        } else {
+            alert('Incorrect hash after # in url. Fix it and reload page.');
+
+            return;
+        }
+    }
     console.log('hash from window hash: ' + hash);
     //let initHash = hash ? hash : localStorage.getItem('applicationHash');
 
@@ -23,7 +32,7 @@ $(document).ready(function () {
     blog = new Blog(swarm);
     let isValid = (hash || blog.uploadedSwarmHash).length > 0;
     if (!isValid) {
-        alert('Yo can\'t access this site. Add #SWARM_HASH to url and update page.');
+        alert('You can\'t access this site. Add #SWARM_HASH to url and update page.');
         return;
     }
 
