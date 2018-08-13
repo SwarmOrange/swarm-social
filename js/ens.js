@@ -56,6 +56,11 @@ function initEns() {
 
     $('.send-ens-transaction').click(function (e) {
         e.preventDefault();
+        if (!web3.eth.defaultAccount) {
+            alert('Please, select main Ethereum account and unlock MetaMask.');
+
+            return;
+        }
         saveDomainHash();
     });
 }
@@ -71,7 +76,7 @@ function saveDomainHash() {
     let swarmHash = $('#currentHash').val();
     console.log([ensDomain, swarmHash]);
 
-    if (!isCorrectDomain(ensDomain) || !blog.isCorrectSwarmHash(swarmHash)) {
+    if (!isCorrectDomain(ensDomain) || !Blog.isCorrectSwarmHash(swarmHash)) {
         alert('Incorrect domain or hash');
 
         return;
