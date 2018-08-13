@@ -5,7 +5,7 @@ $(document).ready(function () {
 function initYoutube() {
     $('.create-video-playlist').click(function (e) {
         e.preventDefault();
-
+        alert('Not implemented');
     });
 }
 
@@ -28,7 +28,6 @@ function initClient() {
     // 'scope' field specifies space-delimited list of access scopes
 
     gapi.client.init({
-        //'clientId': '840608930739-c2b77hc2755o45iua5lqfkbb5iblccrp.apps.googleusercontent.com',
         'clientId': '840608930739-12c2gdat8sefu73ddbos0ci7i3dk0qa4.apps.googleusercontent.com',
         'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
         'scope': 'https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner'
