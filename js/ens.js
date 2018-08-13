@@ -40,7 +40,7 @@ function initEns() {
 
             console.log(result);
             if (result.length === 0) {
-                alert('Please, select main Ethereum account, unlock MetaMask and reload this page.');
+                //alert('Please, select main Ethereum account, unlock MetaMask and reload this page.');
             } else {
                 web3.eth.defaultAccount = result[0];
             }
