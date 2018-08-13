@@ -1,6 +1,7 @@
 class Blog {
     constructor(swarm) {
         this.prefix = "social/";
+        this.mruName = "SWARM Social";
         this.swarm = swarm;
         this.version = 1;
         let elements = window.location.href.split('/').filter(word => word.length === 64 || word.length === 128);
@@ -247,5 +248,51 @@ class Blog {
                 return self.saveAlbumsInfo(newAlbums);
             });
         });
+    }
+
+    createMru(ownerAddress) {
+        let self = this;
+        // todo save it to profile
+        if (!ownerAddress) {
+            throw "Empty owner address";
+        }
+
+        let timestamp = +new Date();
+        let data = {
+            "name": this.mruName,
+            "frequency": 5,
+            "startTime": timestamp,
+            "ownerAddr": ownerAddress
+        };
+
+        return this.swarm.post(null, data, null, null, 'bzz-resource:').then(function (response) {
+            self.myProfile.mru = response.data;
+            return {
+                mru: response.data,
+                response: self.saveProfile(self.myProfile)
+            };
+        });
+    }
+
+    saveMru(mru, rootAddress, swarmHash) {
+        if (mru && rootAddress && swarmHash) {
+        } else {
+            throw "Empty MRU, rootAddress or SWARM hash";
+        }
+
+        let timestamp = +new Date();
+        let data = {
+            "name": this.mruName,
+            "frequency": 5,
+            "startTime": timestamp,
+            "rootAddr": rootAddress,
+            "data": "0x12a3",
+            "multiHash": false,
+            "version": 1,
+            "period": 1,
+            "signature": "0x71c54e53095466d019f9f46e34ae0b393d04a5dac7990ce65934a3944c1f39badfc8c4f3c78baaae8b2e86cd21940914c57a4dff5de45d47e35811f983991b7809"
+        };
+
+        return this.swarm.post(null, data, null, null, 'bzz-resource:');
     }
 }
