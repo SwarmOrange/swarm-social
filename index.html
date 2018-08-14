@@ -112,8 +112,7 @@
 
                     </ul>
                 </li>
-                <li>
-                    <!--<button id="execute-request-button">Authorize</button>-->
+                <!--<li>
                     <p class="float-left">Video playlists</p>
                     <p class="float-right">
                         <a href="#" class="create-video-playlist">
@@ -125,8 +124,7 @@
                     <ul id="videoPlaylists" class="list-inline">
 
                     </ul>
-                </li>
-
+                </li>-->
             </ul>
         </div>
         <div class="col-sm-8">
@@ -455,8 +453,20 @@
             <div id="newAlbumContent" class="modal-body">
                 <!--<p class="float-left">Hello </p><button type="button" class="btn btn-sm btn-primary add-photo-album float-right">Add photos</button>-->
                 <p>
+                    <input id="input-upload-photo-album" type="file" style="display: none;" accept="image/*" multiple>
+                    <button type="button" class="btn btn-primary upload-photos">Upload photos</button>
                     <button type="button" class="btn btn-primary show-insta-panel">Import photos from Instagram</button>
-                    <button type="button" class="btn btn-success upload-all-insta">Upload all</button>
+                    <button type="button" class="btn btn-success upload-all-insta">Upload all from Instagram</button>
+                </p>
+                <p>
+                <div id="progressPanelAlbum" style="display:none;">
+                    <div class="clear-both"></div>
+                    <div class="progress" style="height: 20px;">
+                        <div id="postProgressAlbum" class="progress-bar progress-bar-striped" role="progressbar"
+                             style="width: 0%"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
                 </p>
                 <div class="import-insta-panel" style="display: none">
                     <div class="form-group">
@@ -480,14 +490,13 @@
 
 <script src="js/dist/web.js"></script>
 <script src="js/Blog.js"></script>
+<script src="js/photoalbum.js"></script>
 <script src="js/main.js"></script>
 <script src="js/ens.js"></script>
 <script src="js/mru.js"></script>
 <script src="js/youtube.js"></script>
 <script src="js/anal.js"></script>
-<script async defer src="https://apis.google.com/js/api.js"
-        onload="this.onload=function(){};handleClientLoad()"
-        onreadystatechange="if (this.readyState === 'complete') this.onload()">
-</script>
+<script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()"
+        onreadystatechange="if (this.readyState === 'complete') this.onload()"/>
 </body>
 </html>
