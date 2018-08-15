@@ -143,9 +143,9 @@ class Blog {
                 console.log('one');
                 console.log(response.data);
                 self.myProfile.last_post_id = id;
+                self.swarm.applicationHash = response.data;
 
-                // todo change with saveProfile
-                return self.sendRawFile(self.prefix + "profile.json", JSON.stringify(self.myProfile), 'application/json', response.data);
+                return self.saveProfile(self.myProfile);
             });
     }
 
@@ -158,6 +158,15 @@ class Blog {
             id: id,
             is_deleted: true
         }), 'application/json');
+    }
+
+    editPost(id, description) {
+        let self = this;
+        return this.getPost(id).then(function (response) {
+            let data = response.data;
+            data.description = description;
+            return self.swarm.post(self.prefix + "post/" + id + "/info.json", JSON.stringify(data), 'application/json');
+        });
     }
 
     createPhotoAlbum(id, name, description, photos) {
@@ -193,10 +202,8 @@ class Blog {
                     });
                     console.log('album info');
                     console.log(data);
-                    // todo use saveAlbumsInfo
                     return self.sendRawFile(self.prefix + "photoalbum/info.json", JSON.stringify(data), 'application/json')
                         .then(function (response) {
-                            console.log('one');
                             console.log(response.data);
                             self.swarm.applicationHash = response.data;
                             self.myProfile.last_photoalbum_id = id;

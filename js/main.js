@@ -308,17 +308,31 @@ function init() {
         let id = $(this).attr('data-id');
         if (confirm('Really delete?')) {
             blog.deletePost(id).then(function (response) {
-                //localStorage.setItem('applicationHash', response.data);
-                //reload();
                 onAfterHashChange(response.data);
             });
         }
     });
 
+    $('#userPosts').on('click', '.edit-post', function (e) {
+        e.preventDefault();
+        let id = $(this).attr('data-id');
+        $('#userPost' + id + ' .description').toggle();
+        $('#userPost' + id + ' .edit-post-block').toggle();
+    });
+
+    $('#userPosts').on('click', '.save-post', function (e) {
+        e.preventDefault();
+        let id = $(this).attr('data-id');
+        let description = $(this).closest('.edit-post-block').find('textarea').val();
+        blog.editPost(id, description).then(function (response) {
+            onAfterHashChange(response.data);
+        });
+    });
+
     $('.create-profile').click(function (e) {
         e.preventDefault();
 
-        localStorage.setItem('applicationHash', '');
+        //localStorage.setItem('applicationHash', '');
         // todo how to create empty hash with one file?
         //blog.saveProfile({});
     });
@@ -628,7 +642,10 @@ function loadPosts() {
             }
 
             userPost.find('.description').text(data.description);
+            userPost.find('.edit-post-block textarea').val(data.description);
             userPost.find('.delete-post').attr('data-id', data.id);
+            userPost.find('.edit-post').attr('data-id', data.id);
+            userPost.find('.save-post').attr('data-id', data.id);
             if (data.attachments && data.attachments.length) {
                 let youtubeAttachment = $('#wallYoutubeAttachment');
                 let photoAttachment = $('#photoAttachment');

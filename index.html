@@ -108,9 +108,13 @@
 
 <div id="importData" class="container" style="margin-top: 30px; text-align: center; display: none">
     <h1>Import your data...</h1>
-    <button class="btn btn-primary mb-2 btn-import-instagram"><img src="img/instagram.png" alt="" style="width: 30px"> Import from Instagram</button>
+    <button class="btn btn-primary mb-2 btn-import-instagram"><img src="img/instagram.png" alt="" style="width: 30px">
+        Import from Instagram
+    </button>
     <h1>...or create empty page</h1>
-    <button class="btn btn-success mb-2 btn-create-empty"><img src="img/empty.png" alt="" style="width: 30px"> Create empty page</button>
+    <button class="btn btn-success mb-2 btn-create-empty"><img src="img/empty.png" alt="" style="width: 30px"> Create
+        empty page
+    </button>
 
 </div>
 
@@ -245,7 +249,19 @@
         <a href="#" class="delete-post float-right">
             <img src="img/delete.png" alt="">
         </a>
+        <a href="#" class="edit-post float-right">
+            <img src="img/empty-black.png" alt="">
+        </a>
         <div class="description"></div>
+        <div class="edit-post-block" style="display: none">
+            <div class="form-group">
+
+            <textarea class="form-control" rows="3"></textarea>
+            </div>
+            <p>
+                <button type="button" class="btn btn-primary save-post">Save</button>
+            </p>
+        </div>
     </div>
     <div id="postAttachment" class="post-attachment" style="display: none">
 

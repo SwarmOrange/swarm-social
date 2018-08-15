@@ -43,8 +43,12 @@ img {
     margin-top: 8px;
 }
 
-.delete-post img {
+.delete-post img, .edit-post img {
     width: 10px;
+}
+
+.edit-post {
+    margin-right: 8px;
 }
 
 .disabled-content {
@@ -146,13 +150,16 @@ img {
         padding-top: 0;
         padding-bottom: 0;
     }
+
     .masthead .header-content {
         margin-bottom: 0;
         text-align: left;
     }
+
     .masthead .header-content h1 {
         font-size: 50px;
     }
+
     .masthead .device-container {
         max-width: 325px;
     }
