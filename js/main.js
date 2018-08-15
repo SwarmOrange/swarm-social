@@ -31,9 +31,15 @@ $(document).ready(function () {
     //swarm = new SwarmApi("https://swarm-gateways.net", initHash);
     blog = new Blog(swarm);
     let isValid = (hash || blog.uploadedSwarmHash).length > 0;
-    if (!isValid) {
-        alert('You can\'t access this site. Add #SWARM_HASH to url and update page.');
-        return;
+    if (isValid) {
+        $('#userRegistration').hide();
+        $('#userInfo').show();
+    } else {
+        //alert('You can\'t access this site. Add #SWARM_HASH to url and update page.');
+        //return;
+        $('#userRegistration').show();
+        //$('#importData').show();
+        $('#userInfo').hide();
     }
 
     let initHash = hash ? hash : blog.uploadedSwarmHash;
@@ -42,10 +48,11 @@ $(document).ready(function () {
     console.log(swarm.applicationHash);
     if (swarm.applicationHash) {
         updateProfile();
-    } else {
-        $('#userInfo').hide();
-        $('#mainMenu').click();
     }
+    /*else {
+           $('#userInfo').hide();
+           $('#mainMenu').click();
+       }*/
 
     init();
 });
@@ -149,16 +156,20 @@ function init() {
 
     $('.edit-page-info').click(function (e) {
         let info = blog.myProfile;
-        $('#firstNameEdit').val(info.first_name);
-        $('#lastNameEdit').val(info.last_name);
-        $('#birthDateEdit').val(info.birth_date);
-        $('#locationEdit').val(info.location.name);
-        $('#aboutEdit').val(info.about);
+        if (info) {
+            $('#firstNameEdit').val(info.first_name);
+            $('#lastNameEdit').val(info.last_name);
+            $('#birthDateEdit').val(info.birth_date);
+            $('#locationEdit').val(info.location.name);
+            $('#aboutEdit').val(info.about);
+        }
     });
 
     $('.save-info-changes').click(function () {
         // todo save and close
-        let info = blog.myProfile;
+        let info = blog.myProfile || {
+            location: {}
+        };
         info.first_name = $('#firstNameEdit').val();
         info.last_name = $('#lastNameEdit').val();
         info.birth_date = $('#birthDateEdit').val();
@@ -405,8 +416,6 @@ function init() {
 
         let uploaderPhotos = $('#uploaded-photos');
         uploaderPhotos.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-
-        //swarm.axios.get('http://content-bot.tut.bike/insta/go.php?limit=100&login=' + instaNick).then(function (response) {
         swarm.axios.get('https://mem.lt/insta/go.php?limit=1&login=' + instaNick).then(function (response) {
             let data = response.data;
             $('.upload-all-insta').show();
@@ -439,6 +448,8 @@ function init() {
         e.preventDefault();
         $('#uploaded-photos').html('');
         $('.upload-all-insta').hide();
+        $('.upload-photos').show();
+        $('.show-insta-panel').show();
         $('#newAlbumModal').modal('show');
     });
 

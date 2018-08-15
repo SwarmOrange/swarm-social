@@ -109,3 +109,63 @@ img {
     top: -20px;
     left: 40px;
 }
+
+.masthead {
+    position: relative;
+    width: 100%;
+    padding-top: 150px;
+    padding-bottom: 100px;
+    color: #fff;
+    background: url(../img/bg-pattern.png), linear-gradient(to left, #7b4397, #dc2430);
+}
+
+.masthead .header-content {
+    max-width: 500px;
+    margin-bottom: 100px;
+    text-align: center;
+}
+
+.masthead .header-content h1 {
+    font-size: 30px;
+}
+
+.masthead .device-container {
+    max-width: 325px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.masthead .device-container .screen img {
+    border-radius: 3px;
+}
+
+@media (min-width: 992px) {
+    .masthead {
+        height: 100vh;
+        min-height: 775px;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    .masthead .header-content {
+        margin-bottom: 0;
+        text-align: left;
+    }
+    .masthead .header-content h1 {
+        font-size: 50px;
+    }
+    .masthead .device-container {
+        max-width: 325px;
+    }
+}
+
+.btn-outline {
+    color: white;
+    border: 1px solid;
+    border-color: white;
+}
+
+.btn-outline:hover, .btn-outline:focus, .btn-outline:active, .btn-outline.active {
+    color: white;
+    border-color: #fdcc52;
+    background-color: #fdcc52;
+}
