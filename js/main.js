@@ -26,8 +26,15 @@ $(document).ready(function () {
     }
     console.log('hash from window hash: ' + hash);
     //let initHash = hash ? hash : localStorage.getItem('applicationHash');
+    let swarmHost = window.location.protocol + "//" + window.location.hostname;
+    if (window.location.hostname === "mem.lt") {
+        swarmHost = "https://swarm-gateways.net";
+    } else if (window.location.hostname === "localhost") {
+        swarmHost = "http://127.0.0.1:8500";
+    }
 
-    swarm = new SwarmApi(window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500", "");
+    //swarmHost = window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500";
+    swarm = new SwarmApi(swarmHost, "");
     //swarm = new SwarmApi("https://swarm-gateways.net", initHash);
     blog = new Blog(swarm);
     let isValid = (hash || blog.uploadedSwarmHash).length > 0;
