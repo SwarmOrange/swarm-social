@@ -28,7 +28,8 @@ $(document).ready(function () {
     //let initHash = hash ? hash : localStorage.getItem('applicationHash');
     let swarmHost = window.location.protocol + "//" + window.location.hostname;
     if (window.location.hostname === "mem.lt") {
-        //swarmHost = "https://swarm-gateways.net";
+        swarmHost = "https://swarm-gateways.net";
+    } else if (window.location.hostname === "tut.bike") {
         swarmHost = "http://beefree.me";
     } else if (window.location.hostname === "localhost") {
         swarmHost = "http://127.0.0.1:8500";
