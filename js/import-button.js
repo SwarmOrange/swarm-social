@@ -21,4 +21,16 @@ function initImportButton() {
         $('.upload-all-insta').hide();
         $('#newAlbumModal').modal('show');*/
     });
+
+    $('.btn-profile-import-youtube').click(function (e) {
+        e.preventDefault();
+        alert('Not implemented yet');
+
+    });
+
+    $('.btn-send-crypto,.btn-receive-crypto').click(function (e) {
+        e.preventDefault();
+        alert('Not implemented yet');
+
+    });
 }

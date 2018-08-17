@@ -9,7 +9,7 @@ $(document).ready(function () {
 });
 
 function initPhotoalbum() {
-    $('.upload-photos').click(function (e) {
+    $('.upload-photos, .upload-photos-preview').click(function (e) {
         e.preventDefault();
 
         let input = $('#input-upload-photo-album');

@@ -35,15 +35,26 @@
     </div>-->
     <div class="navbar navbar-dark bg-dark box-shadow">
         <div class="container d-flex justify-content-between">
-            <a href="./index.html" class="navbar-brand d-flex align-items-center">
+            <a href="./" class="navbar-brand d-flex align-items-center">
                 <img src="img/logo.jpeg" alt="" style="width: 50px; margin-right: 12px">
-                <!--<strong>SWARM Social</strong>-->
+                <strong>Bee Free</strong>
             </a>
             <!--<button id="mainMenu" class="navbar-toggler" type="button" data-toggle="collapse"
                     data-target="#navbarHeader"
                     aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>-->
+            <ul class="nav nav-pills nav-fill">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">My Page</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Public Page</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">View Page</a>
+                </li>
+            </ul>
         </div>
     </div>
 </header>
@@ -103,7 +114,7 @@
     <div class="row">
         <div class="col-sm-4">
             <ul class="main-blocks">
-                <li>
+                <!--<li>
                     <p>
                         <img id="bigAvatar" src="img/no-photo.png" alt="">
                     </p>
@@ -113,6 +124,57 @@
                         </button>
                     </p>
 
+                </li>-->
+                <li>
+                    <p>My wallet</p>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">ETH</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Value" aria-label="Username"
+                               aria-describedby="basic-addon1" value="25.04444" disabled>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">BTC</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Value" aria-label="Username"
+                               aria-describedby="basic-addon1" value="0.300080" disabled>
+                    </div>
+
+                    <p>
+                        <button type="button" class="btn btn-light btn-send-crypto" style="width: 130px; margin-right: 13px">
+                            Send Crypto
+                        </button>
+                        <button type="button" class="btn btn-light btn-receive-crypto float-right" style="width: 130px;">
+                            Receive Crypto
+                        </button>
+                    </p>
+                </li>
+                <li>
+                    <p>My data</p>
+                    <p>
+                        <button type="button" class="btn btn-primary upload-photos-preview">Upload photos</button>
+
+                    </p>
+                    <p>Import from </p>
+                    <p>
+                        <button type="button" class="btn btn-primary btn-profile-import-instagram" style="width: 130px; margin-right: 13px">
+                            <img src="img/instagram.png" alt="" style="width: 30px; margin-right: 8px">
+                            Instagram
+                        </button>
+
+                        <button type="button" class="btn btn-primary btn-profile-import-facebook" style="width: 130px">
+                            <img src="img/facebook.png" alt="" style="width: 30px; margin-right: 8px">
+                            Facebook
+                        </button>
+
+                    <p>
+                        <button type="button" class="btn btn-primary btn-profile-import-youtube" style="width: 130px">
+                            <img src="img/youtube-white.png" alt="" style="width: 30px; margin-right: 8px">
+                            Youtube
+                        </button>
+                    </p>
                 </li>
                 <li>
                     <p class="float-left">I follow</p>
@@ -157,31 +219,32 @@
         </div>
         <div class="col-sm-8">
             <ul class="main-blocks">
-                <li>
-                    <div class="dropdown float-right">
-                        <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Import data
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a class="dropdown-item btn-profile-import-instagram" href="#">Instagram</a>
-                            <a class="dropdown-item btn-profile-import-facebook" href="#">Facebook</a>
-                        </div>
-                    </div>
+                <!-- <li>
+                     <!--<div class="dropdown float-right">
+                         <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                             Import data
+                         </button>
+                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                             <a class="dropdown-item btn-profile-import-instagram" href="#">Instagram</a>
+                             <a class="dropdown-item btn-profile-import-facebook" href="#">Facebook</a>
+                         </div>
+                     </div>-->
 
-                    <h1><span id="firstName">...</span> <span id="lastName">...</span> <a href="#"
-                                                                                          class="edit-page-info"
-                                                                                          data-toggle="modal"
-                                                                                          data-target="#editInfoModal"><img
-                            class="project-icon" src="img/edit.png" alt=""></a> </h1>
-                    <h3>Birth: <span id="birthDate">...</span></h3>
-                    <h3>Location: <span id="locationName"></span></h3>
-                    <h3>About: <span id="about"></span></h3>
-                    <p>
-                        <button type="submit" class="btn btn-primary mb-2 save-mru">Save MRU</button>
-                        <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
-                    </p>
-                </li>
+                <!--   <h1><span id="firstName">...</span> <span id="lastName">...</span> <a href="#"
+                                                                                         class="edit-page-info"
+                                                                                         data-toggle="modal"
+                                                                                         data-target="#editInfoModal"><img
+                           class="project-icon" src="img/edit.png" alt=""></a></h1>
+                   <h3>Birth: <span id="birthDate">...</span></h3>
+                   <h3>Location: <span id="locationName"></span></h3>
+                   <h3>About: <span id="about"></span></h3>
+                   <p>
+                       <button type="submit" class="btn btn-primary mb-2 save-mru">Save MRU</button>
+                       <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
+                   </p>
+               </li>-->
                 <li id="postBlock">
+                    <p>Create post</p>
                     <form>
                         <div class="form-group">
                             <textarea class="form-control" id="postContent" rows="3"></textarea>
@@ -194,7 +257,9 @@
                         <div id="postOrAttach" style="height: 30px">
                             <p class="float-left">
                                 <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
-
+                                <input type="checkbox" aria-label="Checkbox for following text input"
+                                       style="margin-left: 8px"> Share anonymously
+                            </p>
                             </p>
 
                             <p class="float-right">

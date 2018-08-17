@@ -176,3 +176,19 @@ img {
     border-color: #fdcc52;
     background-color: #fdcc52;
 }
+
+.bg-dark {
+    background-color: #0092e7 !important;
+}
+
+.nav-link {
+    color: white;
+}
+
+.nav-link:hover {
+    color: #dbedff;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    background-color: #177ce3;
+}
