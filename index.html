@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="favicon.png">
+    <link rel="icon" href="img/logo.jpeg">
 
-    <title>SWARM Social</title>
+    <title>Bee Free</title>
 
     <link href="css/uglify.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
@@ -15,7 +15,7 @@
 <body>
 
 <header>
-    <div class="collapse bg-dark" id="navbarHeader">
+    <!--<div class="collapse bg-dark" id="navbarHeader">
         <div class="container">
             <div class="row">
                 <div class="col-sm-8 col-md-7 py-4">
@@ -25,44 +25,25 @@
                             <label for="navigateUserHash" class="text-muted">Paste here SWARM user hash. If user
                                 registered you can see his page</label>
                             <input type="text" class="form-control" id="navigateUserHash" placeholder="User hash">
-                            <!--<small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>-->
                         </div>
 
                         <button type="submit" class="btn btn-primary go-user-hash">Go</button>
                     </form>
-                    <!--<hr>
-                    <h4 class="text-white">Create new SWARM Social profile</h4>
-
-                    <form>
-                        <button type="submit" class="btn btn-primary create-profile">Create new profile</button>
-                    </form>-->
                 </div>
-                <!--<div class="col-sm-8 col-md-7 py-4">
-                    <h4 class="text-white">About</h4>
-                    <p class="text-muted">Add some information about the album below, the author, or any other background context. Make it a few sentences long so folks can pick up some informative tidbits. Then, link them off to some social networking sites or contact information.</p>
-                </div>-->
-                <!--<div class="col-sm-4 offset-md-1 py-4">
-                    <h4 class="text-white">Contact</h4>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-white">Follow on Twitter</a></li>
-                        <li><a href="#" class="text-white">Like on Facebook</a></li>
-                        <li><a href="#" class="text-white">Email me</a></li>
-                    </ul>
-                </div>-->
             </div>
         </div>
-    </div>
+    </div>-->
     <div class="navbar navbar-dark bg-dark box-shadow">
         <div class="container d-flex justify-content-between">
             <a href="./index.html" class="navbar-brand d-flex align-items-center">
-                <img src="favicon.png" alt="" style="width: 30px; margin-right: 12px">
-                <strong>SWARM Social</strong>
+                <img src="img/logo.jpeg" alt="" style="width: 50px; margin-right: 12px">
+                <!--<strong>SWARM Social</strong>-->
             </a>
-            <button id="mainMenu" class="navbar-toggler" type="button" data-toggle="collapse"
+            <!--<button id="mainMenu" class="navbar-toggler" type="button" data-toggle="collapse"
                     data-target="#navbarHeader"
                     aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
-            </button>
+            </button>-->
         </div>
     </div>
 </header>
@@ -177,11 +158,21 @@
         <div class="col-sm-8">
             <ul class="main-blocks">
                 <li>
+                    <div class="dropdown float-right">
+                        <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Import data
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item btn-profile-import-instagram" href="#">Instagram</a>
+                            <a class="dropdown-item btn-profile-import-facebook" href="#">Facebook</a>
+                        </div>
+                    </div>
+
                     <h1><span id="firstName">...</span> <span id="lastName">...</span> <a href="#"
                                                                                           class="edit-page-info"
                                                                                           data-toggle="modal"
                                                                                           data-target="#editInfoModal"><img
-                            class="project-icon" src="img/edit.png" alt=""></a></h1>
+                            class="project-icon" src="img/edit.png" alt=""></a> </h1>
                     <h3>Birth: <span id="birthDate">...</span></h3>
                     <h3>Location: <span id="locationName"></span></h3>
                     <h3>About: <span id="about"></span></h3>
@@ -523,7 +514,6 @@
                              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
-                </p>
                 <div class="import-insta-panel" style="display: none">
                     <div class="form-group">
                         <input type="text" class="form-control" id="instaNick" placeholder="Instagram nickname">
@@ -548,6 +538,7 @@
 <script src="js/Blog.js"></script>
 <script src="js/photoalbum.js"></script>
 <script src="js/start-now.js"></script>
+<script src="js/import-button.js"></script>
 <script src="js/main.js"></script>
 <script src="js/ens.js"></script>
 <script src="js/mru.js"></script>
