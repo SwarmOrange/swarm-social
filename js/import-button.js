@@ -3,6 +3,12 @@ $(document).ready(function () {
 });
 
 function initImportButton() {
+    $('.fake-nav a').click(function (e) {
+        e.preventDefault();
+        alert('Not implemented yet');
+
+    });
+
     $('.btn-profile-import-instagram').click(function (e) {
         e.preventDefault();
         $('.show-insta-panel').click();
