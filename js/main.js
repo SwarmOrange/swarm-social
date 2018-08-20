@@ -34,6 +34,7 @@ $(document).ready(function () {
         swarmHost = "http://beefree.me";
     } else if (window.location.hostname === "localhost") {
         swarmHost = "http://127.0.0.1:8500";
+        //swarmHost = "https://swarm-gateways.net";
     }
 
     //swarmHost = window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500";
@@ -59,10 +60,6 @@ $(document).ready(function () {
     if (swarm.applicationHash) {
         updateProfile();
     }
-    /*else {
-           $('#userInfo').hide();
-           $('#mainMenu').click();
-       }*/
 
     init();
 });
@@ -110,7 +107,7 @@ function init() {
     $('.publish-post').click(function (e) {
         e.preventDefault();
         let postContentElement = $('#postContent');
-        let text = postContentElement.val();
+        let description = postContentElement.val();
         let attachments = [];
         $('.post-attachment').each(function (k, v) {
             let type = $(v).attr('data-type');
@@ -122,30 +119,34 @@ function init() {
                 });
             }
         });
-        console.log(text);
+        console.log(description);
         console.log(attachments);
-        let isContentExists = text.length || attachments.length;
+        let isContentExists = description.length || attachments.length;
         if (!isContentExists) {
             alert('Please, write text or add attachments');
             return;
         }
 
-        // todo block post button and create wait animation
-        //$('#postBlock').addClass("disabled-content");
-        //showUploadModal();
-        blog.createPost(blog.myProfile.last_post_id + 1, text, attachments)
+        let newPostId = blog.myProfile.last_post_id + 1;
+        addPostByData({
+            id: newPostId,
+            description: description,
+            attachments: attachments
+        });
+        $('#postBlock').addClass("disabled-content");
+        blog.createPost(newPostId, description, attachments)
             .then(function (response) {
                 console.log(response.data);
                 postContentElement.val('');
                 $('#attached-content').html('');
-                onAfterHashChange(response.data);
+                onAfterHashChange(response.data, true);
             })
             .catch(function (error) {
                 console.log(error);
                 console.log('Some error happen');
             })
             .then(function () {
-                // always executed
+                $('#postBlock').removeClass("disabled-content");
             });
     });
 
@@ -176,7 +177,6 @@ function init() {
     });
 
     $('.save-info-changes').click(function () {
-        // todo save and close
         let info = blog.myProfile || {
             location: {}
         };
@@ -190,8 +190,6 @@ function init() {
         showUploadModal();
         blog.saveProfile(info).then(function (response) {
             console.log(response.data);
-            //localStorage.setItem('applicationHash', response.data);
-            //reload();
             onAfterHashChange(response.data);
         });
     });
@@ -250,7 +248,6 @@ function init() {
                     $('#postOrAttach').removeClass("disabled-content");
                 });
             };
-            //console.log(this.files[0]);
             reader.readAsArrayBuffer(this.files[0]);
         }
     });
@@ -266,11 +263,7 @@ function init() {
                     $('#uploadAvatarModal').modal('hide');
                     showUploadModal();
                     blog.uploadAvatar(arrayBuffer).then(function (response) {
-                        //console.log('avatar handled');
                         console.log(response.data);
-                        //swarm.applicationHash = response.data;
-                        //localStorage.setItem('applicationHash', response.data);
-                        //reload();
                         onAfterHashChange(response.data);
                     });
                 });
@@ -284,7 +277,6 @@ function init() {
 
     $('.attach-photo').click(function (e) {
         e.preventDefault();
-        //alert('not implemented');
         let input = $('#input-attach-file');
         input.attr('data-type', 'photo');
         input.attr('accept', 'image/*');
@@ -293,7 +285,6 @@ function init() {
 
     $('.attach-video').click(function (e) {
         e.preventDefault();
-        //alert('not implemented');
         let input = $('#input-attach-file');
         input.attr('data-type', 'video');
         input.attr('accept', 'video/*');
@@ -312,32 +303,32 @@ function init() {
         }
     });
 
-    $('#userPosts').on('click', '.delete-post', function (e) {
-        e.preventDefault();
-        let id = $(this).attr('data-id');
-        if (confirm('Really delete?')) {
-            blog.deletePost(id).then(function (response) {
-                onAfterHashChange(response.data, true);
+    $('#userPosts')
+        .on('click', '.delete-post', function (e) {
+            e.preventDefault();
+            let id = $(this).attr('data-id');
+            if (confirm('Really delete?')) {
+                //$('#my-post').addClass("disabled-content");
                 $('#userPost' + id).hide('slow');
+                blog.deletePost(id).then(function (response) {
+                    onAfterHashChange(response.data, true);
+                });
+            }
+        })
+        .on('click', '.edit-post', function (e) {
+            e.preventDefault();
+            let id = $(this).attr('data-id');
+            $('#userPost' + id + ' .description').toggle();
+            $('#userPost' + id + ' .edit-post-block').toggle();
+        })
+        .on('click', '.save-post', function (e) {
+            e.preventDefault();
+            let id = $(this).attr('data-id');
+            let description = $(this).closest('.edit-post-block').find('textarea').val();
+            blog.editPost(id, description).then(function (response) {
+                onAfterHashChange(response.data);
             });
-        }
-    });
-
-    $('#userPosts').on('click', '.edit-post', function (e) {
-        e.preventDefault();
-        let id = $(this).attr('data-id');
-        $('#userPost' + id + ' .description').toggle();
-        $('#userPost' + id + ' .edit-post-block').toggle();
-    });
-
-    $('#userPosts').on('click', '.save-post', function (e) {
-        e.preventDefault();
-        let id = $(this).attr('data-id');
-        let description = $(this).closest('.edit-post-block').find('textarea').val();
-        blog.editPost(id, description).then(function (response) {
-            onAfterHashChange(response.data);
         });
-    });
 
     $('.create-profile').click(function (e) {
         e.preventDefault();
@@ -373,24 +364,24 @@ function init() {
         }
     });
 
-    $('#iFollowUsers').on('click', '.load-profile', function (e) {
-        e.preventDefault();
-        let swarmProfileHash = $(this).attr('data-profile-id');
-        // todo go to profile
-        goToHash(swarmProfileHash).then(function (response) {
-            //reload();
-        });
-    });
-
-    $('#iFollowUsers').on('click', '.delete-i-follow', function (e) {
-        e.preventDefault();
-        let id = $(this).attr('data-profile-id');
-        if (confirm('Really delete?')) {
-            blog.deleteIFollow(id).then(function (response) {
-                onAfterHashChange(response.data);
+    $('#iFollowUsers')
+        .on('click', '.load-profile', function (e) {
+            e.preventDefault();
+            let swarmProfileHash = $(this).attr('data-profile-id');
+            // todo go to profile
+            goToHash(swarmProfileHash).then(function (response) {
+                //reload();
             });
-        }
-    });
+        })
+        .on('click', '.delete-i-follow', function (e) {
+            e.preventDefault();
+            let id = $(this).attr('data-profile-id');
+            if (confirm('Really delete?')) {
+                blog.deleteIFollow(id).then(function (response) {
+                    onAfterHashChange(response.data);
+                });
+            }
+        });
 
     $('.btn-delete-album').click(function (e) {
         e.preventDefault();
@@ -508,7 +499,6 @@ function uploadAllInstaPhotos() {
             responseType: 'blob',
         }).then(function (response) {
             console.log('Photo downloaded');
-            //console.log(response.data);
             currentElement.attr('data-type', '');
             currentElement.addClass('photo-uploaded-insta');
             console.log('album id ' + currentPhotoAlbum);
@@ -617,7 +607,6 @@ function loadPhotoAlbums() {
                     '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img src="' + swarm.getFullUrl('social/photoalbum/' + id + '/1.jpg') + '" style="width: 100%"></a></li>');
 
             });
-
         });
     }
 }
@@ -635,15 +624,11 @@ function loadIFollow() {
 }
 
 function loadPosts() {
-    let userPostTemplate = $('#userPost');
-    let userPosts = $('#userPosts');
     let maxReceivedPosts = 10;
     let data = blog.myProfile;
     let meetPostId = data.last_post_id - lastLoadedPost;
     for (let i = meetPostId; i > meetPostId - maxReceivedPosts && i > 0; i--) {
-        let newPost = userPostTemplate.clone().attr('id', 'userPost' + i).attr('style', '').attr('data-id', i);
-        newPost.find('.description').text('Loading');
-        userPosts.append(newPost);
+        addPostTemplate(i);
         lastLoadedPost++;
 
         if (lastLoadedPost >= data.last_post_id) {
@@ -654,35 +639,56 @@ function loadPosts() {
 
         blog.getPost(i, swarm.applicationHash).then(function (response) {
             let data = response.data;
-            console.log(data);
-            let userPost = $('#userPost' + data.id);
-            if (data.is_deleted) {
-                userPost.remove();
+            addPostByData(data);
+        });
+    }
+}
 
-                return;
-            }
+function addPostTemplate(id, addToTop) {
+    let userPostTemplate = $('#userPost');
+    let userPosts = $('#userPosts');
+    let newPost = userPostTemplate.clone().attr('id', 'userPost' + id).attr('style', '').attr('data-id', id);
+    newPost.find('.description').text('Loading');
+    if (addToTop) {
+        userPosts.prepend(newPost);
+    } else {
+        userPosts.append(newPost);
+    }
 
-            userPost.find('.description').text(data.description);
-            userPost.find('.edit-post-block textarea').val(data.description);
-            userPost.find('.delete-post').attr('data-id', data.id);
-            userPost.find('.edit-post').attr('data-id', data.id);
-            userPost.find('.save-post').attr('data-id', data.id);
-            if (data.attachments && data.attachments.length) {
-                let youtubeAttachment = $('#wallYoutubeAttachment');
-                let photoAttachment = $('#photoAttachment');
-                let videoAttachment = $('#videoAttachment');
-                data.attachments.forEach(function (v) {
-                    if (v.type === "youtube") {
-                        let videoId = youtube_parser(v.url);
-                        userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
-                            '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
-                            '</div>'));
-                    } else if (v.type === "photo") {
-                        userPost.append(photoAttachment.clone().attr('style', '').html('<img src="' + swarm.getFullUrl(v.url) + '">'));
-                    } else if (v.type === "video") {
-                        userPost.append(photoAttachment.clone().attr('style', '').html('<video width="100%" controls><source src="' + swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
-                    }
-                });
+    return newPost;
+}
+
+function addPostByData(data) {
+    let userPost = $('#userPost' + data.id);
+    if (userPost.length <= 0) {
+        userPost = addPostTemplate(data.id, true);
+    }
+
+    if (data.is_deleted) {
+        userPost.remove();
+
+        return;
+    }
+
+    userPost.find('.description').text(data.description);
+    userPost.find('.edit-post-block textarea').val(data.description);
+    userPost.find('.delete-post').attr('data-id', data.id);
+    userPost.find('.edit-post').attr('data-id', data.id);
+    userPost.find('.save-post').attr('data-id', data.id);
+    if (data.attachments && data.attachments.length) {
+        let youtubeAttachment = $('#wallYoutubeAttachment');
+        let photoAttachment = $('#photoAttachment');
+        let videoAttachment = $('#videoAttachment');
+        data.attachments.forEach(function (v) {
+            if (v.type === "youtube") {
+                let videoId = youtube_parser(v.url);
+                userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
+                    '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
+                    '</div>'));
+            } else if (v.type === "photo") {
+                userPost.append(photoAttachment.clone().attr('style', '').html('<img src="' + swarm.getFullUrl(v.url) + '">'));
+            } else if (v.type === "video") {
+                userPost.append(videoAttachment.clone().attr('style', '').html('<video width="100%" controls><source src="' + swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
             }
         });
     }
