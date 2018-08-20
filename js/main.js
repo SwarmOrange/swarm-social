@@ -318,7 +318,8 @@ function init() {
         let id = $(this).attr('data-id');
         if (confirm('Really delete?')) {
             blog.deletePost(id).then(function (response) {
-                onAfterHashChange(response.data);
+                onAfterHashChange(response.data, true);
+                $('#userPost' + id).hide('slow');
             });
         }
     });
