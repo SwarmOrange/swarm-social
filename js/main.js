@@ -530,6 +530,17 @@ function uploadAllInstaPhotos() {
             onAfterHashChange(response.data);
             $('#newAlbumModal').modal('hide');
             alert('Album created!');
+
+            /*let attachments = [];
+            currentPhotosForAlbum.forEach(function (v) {
+                attachments.push({
+                    type: 'photo',
+                    url: v.file
+                });
+            });
+            blog.createPost(blog.myProfile.last_post_id + 1, '', attachments).then(function (response) {
+                onAfterHashChange(response.data);
+            });*/
         });
     }
 }

@@ -64,6 +64,16 @@ function sendNextFile() {
                     onAfterHashChange(response.data);
                     $('#newAlbumModal').modal('hide');
                     alert('Album created!');
+                    /*let attachmnets = [];
+                    photoalbumInfo.uploadedInfo.forEach(function (v) {
+                        attachmnets.push({
+                            type: 'photo',
+                            url: v.file
+                        });
+                    });
+                    blog.createPost(blog.myProfile.last_post_id + 1, '', attachmnets).then(function (response) {
+                        onAfterHashChange(response.data);
+                    });*/
                 });
             }
         });
