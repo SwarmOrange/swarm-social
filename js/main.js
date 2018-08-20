@@ -244,8 +244,7 @@ function init() {
                     console.log(data);
                     let postAttachmentTemplate = $('#postAttachment').clone();
                     $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', fileType).attr('data-url', url).html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
-                    //swarm.applicationHash = data.response.data;
-                    onAfterHashChange(data.response.data);
+                    onAfterHashChange(data.response.data, true);
                     progressPanel.hide();
                     setProgress(0);
                     $('#postOrAttach').removeClass("disabled-content");
