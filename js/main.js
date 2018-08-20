@@ -24,6 +24,7 @@ $(document).ready(function () {
             return;
         }
     }
+
     console.log('hash from window hash: ' + hash);
     //let initHash = hash ? hash : localStorage.getItem('applicationHash');
     let swarmHost = window.location.protocol + "//" + window.location.hostname;
