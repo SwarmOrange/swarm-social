@@ -325,8 +325,10 @@ function init() {
             e.preventDefault();
             let id = $(this).attr('data-id');
             let description = $(this).closest('.edit-post-block').find('textarea').val();
+            $('#userPost' + id + ' .description').text(description).toggle();
+            $('#userPost' + id + ' .edit-post-block').toggle();
             blog.editPost(id, description).then(function (response) {
-                onAfterHashChange(response.data);
+                onAfterHashChange(response.data, true);
             });
         });
 
