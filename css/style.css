@@ -74,7 +74,7 @@ img {
     }
 }
 
-#iFollowUsers li, #photoAlbums li {
+#iFollowUsers li, #photoAlbums li, #videoPlaylists li {
     border: 0;
     padding: 0;
 }

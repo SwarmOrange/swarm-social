@@ -1,4 +1,4 @@
-$(document).ready(function () {
+/*$(document).ready(function () {
     initYoutube();
 });
 
@@ -7,7 +7,7 @@ function initYoutube() {
         e.preventDefault();
         alert('Not implemented');
     });
-}
+}*/
 
 /***** START BOILERPLATE CODE: Load client library, authorize user. *****/
 
@@ -42,6 +42,7 @@ function initClient() {
 
         // Call handleAuthClick function when user clicks on "Authorize" button.
         $('#execute-request-button').click(function () {
+            $('#youtubeImportContent').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
             handleAuthClick(event);
         });
     });
@@ -49,7 +50,11 @@ function initClient() {
 
 function handleAuthClick(event) {
     // Sign user in after click on auth button.
-    GoogleAuth.signIn();
+    if (isAuthorized) {
+        defineRequest();
+    } else {
+        GoogleAuth.signIn();
+    }
 }
 
 function setSigninStatus() {
@@ -57,7 +62,7 @@ function setSigninStatus() {
     isAuthorized = user.hasGrantedScopes('https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner');
     // Toggle button text and displayed statement based on current auth status.
     if (isAuthorized) {
-        defineRequest();
+        //defineRequest();
     }
 }
 
@@ -106,13 +111,16 @@ function removeEmptyParams(params) {
     return params;
 }
 
-function executeRequest(request) {
+function executeRequest(request, onSuccess) {
     request.execute(function (response) {
         console.log(response);
+        if (onSuccess) {
+            onSuccess(response);
+        }
     });
 }
 
-function buildApiRequest(requestMethod, path, params, properties) {
+function buildApiRequest(requestMethod, path, params, properties, onSuccess) {
     params = removeEmptyParams(params);
     var request;
     if (properties) {
@@ -130,22 +138,58 @@ function buildApiRequest(requestMethod, path, params, properties) {
             'params': params
         });
     }
-    executeRequest(request);
+    executeRequest(request, onSuccess);
 }
 
 /***** END BOILERPLATE CODE *****/
 
 
 function defineRequest() {
-    // See full sample for buildApiRequest() code, which is not
-// specific to a particular API or API method.
-
     buildApiRequest('GET',
         '/youtube/v3/playlists',
         {
-            'channelId': 'UC_x5XG1OV2P6uZZ5FSM9Ttw',
+            'mine': 'true',
             'maxResults': '25',
-            'part': 'snippet,contentDetails'
-        });
+            'part': 'snippet,contentDetails',
+            'onBehalfOfContentOwner': '',
+            'onBehalfOfContentOwnerChannel': ''
+        }, null, function (response) {
+            let youtubeImportContent = $('#youtubeImportContent');
+            youtubeImportContent.html('<ul id="preview-youtube-playlists" class="list-inline">');
+            response.items.forEach(function (v) {
+                youtubeImportContent.append('<li class="list-inline-item"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
+                    '<p><button type="button" class="btn btn-primary receive-youtube-playlist-videos" data-id="' + v.id + '">Receive videos</button></p>' +
+                    '</li>');
 
+            });
+            youtubeImportContent.append('</ul>');
+        });
 }
+
+$('#youtubeImportModal').on('click', '.receive-youtube-playlist-videos', function () {
+    let id = $(this).attr('data-id');
+    if (!id) {
+        alert('Incorrect playlist id');
+
+        return;
+    }
+
+    $('#youtubePlaylistVideos').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+    buildApiRequest('GET',
+        '/youtube/v3/playlistItems',
+        {
+            'maxResults': '25',
+            'part': 'snippet,contentDetails',
+            'playlistId': id
+        }, null, function (response) {
+            let videos = $('#youtubePlaylistVideos');
+            videos.html('<p><button type="button" class="btn btn-success btn-import-all-videos">Import all videos</button></p>' +
+                '<ul id="preview-youtube-videos" class="list-inline">');
+            response.items.forEach(function (v) {
+                videos.append('<li class="list-inline-item youtube-video-import" data-id="' + v.contentDetails.videoId + '" data-cover-file="' + v.snippet.thumbnails.medium.url + '"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
+                    '</li>');
+
+            });
+            videos.append('</ul>');
+        });
+});

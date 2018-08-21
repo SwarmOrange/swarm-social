@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="author" content="Ihar Shaduryn">
     <link rel="icon" href="img/logo.jpeg">
 
     <title>Bee Free</title>
@@ -143,10 +143,12 @@
                     </div>
 
                     <p>
-                        <button type="button" class="btn btn-light btn-send-crypto" style="width: 130px; margin-right: 13px">
+                        <button type="button" class="btn btn-light btn-send-crypto"
+                                style="width: 130px; margin-right: 13px">
                             Send Crypto
                         </button>
-                        <button type="button" class="btn btn-light btn-receive-crypto float-right" style="width: 130px;">
+                        <button type="button" class="btn btn-light btn-receive-crypto float-right"
+                                style="width: 130px;">
                             Receive Crypto
                         </button>
                     </p>
@@ -162,12 +164,14 @@
                     </p>
                     <p>Import from </p>
                     <p>
-                        <button type="button" class="btn btn-primary btn-profile-import-instagram" style="width: 145px; margin-right: 0px">
+                        <button type="button" class="btn btn-primary btn-profile-import-instagram"
+                                style="width: 145px; margin-right: 0px">
                             <img src="img/instagram.png" alt="" style="width: 30px; margin-right: 8px">
                             Instagram
                         </button>
 
-                        <button type="button" class="btn btn-primary btn-profile-import-facebook float-right" style="width: 145px">
+                        <button type="button" class="btn btn-primary btn-profile-import-facebook float-right"
+                                style="width: 145px">
                             <img src="img/facebook.png" alt="" style="width: 30px; margin-right: 8px">
                             Facebook
                         </button>
@@ -178,10 +182,11 @@
                             Youtube
                         </button>
 
-                    <button type="button" class="btn btn-primary btn-profile-import-facebook float-right" style="width: 145px">
-                        <img src="img/google-plus.png" alt="" style="width: 30px; margin-right: 8px">
-                        Google+
-                    </button>
+                        <button type="button" class="btn btn-primary btn-profile-import-facebook float-right"
+                                style="width: 145px">
+                            <img src="img/google-plus.png" alt="" style="width: 30px; margin-right: 8px">
+                            Google+
+                        </button>
                     </p>
                 </li>
                 <li>
@@ -210,19 +215,19 @@
 
                     </ul>
                 </li>
-                <!--<li>
+                <li>
                     <p class="float-left">Video playlists</p>
-                    <p class="float-right">
+                    <!--<p class="float-right">
                         <a href="#" class="create-video-playlist">
                             <img src="img/add.png" alt="" style="width: 20px">
                         </a>
-                    </p>
+                    </p>-->
                     <div class="clear-both"></div>
 
                     <ul id="videoPlaylists" class="list-inline">
 
                     </ul>
-                </li>-->
+                </li>
             </ul>
         </div>
         <div class="col-sm-8">
@@ -558,6 +563,35 @@
     </div>
 </div>
 
+<!-- View Video Modal -->
+<div class="modal fade bd-example-modal-lg" id="viewVideoAlbumModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">View Video Playlist</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!--<button type="button" class="btn btn-sm btn-danger float-right btn-delete-album" data-album-id="0">
+                    Delete
+                </button>-->
+
+                <div class="clear-both"></div>
+                <div id="viewVideoAlbumContent">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
 <!-- Create/Edit Album Modal -->
 <div class="modal fade bd-example-modal-lg" id="newAlbumModal" tabindex="-1" role="dialog"
      aria-labelledby="exampleModalLabel"
@@ -607,6 +641,35 @@
     </div>
 </div>
 
+<!--Youtube Import Modal -->
+<div class="modal fade bd-example-modal-lg" id="youtubeImportModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import YouTube Videos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button id="execute-request-button" type="button" class="btn btn-primary">Authorize with YouTube</button>
+                <div id="youtubeImportContent" style="margin-top: 8px">
+
+                </div>
+                <hr>
+                <div id="youtubePlaylistVideos" style="margin-top: 8px">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
 <script src="js/dist/web.js"></script>
 <script src="js/Blog.js"></script>
 <script src="js/photoalbum.js"></script>
@@ -616,8 +679,8 @@
 <script src="js/ens.js"></script>
 <script src="js/mru.js"></script>
 <script src="js/youtube.js"></script>
+<script src="js/youtube-load.js"></script>
 <script src="js/anal.js"></script>
-<script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()"
-        onreadystatechange="if (this.readyState === 'complete') this.onload()"/>
+
 </body>
 </html>

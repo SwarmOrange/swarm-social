@@ -169,6 +169,62 @@ class Blog {
         });
     }
 
+    createVideoAlbum(id, name, description, videos) {
+        let self = this;
+        // album structure
+        // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
+        // video structure
+        // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "videos":[{"preview":"file/name.jpg", "file": "123123.mp4", "type":"file|youtube", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
+        videos = videos || [];
+        let coverFile = videos.length ? videos[0].cover_file : videos;
+        let info = {
+            id: id,
+            name: name,
+            description: description,
+            cover_file: coverFile,
+            videos: videos
+        };
+
+        return this.sendRawFile(this.prefix + "videoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json')
+            .then(function (response) {
+                console.log('Video album info.json');
+                console.log(response.data);
+                self.swarm.applicationHash = response.data;
+                //self.myProfile.last_videoalbum_id = id;
+
+                return self.getVideoAlbumsInfo().then(function (response) {
+                    let data = response.data;
+                    data = Array.isArray(data) ? data : [];
+
+                    data.push({
+                        id: id,
+                        name: name,
+                        description: description,
+                        cover_file: coverFile
+                    });
+                    console.log('album info');
+                    console.log(data);
+                    // todo use saveVideoAlbumsInfo
+                    return self.sendRawFile(self.prefix + "videoalbum/info.json", JSON.stringify(data), 'application/json')
+                        .then(function (response) {
+                            console.log(response.data);
+                            self.swarm.applicationHash = response.data;
+                            self.myProfile.last_videoalbum_id = id;
+
+                            return self.saveProfile(self.myProfile);
+                        });
+                });
+            });
+    }
+
+    getVideoAlbumsInfo() {
+        return this.swarm.get(this.prefix + 'videoalbum/info.json');
+    }
+
+    getVideoAlbumInfo(id) {
+        return this.swarm.get(this.prefix + 'videoalbum/' + id + '/info.json');
+    }
+
     createPhotoAlbum(id, name, description, photos) {
         let self = this;
         // structure
@@ -189,11 +245,13 @@ class Blog {
                 console.log('Photoalbom info.json');
                 console.log(response.data);
                 self.swarm.applicationHash = response.data;
+                // todo remove?
                 self.myProfile.last_photoalbum_id = id;
 
                 return self.getAlbumsInfo().then(function (response) {
                     let data = response.data;
-
+                    // todo check is array
+                    // data = Array.isArray(data) ? data : [];
                     data.push({
                         id: id,
                         name: name,
@@ -202,6 +260,7 @@ class Blog {
                     });
                     console.log('album info');
                     console.log(data);
+                    // todo use saveAlbumsInfo
                     return self.sendRawFile(self.prefix + "photoalbum/info.json", JSON.stringify(data), 'application/json')
                         .then(function (response) {
                             console.log(response.data);

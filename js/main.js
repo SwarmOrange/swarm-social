@@ -415,6 +415,24 @@ function init() {
         });
     });
 
+    $('#videoPlaylists').on('click', '.load-videoalbum', function (e) {
+        e.preventDefault();
+        let albumId = $(this).attr('data-album-id');
+        let viewAlbumContent = $('#viewVideoAlbumContent');
+        $('.btn-delete-album').attr('data-album-id', albumId);
+        $('#viewVideoAlbumModal').modal('show');
+        viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+        blog.getVideoAlbumInfo(albumId).then(function (response) {
+            let data = response.data;
+            console.log(data);
+            viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
+            data.videos.forEach(function (v) {
+                viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+            });
+            viewAlbumContent.append('</ul>');
+        });
+    });
+
     $('.show-insta-panel').click(function (e) {
         e.preventDefault();
         $('.import-insta-panel').show('fast');
@@ -594,6 +612,7 @@ function updateInfo(data) {
 
     loadIFollow();
     loadPhotoAlbums();
+    loadVideoPlaylists();
 }
 
 function loadPhotoAlbums() {
@@ -607,6 +626,23 @@ function loadPhotoAlbums() {
                 let id = v.id;
                 photoAlbums.append('<li class="list-inline-item">' +
                     '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img src="' + swarm.getFullUrl('social/photoalbum/' + id + '/1.jpg') + '" style="width: 100%"></a></li>');
+
+            });
+        });
+    }
+}
+
+function loadVideoPlaylists() {
+    let data = blog.myProfile;
+    if (data.last_videoalbum_id && data.last_videoalbum_id > 0) {
+        let videoPlaylists = $('#videoPlaylists');
+        videoPlaylists.html('');
+        blog.getVideoAlbumsInfo().then(function (response) {
+            let data = response.data;
+            data.forEach(function (v) {
+                let id = v.id;
+                videoPlaylists.append('<li class="list-inline-item">' +
+                    '<a href="#" class="load-videoalbum" data-album-id="' + id + '"><img src="' + v.cover_file + '" style="width: 100%"></a></li>');
 
             });
         });
