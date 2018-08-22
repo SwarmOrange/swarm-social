@@ -40,7 +40,6 @@ function initImportButton() {
         $('.youtube-video-import').each(function (k, v) {
             let id = $(v).attr('data-id');
             let cover_file = $(v).attr('data-cover-file');
-            //console.log('import video id: ' + id);
             videos.push({
                 id: i,
                 type: "youtube",
@@ -53,10 +52,7 @@ function initImportButton() {
         });
 
         let albumId = typeof blog.myProfile.last_videoalbum_id === 'undefined' ? 1 : blog.myProfile.last_videoalbum_id + 1;
-        console.log('last_videoalbum_id');
-        console.log(albumId);
-        console.log('videos');
-        console.log(videos);
+
         blog.createVideoAlbum(albumId, 'Videos', '', videos).then(function (response) {
             console.log('album created');
             console.log(response.data);
@@ -64,16 +60,16 @@ function initImportButton() {
             $('#youtubeImportModal').modal('hide');
             alert('Album created!');
 
-            /*let attachments = [];
-            currentPhotosForAlbum.forEach(function (v) {
+            let attachments = [];
+            videos.forEach(function (v) {
                 attachments.push({
-                    type: 'photo',
-                    url: v.file
+                    type: 'youtube',
+                    url: "https://www.youtube.com/watch?v=" + v.file
                 });
             });
-            blog.createPost(blog.myProfile.last_post_id + 1, '', attachments).then(function (response) {
+            blog.createPost(blog.myProfile.last_post_id + 1, 'Just added videos from YouTube', attachments).then(function (response) {
                 onAfterHashChange(response.data);
-            });*/
+            });
         });
     });
 }
