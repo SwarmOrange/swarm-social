@@ -2,15 +2,31 @@
   "id": 1,
   "name": "SWARM",
   "description": "SWARM",
-  "cover_file": "https://i.ytimg.com/vi/xrw9rvee7rc/hqdefault.jpg",
+  "cover_file": "https://i.ytimg.com/vi/Bn65-bI-S1o/mqdefault.jpg",
   "videos": [
     {
       "id": 1,
-      "name": "SWARM",
-      "cover_file": "https://i.ytimg.com/vi/xrw9rvee7rc/hqdefault.jpg",
+      "name": "Viktor Tron - SWARM - Ethereum London",
+      "description": "Viktor Tron - SWARM - Ethereum London",
+      "cover_file": "https://i.ytimg.com/vi/Bn65-bI-S1o/mqdefault.jpg",
+      "file": "Bn65-bI-S1o",
+      "type": "youtube"
+    },
+    {
+      "id": 2,
+      "name": "Developing Scalable Decentralized Applications for Swarm & Ethereum - Dr. Daniel Nagy",
+      "description": "Developing Scalable Decentralized Applications for Swarm & Ethereum - Dr. Daniel Nagy",
+      "cover_file": "https://i.ytimg.com/vi/xrw9rvee7rc/mqdefault.jpg",
       "file": "xrw9rvee7rc",
-      "type": "youtube",
-      "description": "Developing Scalable Decentralized Applications for Swarm & Ethereum - Dr. Daniel Nagy"
+      "type": "youtube"
+    },
+    {
+      "id": 3,
+      "name": "Ethereum SWARM - Proof of Concept Release 0.2 Demo.",
+      "description": "Ethereum SWARM - Proof of Concept Release 0.2 Demo.",
+      "cover_file": "https://i.ytimg.com/vi/TJ968X-IFZY/mqdefault.jpg",
+      "file": "TJ968X-IFZY",
+      "type": "youtube"
     }
   ]
 }

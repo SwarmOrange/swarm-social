@@ -81,6 +81,12 @@ img {
 
 #photoAlbums li {
     margin-right: 0;
+    padding-right: 8px;
+}
+
+#videoPlaylists li {
+    margin-right: 0;
+    padding-right: 8px;
 }
 
 .clear-both {
@@ -191,4 +197,12 @@ img {
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
     background-color: #177ce3;
+}
+
+.photoalbum-img {
+    width: 100%;
+}
+
+.videoalbum-img {
+    width: 100%;
 }

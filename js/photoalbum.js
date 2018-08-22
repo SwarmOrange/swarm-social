@@ -24,6 +24,11 @@ function initPhotoalbum() {
             sendNextFile();
         }
     });
+
+    $('.show-all-photoalbums').click(function (e) {
+        e.preventDefault();
+        $('#showAllPhotoalbumsModal').modal('show');
+    });
 }
 
 function sendNextFile() {

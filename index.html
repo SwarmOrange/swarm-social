@@ -126,7 +126,7 @@
 
                 </li>-->
                 <li>
-                    <p>My wallet</p>
+                    <p>My wallet - Estimated earnings</p>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">ETH</span>
@@ -155,13 +155,7 @@
                 </li>
                 <li>
                     <p>My data</p>
-                    <p>
-                        <button type="button" class="btn btn-primary upload-photos-preview" style="width: 100%">
-                            <img src="img/photo-white.png" alt="" style="width: 30px; margin-right: 8px">
-                            Upload photos
-                        </button>
 
-                    </p>
                     <p>Import from </p>
                     <p>
                         <button type="button" class="btn btn-primary btn-profile-import-instagram"
@@ -170,13 +164,17 @@
                             Instagram
                         </button>
 
-                        <button type="button" class="btn btn-primary btn-profile-import-facebook float-right"
+                        <button type="button" class="btn btn-primary btn-profile-import-youtube" style="width: 145px">
+                            <img src="img/youtube-white.png" alt="" style="width: 30px; margin-right: 8px">
+                            Youtube
+                        </button>
+                        <!--<button type="button" class="btn btn-primary btn-profile-import-facebook float-right"
                                 style="width: 145px">
                             <img src="img/facebook.png" alt="" style="width: 30px; margin-right: 8px">
                             Facebook
-                        </button>
+                        </button>-->
 
-                    <p>
+                    <!--<p>
                         <button type="button" class="btn btn-primary btn-profile-import-youtube" style="width: 145px">
                             <img src="img/youtube-white.png" alt="" style="width: 30px; margin-right: 8px">
                             Youtube
@@ -187,47 +185,10 @@
                             <img src="img/google-plus.png" alt="" style="width: 30px; margin-right: 8px">
                             Google+
                         </button>
-                    </p>
-                </li>
-                <li>
-                    <p class="float-left">I follow</p>
-                    <p class="float-right">
-                        <a href="#" data-toggle="modal" data-target="#addFollowerModal">
-                            <img src="img/add.png" alt="" style="width: 20px">
-                        </a>
-                    </p>
-                    <div class="clear-both"></div>
-
-                    <ul id="iFollowUsers" class="list-inline">
-
-                    </ul>
-                </li>
-                <li>
-                    <p class="float-left">Photo albums</p>
-                    <p class="float-right">
-                        <a href="#" class="create-album">
-                            <img src="img/add.png" alt="" style="width: 20px">
-                        </a>
-                    </p>
-                    <div class="clear-both"></div>
-
-                    <ul id="photoAlbums" class="list-inline">
-
-                    </ul>
-                </li>
-                <li>
-                    <p class="float-left">Video playlists</p>
-                    <!--<p class="float-right">
-                        <a href="#" class="create-video-playlist">
-                            <img src="img/add.png" alt="" style="width: 20px">
-                        </a>
                     </p>-->
-                    <div class="clear-both"></div>
-
-                    <ul id="videoPlaylists" class="list-inline">
-
-                    </ul>
                 </li>
+
+
             </ul>
         </div>
         <div class="col-sm-8">
@@ -256,8 +217,78 @@
                        <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
                    </p>
                </li>-->
+
+                <li>
+                    <div class="row">
+                        <div class="col-sm-3" style="border-right: 1px solid #e0e0e0">
+                            <p class="float-left">Contacts</p>
+                            <p class="float-right">
+                                <a href="#" data-toggle="modal" data-target="#addFollowerModal">
+                                    <img src="img/add.png" alt="" style="width: 20px">
+                                </a>
+                            </p>
+                            <div class="clear-both"></div>
+
+                            <ul id="iFollowUsers" class="list-inline">
+
+                            </ul>
+                        </div>
+                        <div class="col-sm-4" style="border-right: 1px solid #e0e0e0">
+                            <p><strong>Lynn Jobs</strong></p>
+                            <div class="form-group">
+                                <textarea class="form-control" id="" rows="6"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary mb-2" onclick="alert('Not implemented')">Send
+                            </button>
+
+                        </div>
+                        <div class="col-sm-5">
+                            <p>Inbox</p>
+                            <div class="pre-scrollable">
+                                <table class="table table-striped">
+                                    <!--<thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">First</th>
+                                    </tr>
+                                    </thead>-->
+                                    <tbody>
+                                    <tr>
+                                        <th scope="row">Bill G.</th>
+                                        <td>What's up</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Warren B.</th>
+                                        <td>RE: Money? No problem</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Larry P.</th>
+                                        <td>RE: SWARM + Goo...</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Larry P.</th>
+                                        <td>RE: SWARM + Goo...</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
                 <li id="postBlock">
-                    <p>Create post</p>
+                    <p>Create post
+                        <button type="button" class="btn btn-primary upload-photos-preview" style="margin-left: 10px">
+                            <img src="img/photo-white.png" alt="" style="width: 20px; margin-right: 8px;">
+                            Upload photos
+                        </button>
+                        <button type="button" class="btn btn-primary upload-videos-preview">
+                            <img src="img/video-white.png" alt="" style="width: 20px; margin-right: 8px">
+                            Upload videos
+                        </button>
+
+                    </p>
                     <form>
                         <div class="form-group">
                             <textarea class="form-control" id="postContent" rows="3"></textarea>
@@ -272,7 +303,6 @@
                                 <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
                                 <input type="checkbox" aria-label="Checkbox for following text input"
                                        style="margin-left: 8px"> Share anonymously
-                            </p>
                             </p>
 
                             <p class="float-right">
@@ -298,6 +328,36 @@
                         </div>
                     </form>
                 </li>
+
+                <li>
+                    <!--<p class="float-left">Photo albums / <a class="show-all-photoalbums" href="#">All</a></p>-->
+                    <p class="float-left">Photo albums</p>
+                    <p class="float-right">
+                        <a href="#" class="create-album">
+                            <img src="img/add.png" alt="" style="width: 20px">
+                        </a>
+                    </p>
+                    <div class="clear-both"></div>
+
+                    <ul id="photoAlbums" class="list-inline">
+
+                    </ul>
+                </li>
+                <li>
+                    <!--<p class="float-left">Video playlists / <a class="show-all-videoalbums" href="#">All</a></p>-->
+                    <p class="float-left">Video playlists</p>
+                    <!--<p class="float-right">
+                        <a href="#" class="create-video-playlist">
+                            <img src="img/add.png" alt="" style="width: 20px">
+                        </a>
+                    </p>-->
+                    <div class="clear-both"></div>
+
+                    <ul id="videoPlaylists" class="list-inline">
+
+                    </ul>
+                </li>
+
                 <li style="border: 0; padding: 0">
                     <div id="userPosts" class="posts">
 
@@ -654,12 +714,37 @@
                 </button>
             </div>
             <div class="modal-body">
-                <button id="execute-request-button" type="button" class="btn btn-primary">Authorize with YouTube</button>
+                <button id="execute-request-button" type="button" class="btn btn-primary">Authorize with YouTube
+                </button>
                 <div id="youtubeImportContent" style="margin-top: 8px">
 
                 </div>
                 <hr>
                 <div id="youtubePlaylistVideos" style="margin-top: 8px">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!--Show all photoalbums Modal -->
+<div class="modal fade bd-example-modal-lg" id="allPhotoalbumsModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import YouTube Videos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="allPhotoAlbums">
 
                 </div>
             </div>

@@ -542,16 +542,16 @@ function uploadAllInstaPhotos() {
             $('#newAlbumModal').modal('hide');
             alert('Album created!');
 
-            /*let attachments = [];
+            let attachments = [];
             currentPhotosForAlbum.forEach(function (v) {
                 attachments.push({
                     type: 'photo',
                     url: v.file
                 });
             });
-            blog.createPost(blog.myProfile.last_post_id + 1, '', attachments).then(function (response) {
+            blog.createPost(blog.myProfile.last_post_id + 1, 'Just uploaded new photos', attachments).then(function (response) {
                 onAfterHashChange(response.data);
-            });*/
+            });
         });
     }
 }
@@ -611,42 +611,72 @@ function updateInfo(data) {
     }
 
     loadIFollow();
-    loadPhotoAlbums();
-    loadVideoPlaylists();
+    loadPhotoAlbums(3, 'desc');
+    loadVideoPlaylists(3, 'desc');
 }
 
-function loadPhotoAlbums() {
+function loadPhotoAlbums(limit, sorting) {
+    // todo move limits and sorting to api
+    limit = limit || 'all';
+    sorting = sorting || 'asc';
     let data = blog.myProfile;
     if (data.last_photoalbum_id && data.last_photoalbum_id > 0) {
         let photoAlbums = $('#photoAlbums');
         photoAlbums.html('');
         blog.getAlbumsInfo().then(function (response) {
             let data = response.data;
-            data.forEach(function (v) {
-                let id = v.id;
-                photoAlbums.append('<li class="list-inline-item">' +
-                    '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img src="' + swarm.getFullUrl('social/photoalbum/' + id + '/1.jpg') + '" style="width: 100%"></a></li>');
+            if (sorting === 'desc') {
+                data.reverse();
+            }
 
+            let i = 0;
+            data.forEach(function (v) {
+                if (limit !== 'all' && i >= limit) {
+                    return;
+                }
+
+                let id = v.id;
+                photoAlbums.append('<li class="list-inline-item col-sm-4 photoalbum-item">' +
+                    '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img class="photoalbum-img" src="' + swarm.getFullUrl('social/photoalbum/' + id + '/1.jpg') + '" ></a></li>');
+                i++;
             });
         });
     }
 }
 
-function loadVideoPlaylists() {
+function loadVideoPlaylists(limit, sorting) {
+    // todo move limits and sorting to api
+    limit = limit || 'all';
+    sorting = sorting || 'asc';
     let data = blog.myProfile;
     if (data.last_videoalbum_id && data.last_videoalbum_id > 0) {
         let videoPlaylists = $('#videoPlaylists');
         videoPlaylists.html('');
         blog.getVideoAlbumsInfo().then(function (response) {
             let data = response.data;
-            data.forEach(function (v) {
-                let id = v.id;
-                videoPlaylists.append('<li class="list-inline-item">' +
-                    '<a href="#" class="load-videoalbum" data-album-id="' + id + '"><img src="' + v.cover_file + '" style="width: 100%"></a></li>');
+            if (sorting === 'desc') {
+                data.reverse();
+            }
 
+            let i = 0;
+            data.forEach(function (v) {
+                if (limit !== 'all' && i >= limit) {
+                    return;
+                }
+
+                let id = v.id;
+                videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
+                    '<a href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img" src="' + v.cover_file + '"></a></li>');
+
+                i++;
             });
         });
     }
+}
+
+function randomName() {
+    let items = ['Johny First', 'Martin Adam', 'Gregory Grey', 'Lynn Jobs', 'Steve Works'];
+    return items[Math.floor(Math.random() * items.length)];
 }
 
 function loadIFollow() {
@@ -654,9 +684,10 @@ function loadIFollow() {
     let iFollowBlock = $('#iFollowUsers');
     if ('i_follow' in data && data.i_follow.length) {
         data.i_follow.forEach(function (v) {
-            iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
-                '<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
-                '<a href="' + swarm.getFullUrl('', v) + '" class="load-profile" data-profile-id="' + v + '"><img src="' + swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 50px"></a></li>');
+            //iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
+            iFollowBlock.append('<li class="i-follow-li">' +
+                //'<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
+                '<a onclick="return false;" href="' + swarm.getFullUrl('', v) + '" class="load-profile--" data-profile-id="' + v + '"><img src="' + swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 30px"></a> <a href="#" onclick="return false;"><span style="margin-left: 8px">' + randomName() + '</span></a></li>');
         });
     }
 }
