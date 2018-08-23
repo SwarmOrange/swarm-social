@@ -190,7 +190,6 @@ class Blog {
                 console.log('Video album info.json');
                 console.log(response.data);
                 self.swarm.applicationHash = response.data;
-                //self.myProfile.last_videoalbum_id = id;
 
                 return self.getVideoAlbumsInfo().then(function (response) {
                     let data = response.data;
@@ -223,6 +222,13 @@ class Blog {
 
     getVideoAlbumInfo(id) {
         return this.swarm.get(this.prefix + 'videoalbum/' + id + '/info.json');
+    }
+
+    uploadVideoToAlbum(photoAlbumId, photoId, fileContent, contentType) {
+        let fileName = this.prefix + "videoalbum/" + photoAlbumId + "/" + photoId + ".mp4";
+        return this.sendRawFile(fileName, fileContent, contentType).then(function (response) {
+            return {fileName: fileName, response: response.data};
+        });
     }
 
     createPhotoAlbum(id, name, description, photos) {

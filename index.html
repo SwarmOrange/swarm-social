@@ -248,6 +248,10 @@
                                 <img src="img/avatars/4.png" alt="" style="max-width: 40px"> <span>Ann Holod</span>
 
                             </p>
+                            <p>
+                                <img src="img/avatars/4.png" alt="" style="max-width: 40px"> <span>Ann Holod</span>
+
+                            </p>
 
                         </div>
                         <div class="col-sm-4" style="border-right: 1px solid #e0e0e0">
@@ -288,6 +292,14 @@
                                         <th scope="row">Larry P.</th>
                                         <td>RE: SWARM + Goo...</td>
                                     </tr>
+                                    <tr>
+                                        <th scope="row">Mark Z.</th>
+                                        <td>New social network!</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Johny B.</th>
+                                        <td>SWARM</td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -297,7 +309,7 @@
 
                 <li id="postBlock">
                     <p>Create post
-                        <button type="button" class="btn btn-primary upload-photos-preview" style="margin-left: 10px">
+                        <button type="button" class="btn btn-primary create-album" style="margin-left: 10px">
                             <img src="img/photo-white.png" alt="" style="width: 20px; margin-right: 8px;">
                             Upload photos
                         </button>
@@ -719,6 +731,46 @@
     </div>
 </div>
 
+<!-- Create/Edit Video Album Modal -->
+<div class="modal fade bd-example-modal-lg" id="newVideoModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create/Edit Album</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <input id="input-upload-video-album" type="file" style="display: none;" accept="video/*" multiple>
+                    <button type="button" class="btn btn-primary upload-videos">Upload videos</button>
+                </p>
+                <p>
+                <div id="progressPanelVideoAlbum" style="display:none;">
+                    <div class="clear-both"></div>
+                    <div class="progress" style="height: 20px;">
+                        <div id="postProgressVideoAlbum" class="progress-bar progress-bar-striped" role="progressbar"
+                             style="width: 0%"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+                <div class="clear-both"></div>
+                <hr>
+                <div id="uploaded-videos">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary send-ens-transaction">Save</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
 <!--Youtube Import Modal -->
 <div class="modal fade bd-example-modal-lg" id="youtubeImportModal" tabindex="-1" role="dialog"
      aria-labelledby="exampleModalLabel"
@@ -776,6 +828,7 @@
 <script src="js/dist/web.js"></script>
 <script src="js/Blog.js"></script>
 <script src="js/photoalbum.js"></script>
+<script src="js/videoplaylist.js"></script>
 <script src="js/start-now.js"></script>
 <script src="js/import-button.js"></script>
 <script src="js/main.js"></script>

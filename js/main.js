@@ -427,7 +427,11 @@ function init() {
             console.log(data);
             viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
             data.videos.forEach(function (v) {
-                viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                if (v.type === "youtube") {
+                    viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                } else {
+                    viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                }
             });
             viewAlbumContent.append('</ul>');
         });
