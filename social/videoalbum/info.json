@@ -6,5 +6,13 @@
     "cover_file": "https://i.ytimg.com/vi/Bn65-bI-S1o/mqdefault.jpg",
     "file": "Bn65-bI-S1o",
     "type": "youtube"
+  },
+  {
+    "id": 2,
+    "name": "Movies",
+    "description": "Movies",
+    "cover_file": "social/videoalbum/2/2.png",
+    "file": "social/videoalbum/2/1.mp4",
+    "type": "video"
   }
 ]

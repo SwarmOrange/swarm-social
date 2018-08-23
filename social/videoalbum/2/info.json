@@ -1,0 +1,24 @@
+{
+  "id": 2,
+  "name": "SWARM",
+  "description": "SWARM",
+  "cover_file": "https://i.ytimg.com/vi/Bn65-bI-S1o/mqdefault.jpg",
+  "videos": [
+    {
+      "id": 1,
+      "name": "Motor",
+      "description": "Motor",
+      "cover_file": "social/videoalbum/2/1.png",
+      "file": "social/videoalbum/2/1.mp4",
+      "type": "video"
+    },
+    {
+      "id": 2,
+      "name": "Sintel",
+      "description": "Sintel",
+      "cover_file": "social/videoalbum/2/2.png",
+      "file": "social/videoalbum/2/2.mp4",
+      "type": "video"
+    }
+  ]
+}

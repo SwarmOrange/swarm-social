@@ -430,7 +430,7 @@ function init() {
                 if (v.type === "youtube") {
                     viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
                 } else {
-                    viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                    viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
                 }
             });
             viewAlbumContent.append('</ul>');
@@ -669,8 +669,14 @@ function loadVideoPlaylists(limit, sorting) {
                 }
 
                 let id = v.id;
-                videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                    '<a href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img" src="' + v.cover_file + '"></a></li>');
+                if (v.type === "youtube") {
+                    videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
+                        '<a href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img" src="' + v.cover_file + '"></a></li>');
+                } else {
+                    videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
+                        '<a data-type="video" href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img" src="' + swarm.getFullUrl(v.cover_file) + '"></a></li>');
+                }
+
 
                 i++;
             });
