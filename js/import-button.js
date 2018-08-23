@@ -22,6 +22,12 @@ function initImportButton() {
         $('#importFromFacebookModal').modal('show');
     });
 
+    $('.btn-profile-import-vk').click(function (e) {
+        e.preventDefault();
+        //alert('Not implemented yet');
+        $('#importFromVKModal').modal('show');
+    });
+
     $('.btn-profile-import-youtube').click(function (e) {
         e.preventDefault();
         $('#youtubeImportContent').html('');

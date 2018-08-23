@@ -11,8 +11,15 @@
 
     <link href="css/uglify.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <script src="https://vk.com/js/api/openapi.js?159" type="text/javascript"></script>
 </head>
 <body>
+
+<script type="text/javascript">
+    VK.init({
+        apiId: 6670736
+    });
+</script>
 
 <div id="fb-root"></div>
 <script>(function (d, s, id) {
@@ -174,18 +181,19 @@
                             Instagram
                         </button>
 
-                        <button type="button" class="btn btn-primary btn-profile-import-youtube float-right col-sm-5" style="">
+                        <button type="button" class="btn btn-primary btn-profile-import-youtube float-right col-sm-5"
+                                style="">
                             <img src="img/youtube-white.png" alt="" style="width: 30px; margin-right: 8px">
                             Youtube
                         </button>
                     </p>
                     <p>
 
-                        <!--<button type="button" class="btn btn-primary btn-profile-import-vk col-sm-5"
+                        <button type="button" class="btn btn-primary btn-profile-import-vk col-sm-5"
                                 style="">
                             <img src="img/facebook.png" alt="" style="width: 30px; margin-right: 8px">
                             VK
-                        </button>-->
+                        </button>
                         <!--<button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
                                 style="">
                             <img src="img/facebook.png" alt="" style="width: 30px; margin-right: 8px">
@@ -266,7 +274,7 @@
 
                         </div>
                         <div class="col-sm-4" style="border-right: 1px solid #e0e0e0">
-                            <p><strong>Nikitus Barmal</strong></p>
+                            <p><strong>Ann Holod</strong></p>
                             <!--<div class="form-group">
                                 <textarea class="form-control" id="" rows="6"></textarea>
                             </div>
@@ -800,8 +808,12 @@
                 </button>
             </div>
             <div class="modal-body">
-                <button id="execute-request-button" type="button" class="btn btn-primary">Authorize with YouTube
-                </button>
+
+                <div class="d-flex justify-content-center">
+                    <button id="execute-request-button" type="button" class="btn btn-primary">Authorize with YouTube
+                    </button>
+                </div>
+
                 <div id="youtubeImportContent" style="margin-top: 8px">
 
                 </div>
@@ -855,9 +867,46 @@
             </div>
             <div class="modal-body">
                 <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="continue_with"
-                     data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="true" data-onlogin="fbCheckLoginState" data-scope="user_videos,user_posts,user_photos"></div>
+                     data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="true"
+                     data-onlogin="fbCheckLoginState" data-scope="user_videos,user_posts,user_photos"></div>
 
                 <div id="importFacebookContent">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!-- Import from VK Modal -->
+<div class="modal fade bd-example-modal-lg" id="importFromVKModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import from VK</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-center">
+                    <div id="vk_auth"></div>
+                </div>
+
+                <script type="text/javascript">
+                    VK.Widgets.Auth("vk_auth", {
+                        "onAuth": function (data) {
+                            onVkLogin(data);
+                        }
+                    }, 20);
+                </script>
+
+                <div id="importVKContent">
 
                 </div>
             </div>
@@ -879,6 +928,7 @@
 <script src="js/mru.js"></script>
 <script src="js/youtube.js"></script>
 <script src="js/facebook.js"></script>
+<script src="js/vk.js"></script>
 <script src="js/youtube-load.js"></script>
 <script src="js/anal.js"></script>
 
