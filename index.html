@@ -14,6 +14,16 @@
 </head>
 <body>
 
+<div id="fb-root"></div>
+<script>(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = 'https://connect.facebook.net/ru_RU/sdk.js#xfbml=1&version=v3.1&appId=1804254456326979&autoLogAppEvents=1';
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
 <header>
     <!--<div class="collapse bg-dark" id="navbarHeader">
         <div class="container">
@@ -158,34 +168,35 @@
 
                     <p>Import from </p>
                     <p>
-                        <button type="button" class="btn btn-primary btn-profile-import-instagram"
-                                style="width: 145px; margin-right: 0px">
+                        <button type="button" class="btn btn-primary btn-profile-import-instagram col-sm-5"
+                                style="">
                             <img src="img/instagram.png" alt="" style="width: 30px; margin-right: 8px">
                             Instagram
                         </button>
 
-                        <button type="button" class="btn btn-primary btn-profile-import-youtube" style="width: 145px">
+                        <button type="button" class="btn btn-primary btn-profile-import-youtube float-right col-sm-5" style="">
                             <img src="img/youtube-white.png" alt="" style="width: 30px; margin-right: 8px">
                             Youtube
                         </button>
-                        <!--<button type="button" class="btn btn-primary btn-profile-import-facebook float-right"
-                                style="width: 145px">
+                    </p>
+                    <p>
+
+                        <!--<button type="button" class="btn btn-primary btn-profile-import-vk col-sm-5"
+                                style="">
+                            <img src="img/facebook.png" alt="" style="width: 30px; margin-right: 8px">
+                            VK
+                        </button>-->
+                        <!--<button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
+                                style="">
                             <img src="img/facebook.png" alt="" style="width: 30px; margin-right: 8px">
                             Facebook
                         </button>-->
-
-                        <!--<p>
-                            <button type="button" class="btn btn-primary btn-profile-import-youtube" style="width: 145px">
-                                <img src="img/youtube-white.png" alt="" style="width: 30px; margin-right: 8px">
-                                Youtube
-                            </button>
-
-                            <button type="button" class="btn btn-primary btn-profile-import-facebook float-right"
-                                    style="width: 145px">
-                                <img src="img/google-plus.png" alt="" style="width: 30px; margin-right: 8px">
-                                Google+
-                            </button>
-                        </p>-->
+                        <!--<button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
+                                style="">
+                            <img src="img/google-plus.png" alt="" style="width: 30px; margin-right: 8px">
+                            Google+
+                        </button>-->
+                    </p>
                 </li>
 
 
@@ -308,17 +319,22 @@
                 </li>
 
                 <li id="postBlock">
-                    <p>Create post
-                        <button type="button" class="btn btn-primary create-album" style="margin-left: 10px">
-                            <img src="img/photo-white.png" alt="" style="width: 20px; margin-right: 8px;">
-                            Upload photos
-                        </button>
-                        <button type="button" class="btn btn-primary upload-videos-preview">
-                            <img src="img/video-white.png" alt="" style="width: 20px; margin-right: 8px">
-                            Upload videos
-                        </button>
-
-                    </p>
+                    <div class="row">
+                        <div class="col-sm-2">Create post</div>
+                        <div class="col-sm-3">
+                            <button type="button" class="btn btn-primary create-album">
+                                <img src="img/photo-white.png" alt="" style="width: 20px; margin-right: 8px;">
+                                Upload photos
+                            </button>
+                        </div>
+                        <div class="col-sm-7">
+                            <button type="button" class="btn btn-primary upload-videos-preview">
+                                <img src="img/video-white.png" alt="" style="width: 20px; margin-right: 8px">
+                                Upload videos
+                            </button>
+                        </div>
+                    </div>
+                    <p></p>
                     <form>
                         <div class="form-group">
                             <textarea class="form-control" id="postContent" rows="3"></textarea>
@@ -825,6 +841,33 @@
     </div>
 </div>
 
+<!-- Import from Facebook Modal -->
+<div class="modal fade bd-example-modal-lg" id="importFromFacebookModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import from Facebook</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="continue_with"
+                     data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="true" data-onlogin="fbCheckLoginState" data-scope="user_videos,user_posts,user_photos"></div>
+
+                <div id="importFacebookContent">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
 <script src="js/dist/web.js"></script>
 <script src="js/Blog.js"></script>
 <script src="js/photoalbum.js"></script>
@@ -835,6 +878,7 @@
 <script src="js/ens.js"></script>
 <script src="js/mru.js"></script>
 <script src="js/youtube.js"></script>
+<script src="js/facebook.js"></script>
 <script src="js/youtube-load.js"></script>
 <script src="js/anal.js"></script>
 
