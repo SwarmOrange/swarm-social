@@ -25,6 +25,7 @@ function initImportButton() {
     $('.btn-profile-import-vk').click(function (e) {
         e.preventDefault();
         //alert('Not implemented yet');
+        $('#receiveVkPhotos').text('');
         $('#importFromVKModal').modal('show');
     });
 
