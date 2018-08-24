@@ -63,12 +63,15 @@ function sendNextFile() {
             if (photoalbumInfo.files.length > 0) {
                 sendNextFile();
             } else {
-                blog.createPhotoAlbum(blog.myProfile.last_photoalbum_id + 1, 'Uploaded', '', photoalbumInfo.uploadedInfo).then(function (response) {
+                let newAlbumId = blog.myProfile.last_photoalbum_id + 1;
+                blog.createPhotoAlbum(newAlbumId, 'Uploaded', '', photoalbumInfo.uploadedInfo).then(function (response) {
                     console.log('album created');
                     console.log(response.data);
                     onAfterHashChange(response.data);
                     $('#newAlbumModal').modal('hide');
-                    alert('Album created!');
+                    alert('Album created!', [
+                        '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + newAlbumId + '">Share</button>'
+                    ]);
                     /*let attachmnets = [];
                     photoalbumInfo.uploadedInfo.forEach(function (v) {
                         attachmnets.push({

@@ -1,5 +1,7 @@
 class Blog {
     constructor(swarm) {
+        this.last_photoalbum_id = 0;
+        this.last_videoalbum_id = 0;
         this.prefix = "social/";
         this.mruName = "SWARM Social";
         this.swarm = swarm;
@@ -177,8 +179,10 @@ class Blog {
         // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "videos":[{"preview":"file/name.jpg", "file": "123123.mp4", "type":"file|youtube", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
         videos = videos || [];
         let coverFile = videos.length ? videos[0].cover_file : videos;
+        let fileType = videos.length ? videos[0].type : videos;
         let info = {
             id: id,
+            type: fileType,
             name: name,
             description: description,
             cover_file: coverFile,
@@ -203,6 +207,7 @@ class Blog {
                 self.swarm.applicationHash = response.data;
                 let newInfo = {
                     id: id,
+                    type: fileType,
                     name: name,
                     description: description,
                     cover_file: coverFile

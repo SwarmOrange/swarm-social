@@ -103,8 +103,3 @@ function saveDomainHash() {
         alert('Domain name not found, resolver not set or it does not belong to you');
     });
 }
-
-function alert(message) {
-    $('#messageBody').html(message);
-    $('#messageModal').modal('show');
-}

@@ -104,6 +104,21 @@ function onAfterHashChange(newHash, notUpdateProfile) {
 }
 
 function init() {
+    $('.additional-buttons').on('click', '.btn-share-item', function (e) {
+        let itemType = $(this).attr('data-type');
+        let itemId = $(this).attr('data-id');
+        let message = $(this).attr('data-message');
+        $('#messageModal').modal('hide');
+        if (itemType === "photoalbum") {
+            blog.createPost(blog.myProfile.last_post_id + 1, message, [{
+                type: 'photoalbum',
+                url: itemId
+            }]).then(function (response) {
+                onAfterHashChange(response.data);
+            });
+        }
+    });
+
     $('.publish-post').click(function (e) {
         e.preventDefault();
         let postContentElement = $('#postContent');
@@ -397,7 +412,7 @@ function init() {
         }
     });
 
-    $('#photoAlbums').on('click', '.load-photoalbum', function (e) {
+    $('#photoAlbums,.post-photoalbum-item').on('click', '.load-photoalbum', function (e) {
         e.preventDefault();
         let albumId = $(this).attr('data-album-id');
         let viewAlbumContent = $('#viewAlbumContent');
@@ -660,6 +675,7 @@ function loadVideoPlaylists(limit, sorting) {
         videoPlaylists.html('');
         blog.getVideoAlbumsInfo().then(function (response) {
             let data = response.data;
+            console.log(data);
             if (sorting === 'desc') {
                 data.reverse();
             }
@@ -673,16 +689,16 @@ function loadVideoPlaylists(limit, sorting) {
                 let id = v.id;
                 if (v.type === "youtube") {
                     videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                        '<a href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img" src="' + v.cover_file + '"></a></li>');
+                        '<a href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
                 } else {
                     videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                        '<a data-type="video" href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img" src="' + swarm.getFullUrl(v.cover_file) + '"></a></li>');
+                        '<a data-type="video" href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + swarm.getFullUrl(v.cover_file) + '"></a></li>');
                 }
 
 
                 i++;
             });
-        }).catch(function(){
+        }).catch(function () {
 
         });
     }
@@ -772,7 +788,23 @@ function addPostByData(data) {
                 userPost.append(photoAttachment.clone().attr('style', '').html('<img src="' + swarm.getFullUrl(v.url) + '">'));
             } else if (v.type === "video") {
                 userPost.append(videoAttachment.clone().attr('style', '').html('<video width="100%" controls><source src="' + swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
+            } else if (v.type === "photoalbum") {
+                userPost.append(videoAttachment.clone().attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + swarm.getFullUrl("social/photoalbum/" + v.url + "/1.jpg") + '"></a></li>'));
             }
         });
     }
+}
+
+function alert(message, buttons) {
+    let messageModal = $('#messageModal');
+    $('#messageBody').html(message);
+    messageModal.modal('show');
+    let btns = messageModal.find('.additional-buttons');
+    btns.html('');
+    /*if (buttons && buttons.length) {
+        buttons.forEach(function (v) {
+            btns.append(v);
+        });
+    }*/
+
 }
