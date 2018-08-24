@@ -18,14 +18,14 @@ function initImportButton() {
 
     $('.btn-profile-import-facebook').click(function (e) {
         e.preventDefault();
-        //alert('Not implemented yet');
-        $('#importFromFacebookModal').modal('show');
+        alert('Not implemented yet');
+        //$('#importFromFacebookModal').modal('show');
     });
 
     $('.btn-profile-import-vk').click(function (e) {
         e.preventDefault();
-        //alert('Not implemented yet');
-        $('#importFromVKModal').modal('show');
+        alert('Not implemented yet');
+        //$('#importFromVKModal').modal('show');
     });
 
     $('.btn-profile-import-youtube').click(function (e) {

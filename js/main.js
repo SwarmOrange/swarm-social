@@ -644,6 +644,8 @@ function loadPhotoAlbums(limit, sorting) {
                     '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img class="photoalbum-img" src="' + swarm.getFullUrl('social/photoalbum/' + id + '/1.jpg') + '" ></a></li>');
                 i++;
             });
+        }).catch(function (error) {
+
         });
     }
 }
@@ -680,6 +682,8 @@ function loadVideoPlaylists(limit, sorting) {
 
                 i++;
             });
+        }).catch(function(){
+
         });
     }
 }
