@@ -217,3 +217,9 @@ img {
     width: 230px;
     height: 230px;
 }
+
+.preview-album-photo {
+    object-fit: cover;
+    width: 250px;
+    height: 250px;
+}

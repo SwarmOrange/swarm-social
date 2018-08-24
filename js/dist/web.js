@@ -168,6 +168,21 @@ window.EthereumENS = require('ethereum-ens');
 window.Cropper = require('cropperjs');
 require('bootstrap');
 require('ekko-lightbox');
+///////////////////////////
+
+/*require('js/Blog.js');
+require('js/photoalbum.js');
+require('js/videoplaylist.js');
+require('js/start-now.js');
+require('js/import-button.js');
+require('js/main.js');
+require('js/ens.js');
+require('js/mru.js');
+require('js/youtube.js');
+require('js/facebook.js');
+require('js/vk.js');
+require('js/youtube-load.js');
+require('js/anal.js');*/
 },{"./SwarmApi":1,"bootstrap":30,"cropperjs":31,"ekko-lightbox":66,"ethereum-ens":68,"jquery":72}],3:[function(require,module,exports){
 module.exports = require('./lib/axios');
 },{"./lib/axios":5}],4:[function(require,module,exports){
