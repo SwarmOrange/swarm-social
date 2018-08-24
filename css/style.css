@@ -79,13 +79,8 @@ img {
     padding: 0;
 }
 
-#photoAlbums li {
-    margin-right: 0;
-    padding-right: 8px;
-}
-
-#videoPlaylists li {
-    margin-right: 0;
+#photoAlbums li, #videoPlaylists li, .vk-list li {
+    margin-right: 0 !important;
     padding-right: 8px;
 }
 
@@ -205,4 +200,20 @@ img {
 
 .videoalbum-img {
     width: 100%;
+}
+
+.vk-list {
+    margin-top: 8px;
+}
+
+.vk-list img {
+    object-fit: cover;
+    width: 168px;
+    height: 168px;
+}
+
+#photoAlbums > li img {
+    object-fit: cover;
+    width: 230px;
+    height: 230px;
 }

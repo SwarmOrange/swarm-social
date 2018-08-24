@@ -326,6 +326,35 @@
                     </div>
                 </li>
 
+                <li>
+                    <!--<p class="float-left">Photo albums / <a class="show-all-photoalbums" href="#">All</a></p>-->
+                    <p class="float-left">Photo albums</p>
+                    <p class="float-right">
+                        <a href="#" class="create-album">
+                            <img src="img/add.png" alt="" style="width: 20px">
+                        </a>
+                    </p>
+                    <div class="clear-both"></div>
+
+                    <ul id="photoAlbums" class="list-inline">
+
+                    </ul>
+                </li>
+                <li>
+                    <!--<p class="float-left">Video playlists / <a class="show-all-videoalbums" href="#">All</a></p>-->
+                    <p class="float-left">Video playlists</p>
+                    <!--<p class="float-right">
+                        <a href="#" class="create-video-playlist">
+                            <img src="img/add.png" alt="" style="width: 20px">
+                        </a>
+                    </p>-->
+                    <div class="clear-both"></div>
+
+                    <ul id="videoPlaylists" class="list-inline">
+
+                    </ul>
+                </li>
+
                 <li id="postBlock">
                     <div class="row">
                         <div class="col-sm-2">Create post</div>
@@ -383,34 +412,7 @@
                     </form>
                 </li>
 
-                <li>
-                    <!--<p class="float-left">Photo albums / <a class="show-all-photoalbums" href="#">All</a></p>-->
-                    <p class="float-left">Photo albums</p>
-                    <p class="float-right">
-                        <a href="#" class="create-album">
-                            <img src="img/add.png" alt="" style="width: 20px">
-                        </a>
-                    </p>
-                    <div class="clear-both"></div>
 
-                    <ul id="photoAlbums" class="list-inline">
-
-                    </ul>
-                </li>
-                <li>
-                    <!--<p class="float-left">Video playlists / <a class="show-all-videoalbums" href="#">All</a></p>-->
-                    <p class="float-left">Video playlists</p>
-                    <!--<p class="float-right">
-                        <a href="#" class="create-video-playlist">
-                            <img src="img/add.png" alt="" style="width: 20px">
-                        </a>
-                    </p>-->
-                    <div class="clear-both"></div>
-
-                    <ul id="videoPlaylists" class="list-inline">
-
-                    </ul>
-                </li>
 
                 <li style="border: 0; padding: 0">
                     <div id="userPosts" class="posts">
@@ -895,24 +897,17 @@
             </div>
             <div class="modal-body">
                 <div class="d-flex justify-content-center">
-                    <div id="vk_auth"></div>
-                </div>
 
-                <script type="text/javascript">
-                    VK.Widgets.Auth("vk_auth", {
-                        "onAuth": function (data) {
-                            onVkLogin(data);
-                        }
-                    }, 20);
-                </script>
+                    <button type="button" class="btn btn-primary" onclick="VK.Auth.login(vkAuthInfo, 20);">
+                        Authorize and receive albums
+                    </button>
+
+                </div>
 
                 <div id="importVKContent">
-
+                    <ul class="list-inline vk-list"></ul>
                 </div>
             </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-            </div>-->
         </div>
     </div>
 </div>
