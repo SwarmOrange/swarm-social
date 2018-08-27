@@ -73,22 +73,29 @@ function sendNextVideoFile() {
             if (videoInfo.files.length > 0) {
                 sendNextVideoFile();
             } else {
-                blog.createVideoAlbum(blog.myProfile.last_videoalbum_id + 1, 'Uploaded', '', videoInfo.uploadedInfo).then(function (response) {
-                    console.log('album created');
-                    console.log(response.data);
-                    onAfterHashChange(response.data);
-                    $('#newVideoModal').modal('hide');
-                    alert('Album created!');
-                    /*let attachmnets = [];
-                    videoInfo.uploadedInfo.forEach(function (v) {
-                        attachmnets.push({
-                            type: 'photo',
-                            url: v.file
-                        });
-                    });
-                    blog.createPost(blog.myProfile.last_post_id + 1, '', attachmnets).then(function (response) {
+                let newAlbumId = blog.myProfile.last_videoalbum_id + 1;
+                blog.createVideoAlbum(newAlbumId, 'Uploaded', '', videoInfo.uploadedInfo).then(function (preResponse) {
+                    let info = preResponse.info;
+                    preResponse.response.then(function (response) {
+                        console.log('album created');
+                        console.log(response);
                         onAfterHashChange(response.data);
-                    });*/
+                        $('#newVideoModal').modal('hide');
+                        alert('Video playlist created!', [
+                            '<button type="button" class="btn btn-success btn-share-item" data-type="videoalbum" data-info=\'' + JSON.stringify(info) + '\' data-message="Just created new video playlist!" data-id="' + newAlbumId + '">Share</button>'
+                        ]);
+                        /*let attachmnets = [];
+                        videoInfo.uploadedInfo.forEach(function (v) {
+                            attachmnets.push({
+                                type: 'photo',
+                                url: v.file
+                            });
+                        });
+                        blog.createPost(blog.myProfile.last_post_id + 1, '', attachmnets).then(function (response) {
+                            onAfterHashChange(response.data);
+                        });*/
+                    });
+
                 });
             }
         });

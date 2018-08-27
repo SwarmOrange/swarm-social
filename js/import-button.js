@@ -61,23 +61,30 @@ function initImportButton() {
 
         let albumId = typeof blog.myProfile.last_videoalbum_id === 'undefined' ? 1 : blog.myProfile.last_videoalbum_id + 1;
 
-        blog.createVideoAlbum(albumId, 'Videos', '', videos).then(function (response) {
-            console.log('album created');
-            console.log(response.data);
-            onAfterHashChange(response.data);
-            $('#youtubeImportModal').modal('hide');
-            alert('Album created!');
-
-            let attachments = [];
-            videos.forEach(function (v) {
-                attachments.push({
-                    type: 'youtube',
-                    url: "https://www.youtube.com/watch?v=" + v.file
-                });
-            });
-            blog.createPost(blog.myProfile.last_post_id + 1, 'Just added videos from YouTube', attachments).then(function (response) {
+        blog.createVideoAlbum(albumId, 'Videos', '', videos).then(function (preResponse) {
+            let info = preResponse.info;
+            preResponse.response.then(function (response) {
+                console.log('album created');
+                console.log(response.data);
                 onAfterHashChange(response.data);
+                $('#youtubeImportModal').modal('hide');
+                alert('Video playlist created!', [
+                    '<button type="button" class="btn btn-success btn-share-item" data-type="videoalbum" data-info=\'' + JSON.stringify(info) + '\' data-message="Just created new video playlist!" data-id="' + albumId + '">Share</button>'
+                ]);
+
+                let attachments = [];
+                videos.forEach(function (v) {
+                    attachments.push({
+                        type: 'youtube',
+                        url: "https://www.youtube.com/watch?v=" + v.file
+                    });
+                });
+                // todo alert
+                /*blog.createPost(blog.myProfile.last_post_id + 1, 'Just added videos from YouTube', attachments).then(function (response) {
+                    onAfterHashChange(response.data);
+                });*/
             });
+
         });
     });
 }

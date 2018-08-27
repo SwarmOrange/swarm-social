@@ -196,7 +196,7 @@ class Blog {
                     self.swarm.applicationHash = response.data;
                     self.myProfile.last_videoalbum_id = id;
 
-                    return self.saveProfile(self.myProfile);
+                    return {response: self.saveProfile(self.myProfile), info: info};
                 });
         };
 

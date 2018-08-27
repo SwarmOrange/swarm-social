@@ -224,7 +224,7 @@ img {
     height: 250px;
 }
 
-.post-photoalbum-item {
+.post-photoalbum-item, .post-videoalbum-item {
     padding: 0 !important;
 }
 

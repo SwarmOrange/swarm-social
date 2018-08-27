@@ -106,17 +106,17 @@ function onAfterHashChange(newHash, notUpdateProfile) {
 function init() {
     $('.additional-buttons').on('click', '.btn-share-item', function (e) {
         let itemType = $(this).attr('data-type');
+        let itemInfo = $(this).attr('data-info');
         let itemId = $(this).attr('data-id');
         let message = $(this).attr('data-message');
         $('#messageModal').modal('hide');
-        if (itemType === "photoalbum") {
-            blog.createPost(blog.myProfile.last_post_id + 1, message, [{
-                type: 'photoalbum',
-                url: itemId
-            }]).then(function (response) {
-                onAfterHashChange(response.data);
-            });
-        }
+        blog.createPost(blog.myProfile.last_post_id + 1, message, [{
+            type: itemType,
+            url: itemId,
+            info: itemInfo
+        }]).then(function (response) {
+            onAfterHashChange(response.data);
+        });
     });
 
     $('.publish-post').click(function (e) {
@@ -412,7 +412,7 @@ function init() {
         }
     });
 
-    $('#photoAlbums,.post-photoalbum-item').on('click', '.load-photoalbum', function (e) {
+    $('body').on('click', '.load-photoalbum', function (e) {
         e.preventDefault();
         let albumId = $(this).attr('data-album-id');
         let viewAlbumContent = $('#viewAlbumContent');
@@ -430,7 +430,7 @@ function init() {
         });
     });
 
-    $('#videoPlaylists').on('click', '.load-videoalbum', function (e) {
+    $('html').on('click', '.load-videoalbum', function (e) {
         e.preventDefault();
         let albumId = $(this).attr('data-album-id');
         let viewAlbumContent = $('#viewVideoAlbumContent');
@@ -559,18 +559,9 @@ function uploadAllInstaPhotos() {
             console.log(response.data);
             onAfterHashChange(response.data);
             $('#newAlbumModal').modal('hide');
-            alert('Album created!');
-
-            let attachments = [];
-            currentPhotosForAlbum.forEach(function (v) {
-                attachments.push({
-                    type: 'photo',
-                    url: v.file
-                });
-            });
-            blog.createPost(blog.myProfile.last_post_id + 1, 'Just uploaded new photos', attachments).then(function (response) {
-                onAfterHashChange(response.data);
-            });
+            alert('Album created!', [
+                '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum from Instagram!" data-id="' + currentPhotoAlbum + '">Share</button>'
+            ]);
         });
     }
 }
@@ -778,6 +769,8 @@ function addPostByData(data) {
         let youtubeAttachment = $('#wallYoutubeAttachment');
         let photoAttachment = $('#photoAttachment');
         let videoAttachment = $('#videoAttachment');
+        let photoalbumAttachment = $('#photoalbumAttachment');
+        let videoalbumAttachment = $('#videoalbumAttachment');
         data.attachments.forEach(function (v) {
             if (v.type === "youtube") {
                 let videoId = youtube_parser(v.url);
@@ -787,9 +780,28 @@ function addPostByData(data) {
             } else if (v.type === "photo") {
                 userPost.append(photoAttachment.clone().attr('style', '').html('<img src="' + swarm.getFullUrl(v.url) + '">'));
             } else if (v.type === "video") {
-                userPost.append(videoAttachment.clone().attr('style', '').html('<video width="100%" controls><source src="' + swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
+                // todo move to html
+                userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<video width="100%" controls><source src="' + swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
             } else if (v.type === "photoalbum") {
-                userPost.append(videoAttachment.clone().attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + swarm.getFullUrl("social/photoalbum/" + v.url + "/1.jpg") + '"></a></li>'));
+                // todo move to html
+                userPost.append(photoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + swarm.getFullUrl("social/photoalbum/" + v.url + "/1.jpg") + '"></a></li>'));
+            } else if (v.type === "videoalbum") {
+                // todo move to html
+                let info;
+                let cover;
+
+                try {
+                    info = JSON.parse(v.info);
+                    if (info.type === "video") {
+                        cover = swarm.getFullUrl(info.cover_file);
+                    } else {
+                        cover = info.cover_file;
+                    }
+                } catch (ex) {
+                    cover = swarm.getFullUrl('img/video-cover.jpg');
+                }
+
+                userPost.append(videoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 videoalbum-item post-videoalbum-item"><a href="#" class="load-videoalbum" data-album-id="' + v.url + '"><img class="videoalbum-img" src="' + cover + '"></a></li>'));
             }
         });
     }
@@ -801,10 +813,9 @@ function alert(message, buttons) {
     messageModal.modal('show');
     let btns = messageModal.find('.additional-buttons');
     btns.html('');
-    /*if (buttons && buttons.length) {
+    if (buttons && buttons.length) {
         buttons.forEach(function (v) {
             btns.append(v);
         });
-    }*/
-
+    }
 }
