@@ -48,16 +48,23 @@ Check your npm version:
 npm -v
 ```
 
+Update NPM:
+```
+npm install -g npm
+```
+
 Install dependencies
 
 ```
 npm install
 ```
 
-
-
 ```
 npm install uglifycss -g
+```
+
+```
+npm install -g uglify-js
 ```
 
 ```
@@ -66,7 +73,7 @@ npm install -g browserify
 
 After changing or adding JS libraries, run
 ```
-browserify js/web.js > js/dist/web.js
+browserify js/web-modules.js > js/dist/web-modules.js && browserify js/web-full.js > js/dist/web-full.js
 ```
 
 ... CSS libraries

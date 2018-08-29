@@ -1,2497 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="Ihar Shaduryn">
-    <link rel="icon" href="img/logo.jpeg">
-
-    <title>Bee Free</title>
-
-    <link href="css/uglify.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-    <script src="https://vk.com/js/api/openapi.js?159" type="text/javascript"></script>
-</head>
-<body>
-
-<script type="text/javascript">
-    VK.init({
-        apiId: 6670736
-    });
-</script>
-
-<div id="fb-root"></div>
-<script>(function (d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) return;
-    js = d.createElement(s);
-    js.id = id;
-    js.src = 'https://connect.facebook.net/ru_RU/sdk.js#xfbml=1&version=v3.1&appId=1804254456326979&autoLogAppEvents=1';
-    fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
-<header>
-    <!--<div class="collapse bg-dark" id="navbarHeader">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-8 col-md-7 py-4">
-                    <h4 class="text-white">Navigate to user page</h4>
-                    <form>
-                        <div class="form-group">
-                            <label for="navigateUserHash" class="text-muted">Paste here SWARM user hash. If user
-                                registered you can see his page</label>
-                            <input type="text" class="form-control" id="navigateUserHash" placeholder="User hash">
-                        </div>
-
-                        <button type="submit" class="btn btn-primary go-user-hash">Go</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>-->
-    <div class="navbar navbar-dark bg-dark box-shadow">
-        <div class="container d-flex justify-content-between">
-            <a href="./" class="navbar-brand d-flex align-items-center">
-                <img src="img/logo.jpeg" alt="" style="width: 60px; margin-right: 12px">
-                <!--<strong>Bee Free</strong>-->
-            </a>
-            <!--<button id="mainMenu" class="navbar-toggler" type="button" data-toggle="collapse"
-                    data-target="#navbarHeader"
-                    aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>-->
-            <ul class="nav nav-pills nav-fill fake-nav">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">My Page</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Public Page</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">View Page</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</header>
-
-<div id="userRegistration" class="masthead" style="display: none">
-    <div class="container h-100">
-        <div class="row h-100">
-            <div class="col-lg-7 my-auto">
-                <div class="header-content mx-auto">
-                    <h1 class="mb-5">Decentralized social network where only you own your data!</h1>
-                    <a href="#" class="btn btn-outline btn-lg js-scroll-trigger btn-start-now">Start Now for Free!</a>
-                </div>
-            </div>
-            <div class="col-lg-5 my-auto">
-                <!--<div class="device-container">
-                    <div class="device-mockup iphone6_plus portrait white">
-                        <div class="device">
-                            <div class="screen">
-                               <img src="img/demo-screen-1.jpg" class="img-fluid" alt="">
-                            </div>
-                            <div class="button">
-                            </div>
-                        </div>
-                    </div>
-                </div>-->
-                <div class="device-wrapper">
-                    <div class="device" data-device="iPhone6" data-orientation="portrait" data-color="white">
-                        <div class="screen">
-                            <!-- PUT CONTENTS HERE -->
-                            <img src="img/swarm.png" class="img-fluid" alt="">
-
-                        </div>
-                        <div class="button">
-                            <!-- You can hook the "home button" to some JavaScript events or just remove it -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div id="importData" class="container" style="margin-top: 30px; text-align: center; display: none">
-    <h1>Import your data...</h1>
-    <button class="btn btn-primary mb-2 btn-import-instagram"><img src="img/instagram.png" alt="" style="width: 30px">
-        Import from Instagram
-    </button>
-    <h1>...or create empty page</h1>
-    <button class="btn btn-success mb-2 btn-create-empty"><img src="img/empty.png" alt="" style="width: 30px"> Create
-        empty page
-    </button>
-
-</div>
-
-<div id="userInfo" class="container" style="margin-top: 30px; display: none">
-    <div class="row">
-        <div class="col-sm-4">
-            <ul class="main-blocks">
-                <!--<li>
-                    <p>
-                        <img id="bigAvatar" src="img/no-photo.png" alt="">
-                    </p>
-                    <p>
-                        <button id="uploadAvatarButton" type="button" class="btn btn-success" data-toggle="modal"
-                                data-target="#uploadAvatarModal" style="width: 100%">Upload avatar
-                        </button>
-                    </p>
-
-                </li>-->
-                <li>
-                    <p>My wallet - Estimated earnings</p>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">ETH</span>
-                        </div>
-                        <input type="text" class="form-control" placeholder="Value" aria-label="Username"
-                               aria-describedby="basic-addon1" value="25.04444" disabled>
-                    </div>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">BTC</span>
-                        </div>
-                        <input type="text" class="form-control" placeholder="Value" aria-label="Username"
-                               aria-describedby="basic-addon1" value="0.300080" disabled>
-                    </div>
-
-                    <p>
-                        <button type="button" class="btn btn-light btn-send-crypto"
-                                style="width: 130px; margin-right: 13px">
-                            Send Crypto
-                        </button>
-                        <button type="button" class="btn btn-light btn-receive-crypto float-right"
-                                style="width: 130px;">
-                            Receive Crypto
-                        </button>
-                    </p>
-                </li>
-                <li>
-                    <p>My data</p>
-
-                    <p>Import from </p>
-                    <p>
-                        <button type="button" class="btn btn-primary btn-profile-import-instagram col-sm-5"
-                                style="">
-                            <img src="img/instagram.png" alt="" style="width: 30px; margin-right: 8px">
-                            Instagram
-                        </button>
-
-                        <button type="button" class="btn btn-primary btn-profile-import-youtube float-right col-sm-5"
-                                style="">
-                            <img src="img/youtube-white.png" alt="" style="width: 30px; margin-right: 8px">
-                            Youtube
-                        </button>
-                    </p>
-                    <p>
-
-                        <button type="button" class="btn btn-primary btn-profile-import-vk col-sm-5"
-                                style="">
-                            <img src="img/vk.png" alt="" style="width: 30px; margin-right: 8px">
-                            VK
-                        </button>
-                        <button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
-                                style="">
-                            <img src="img/facebook.png" alt="" style="width: 30px; margin-right: 8px">
-                            Facebook
-                        </button>
-                        <!--<button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
-                                style="">
-                            <img src="img/google-plus.png" alt="" style="width: 30px; margin-right: 8px">
-                            Google+
-                        </button>-->
-                    </p>
-                </li>
-
-
-            </ul>
-        </div>
-        <div class="col-sm-8">
-            <ul class="main-blocks">
-                <!-- <li>
-                     <!--<div class="dropdown float-right">
-                         <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                             Import data
-                         </button>
-                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                             <a class="dropdown-item btn-profile-import-instagram" href="#">Instagram</a>
-                             <a class="dropdown-item btn-profile-import-facebook" href="#">Facebook</a>
-                         </div>
-                     </div>-->
-
-                <!--   <h1><span id="firstName">...</span> <span id="lastName">...</span> <a href="#"
-                                                                                         class="edit-page-info"
-                                                                                         data-toggle="modal"
-                                                                                         data-target="#editInfoModal"><img
-                           class="project-icon" src="img/edit.png" alt=""></a></h1>
-                   <h3>Birth: <span id="birthDate">...</span></h3>
-                   <h3>Location: <span id="locationName"></span></h3>
-                   <h3>About: <span id="about"></span></h3>
-                   <p>
-                       <button type="submit" class="btn btn-primary mb-2 save-mru">Save MRU</button>
-                       <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
-                   </p>
-               </li>-->
-
-                <li>
-                    <div class="row">
-                        <div class="col-sm-3" style="border-right: 1px solid #e0e0e0">
-                            <p>Contacts</p>
-                            <!--<p class="float-left">Contacts</p>-->
-                            <!--<p class="float-right">
-                                <a href="#" data-toggle="modal" data-target="#addFollowerModal">
-                                    <img src="img/add.png" alt="" style="width: 20px">
-                                </a>
-                            </p>
-                            <div class="clear-both"></div>
-
-                            <ul id="iFollowUsers" class="list-inline">
-
-                            </ul>-->
-                            <p>
-                                <img src="img/avatars/1.png" alt="" style="max-width: 40px"> <span>Nikitus Barmal</span>
-                            </p>
-                            <p>
-                                <img src="img/avatars/2.png" alt="" style="max-width: 40px"> <span>Anton Zelten</span>
-
-                            </p>
-                            <p>
-                                <img src="img/avatars/3.png" alt="" style="max-width: 40px"> <span>Iren Nagorny</span>
-
-                            </p>
-                            <p>
-                                <img src="img/avatars/4.png" alt="" style="max-width: 40px"> <span>Ann Holod</span>
-
-                            </p>
-                            <p>
-                                <img src="img/avatars/4.png" alt="" style="max-width: 40px"> <span>Ann Holod</span>
-
-                            </p>
-
-                        </div>
-                        <div class="col-sm-4" style="border-right: 1px solid #e0e0e0">
-                            <p><strong>Ann Holod</strong></p>
-                            <!--<div class="form-group">
-                                <textarea class="form-control" id="" rows="6"></textarea>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary mb-2" onclick="alert('Not implemented')">Send
-                            </button>-->
-                            <img src="img/avatars/video.png" style="width: 100%">
-
-                        </div>
-                        <div class="col-sm-5">
-                            <p>Inbox</p>
-                            <div class="pre-scrollable">
-                                <table class="table table-striped">
-                                    <!--<thead>
-                                    <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">First</th>
-                                    </tr>
-                                    </thead>-->
-                                    <tbody>
-                                    <tr>
-                                        <th scope="row">Bill G.</th>
-                                        <td>What's up</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Warren B.</th>
-                                        <td>RE: Money? No problem</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Larry P.</th>
-                                        <td>RE: SWARM + Goo...</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Larry P.</th>
-                                        <td>RE: SWARM + Goo...</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Mark Z.</th>
-                                        <td>New social network!</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Johny B.</th>
-                                        <td>SWARM</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-
-                <li>
-                    <!--<p class="float-left">Photo albums / <a class="show-all-photoalbums" href="#">All</a></p>-->
-                    <p class="float-left">Photo albums</p>
-                    <p class="float-right">
-                        <a href="#" class="create-album">
-                            <img src="img/add.png" alt="" style="width: 20px">
-                        </a>
-                    </p>
-                    <div class="clear-both"></div>
-
-                    <ul id="photoAlbums" class="list-inline">
-
-                    </ul>
-                </li>
-                <li>
-                    <!--<p class="float-left">Video playlists / <a class="show-all-videoalbums" href="#">All</a></p>-->
-                    <p class="float-left">Video playlists</p>
-                    <!--<p class="float-right">
-                        <a href="#" class="create-video-playlist">
-                            <img src="img/add.png" alt="" style="width: 20px">
-                        </a>
-                    </p>-->
-                    <div class="clear-both"></div>
-
-                    <ul id="videoPlaylists" class="list-inline">
-
-                    </ul>
-                </li>
-
-                <li id="postBlock">
-                    <div class="row">
-                        <div class="col-sm-2">Create post</div>
-                        <div class="col-sm-3">
-                            <button type="button" class="btn btn-primary create-album">
-                                <img src="img/photo-white.png" alt="" style="width: 20px; margin-right: 8px;">
-                                Upload photos
-                            </button>
-                        </div>
-                        <div class="col-sm-7">
-                            <button type="button" class="btn btn-primary upload-videos-preview">
-                                <img src="img/video-white.png" alt="" style="width: 20px; margin-right: 8px">
-                                Upload videos
-                            </button>
-                        </div>
-                    </div>
-                    <p></p>
-                    <form>
-                        <div class="form-group">
-                            <textarea class="form-control" id="postContent" rows="3"></textarea>
-                        </div>
-
-                        <div id="attached-content">
-
-                        </div>
-
-                        <div id="postOrAttach" style="height: 30px">
-                            <p class="float-left">
-                                <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
-                                <input type="checkbox" aria-label="Checkbox for following text input"
-                                       style="margin-left: 8px"> Share anonymously
-                            </p>
-
-                            <p class="float-right">
-                                <input id="input-attach-file" type="file" style="display: none;" data-type="other"
-                                       accept="">
-                                <a href="#" class="attach-button attach-photo"><img src="img/photo.png"
-                                                                                    alt=""></a>
-                                <a href="#" class="attach-button attach-video"><img src="img/video.png"
-                                                                                    alt=""></a>
-                                <a href="#" class="attach-button attach-youtube" data-toggle="modal"
-                                   data-target="#attachYoutubeModal"><img src="img/youtube.png"
-                                                                          alt=""></a>
-                            </p>
-
-                        </div>
-                        <div id="progressPanel" style="display:none;">
-                            <div class="clear-both"></div>
-                            <div class="progress" style="height: 20px;">
-                                <div id="postProgress" class="progress-bar progress-bar-striped" role="progressbar"
-                                     style="width: 0%"
-                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                    </form>
-                </li>
-
-
-                <li style="border: 0; padding: 0">
-                    <div id="userPosts" class="posts">
-
-                    </div>
-                    <p id="loadMore" class="text-center" style="display: none"><a class="btn btn-primary load-more"
-                                                                                  href="#">Load
-                        more..</a></p>
-                </li>
-            </ul>
-        </div>
-    </div>
-
-
-</div>
-
-<div class="templates" style="display: none">
-    <div id="userPost" class="wall-post col-sm-12" style="display: none">
-        <a href="#" class="delete-post float-right">
-            <img src="img/delete.png" alt="">
-        </a>
-        <a href="#" class="edit-post float-right">
-            <img src="img/empty-black.png" alt="">
-        </a>
-        <div class="description"></div>
-        <div class="edit-post-block" style="display: none">
-            <div class="form-group">
-                <textarea class="form-control" rows="3"></textarea>
-            </div>
-            <p>
-                <button type="button" class="btn btn-primary save-post">Save</button>
-            </p>
-        </div>
-    </div>
-    <div id="postAttachment" class="post-attachment" style="display: none">
-
-    </div>
-    <div id="wallYoutubeAttachment" class="wall-attachment" style="display: none">
-
-    </div>
-    <div id="photoAttachment" class="wall-attachment" style="display: none">
-
-    </div>
-    <div id="videoAttachment" class="wall-attachment" style="display: none">
-
-    </div>
-    <div id="photoalbumAttachment" class="wall-attachment photoalbum-attachment" style="display: none">
-
-    </div>
-    <div id="videoalbumAttachment" class="wall-attachment videoalbum-attachment" style="display: none">
-
-    </div>
-</div>
-
-<!-- Edit Info Modal -->
-<div class="modal fade" id="editInfoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Edit info</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-
-                <div class="form-group">
-                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
-                    <input type="text" class="form-control" id="firstNameEdit" placeholder="First name">
-                </div>
-
-                <div class="form-group">
-                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
-                    <input type="text" class="form-control" id="lastNameEdit" placeholder="Last name">
-                </div>
-
-                <div class="form-group">
-                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
-                    <input type="text" class="form-control" id="birthDateEdit" placeholder="Birth date">
-                </div>
-
-                <div class="form-group">
-                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
-                    <input type="text" class="form-control" id="locationEdit" placeholder="Location">
-                </div>
-
-                <div class="form-group">
-                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
-                    <textarea class="form-control" id="aboutEdit" rows="3" placeholder="About"></textarea>
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary save-info-changes">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Upload Avatar Modal -->
-<div class="modal fade" id="uploadAvatarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Upload avatar</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>
-                    <img id="avatarUpload">
-                </p>
-                <p>
-                    <input id="file-input" type="file">
-                </p>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary save-avatar">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Attach Youtube Modal -->
-<div class="modal fade" id="attachYoutubeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Attach Youtube Video</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <input type="text" class="form-control" id="youtubeUrl" placeholder="Youtube Video URL">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
-                <button type="button" class="btn btn-primary add-youtube-video">Add</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Add Follower Modal -->
-<div class="modal fade" id="addFollowerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add follower</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <input type="text" class="form-control" id="followerHash" placeholder="Follower SWARM hash">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
-                <button type="button" class="btn btn-primary add-follower">Add</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Update ENS Modal -->
-<div class="modal fade" id="updateEnsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Update ENS domain with current hash</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <input type="text" class="form-control" id="ensDomain" placeholder="Your ENS domain">
-                </div>
-                <div class="form-group">
-                    <input type="text" class="form-control" id="currentHash" placeholder="Current page hash" disabled>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
-                <button type="button" class="btn btn-primary send-ens-transaction">Send transaction</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Alert Modal -->
-<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Message</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div id="messageBody" class="modal-body">
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                <div class="additional-buttons">
-
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Load Modal -->
-<div class="modal fade" id="loadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Transfer SWARM data</h5>
-            </div>
-            <div id="loadContent" class="modal-body">
-                <div class="col-sm-4 offset-sm-4">
-                    <div class="loader-animation"></div>
-                </div>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-            </div>-->
-        </div>
-    </div>
-</div>
-
-<!-- View Album Modal -->
-<div class="modal fade bd-example-modal-lg" id="viewAlbumModal" tabindex="-1" role="dialog"
-     aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">View Photo Album</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <button type="button" class="btn btn-sm btn-danger float-right btn-delete-album" data-album-id="0">
-                    Delete
-                </button>
-
-                <div class="clear-both"></div>
-                <div id="viewAlbumContent">
-
-                </div>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-            </div>-->
-        </div>
-    </div>
-</div>
-
-<!-- View Video Modal -->
-<div class="modal fade bd-example-modal-lg" id="viewVideoAlbumModal" tabindex="-1" role="dialog"
-     aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">View Video Playlist</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!--<button type="button" class="btn btn-sm btn-danger float-right btn-delete-album" data-album-id="0">
-                    Delete
-                </button>-->
-
-                <div class="clear-both"></div>
-                <div id="viewVideoAlbumContent">
-
-                </div>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-            </div>-->
-        </div>
-    </div>
-</div>
-
-<!-- Create/Edit Album Modal -->
-<div class="modal fade bd-example-modal-lg" id="newAlbumModal" tabindex="-1" role="dialog"
-     aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Create/Edit Album</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div id="newAlbumContent" class="modal-body">
-                <!--<p class="float-left">Hello </p><button type="button" class="btn btn-sm btn-primary add-photo-album float-right">Add photos</button>-->
-                <p>
-                    <input id="input-upload-photo-album" type="file" style="display: none;" accept="image/*" multiple>
-                    <button type="button" class="btn btn-primary upload-photos">Upload photos</button>
-                    <button type="button" class="btn btn-primary show-insta-panel">Import photos from Instagram</button>
-                    <button type="button" class="btn btn-success upload-all-insta">Upload all from Instagram</button>
-                </p>
-                <p>
-                <div id="progressPanelAlbum" style="display:none;">
-                    <div class="clear-both"></div>
-                    <div class="progress" style="height: 20px;">
-                        <div id="postProgressAlbum" class="progress-bar progress-bar-striped" role="progressbar"
-                             style="width: 0%"
-                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </div>
-                <div class="import-insta-panel" style="display: none">
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="instaNick" placeholder="Instagram nickname">
-                    </div>
-                    <button type="button" class="btn btn-primary import-instagram">Import</button>
-                    <button type="button" class="btn btn-secondary import-instagram-cancel">Cancel</button>
-                </div>
-                <div class="clear-both"></div>
-                <hr>
-                <div id="uploaded-photos">
-
-                </div>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-primary send-ens-transaction">Save</button>
-            </div>-->
-        </div>
-    </div>
-</div>
-
-<!-- Create/Edit Video Album Modal -->
-<div class="modal fade bd-example-modal-lg" id="newVideoModal" tabindex="-1" role="dialog"
-     aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Create/Edit Album</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>
-                    <input id="input-upload-video-album" type="file" style="display: none;" accept="video/*" multiple>
-                    <button type="button" class="btn btn-primary upload-videos">Upload videos</button>
-                </p>
-                <p>
-                <div id="progressPanelVideoAlbum" style="display:none;">
-                    <div class="clear-both"></div>
-                    <div class="progress" style="height: 20px;">
-                        <div id="postProgressVideoAlbum" class="progress-bar progress-bar-striped" role="progressbar"
-                             style="width: 0%"
-                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </div>
-
-                <div class="clear-both"></div>
-                <hr>
-                <div id="uploaded-videos">
-
-                </div>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-primary send-ens-transaction">Save</button>
-            </div>-->
-        </div>
-    </div>
-</div>
-
-<!--Youtube Import Modal -->
-<div class="modal fade bd-example-modal-lg" id="youtubeImportModal" tabindex="-1" role="dialog"
-     aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Import YouTube Videos</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-
-                <div class="d-flex justify-content-center">
-                    <button id="execute-request-button" type="button" class="btn btn-primary">Authorize with YouTube
-                    </button>
-                </div>
-
-                <div id="youtubeImportContent" style="margin-top: 8px">
-
-                </div>
-                <hr>
-                <div id="youtubePlaylistVideos" style="margin-top: 8px">
-
-                </div>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-            </div>-->
-        </div>
-    </div>
-</div>
-
-<!--Show all photoalbums Modal -->
-<div class="modal fade bd-example-modal-lg" id="allPhotoalbumsModal" tabindex="-1" role="dialog"
-     aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Import YouTube Videos</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div id="allPhotoAlbums">
-
-                </div>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-            </div>-->
-        </div>
-    </div>
-</div>
-
-<!-- Import from Facebook Modal -->
-<div class="modal fade bd-example-modal-lg" id="importFromFacebookModal" tabindex="-1" role="dialog"
-     aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Import from Facebook</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="continue_with"
-                     data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="true"
-                     data-onlogin="fbCheckLoginState" data-scope="user_videos,user_posts,user_photos"></div>
-
-                <div id="importFacebookContent">
-
-                </div>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-            </div>-->
-        </div>
-    </div>
-</div>
-
-<!-- Import from VK Modal -->
-<div class="modal fade bd-example-modal-lg" id="importFromVKModal" tabindex="-1" role="dialog"
-     aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Import from VK</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="d-flex justify-content-center">
-
-                    <button type="button" class="btn btn-primary" onclick="VK.Auth.login(vkImport.vkAuthInfo, 20);">
-                        Authorize and receive albums
-                    </button>
-
-                </div>
-
-                <div id="importVKContent">
-                    <span id="receiveVkPhotos"></span>
-                    <ul class="list-inline vk-list"></ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-class Blog {
-    constructor(swarm) {
-        this.last_photoalbum_id = 0;
-        this.last_videoalbum_id = 0;
-        this.prefix = "social/";
-        this.mruName = "SWARM Social";
-        this.swarm = swarm;
-        this.version = 1;
-        let elements = window.location.href.split('/').filter(word => word.length === 64 || word.length === 128 || (word.length >= 11 && word.endsWith('.eth')));
-        this.uploadedToSwarm = elements.length > 0;
-        if (this.uploadedToSwarm) {
-            this.uploadedSwarmHash = elements[0];
-        } else {
-            this.uploadedSwarmHash = '';
-        }
-    }
-
-    replaceUrlSwarmHash(newHash) {
-        if (this.uploadedToSwarm) {
-            window.location.hash = '';
-        }
-
-        let newElements = [];
-        window.location.href.split('/').forEach(function (v) {
-            let item = v;
-            if (Blog.isCorrectSwarmHash(v)) {
-                item = newHash;
-            }
-
-            newElements.push(item);
-        });
-        let newUrl = newElements.join('/');
-        window.history.pushState({"swarmHash": newHash}, "", newUrl);
-
-        return newUrl;
-    }
-
-    static isCorrectSwarmHash(hash) {
-        let hashLength = 64;
-        let hashLengthEncrypted = 128;
-
-        return hash && (hash.length === hashLength || hash.length === hashLengthEncrypted);
-    }
-
-    setMyProfile(data) {
-        this.myProfile = data;
-    }
-
-    saveProfile(data, userHash) {
-        data.version = this.version;
-        return this.swarm.post(this.prefix + "profile.json", JSON.stringify(data), 'application/json', userHash);
-    }
-
-    getProfile(userHash) {
-        return this.swarm.get(this.prefix + 'profile.json', userHash);
-    }
-
-    getMyProfile() {
-        return this.getProfile(this.swarm.applicationHash);
-    }
-
-    addIFollow(swarmProfileHash) {
-        if ('i_follow' in this.myProfile) {
-            if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
-                throw "Hash already exists";
-            }
-
-            this.myProfile.i_follow.push(swarmProfileHash);
-        } else {
-            this.myProfile.i_follow = [swarmProfileHash];
-        }
-
-        return this.saveProfile(this.myProfile);
-    }
-
-    deleteIFollow(swarmProfileHash) {
-        if ('i_follow' in this.myProfile) {
-            if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
-                let index = this.myProfile.i_follow.indexOf(swarmProfileHash);
-                if (index > -1) {
-                    this.myProfile.i_follow.splice(index, 1);
-                }
-            }
-        } else {
-            this.myProfile.i_follow = [];
-        }
-
-        return this.saveProfile(this.myProfile);
-    }
-
-    sendRawFile(fileName, data, fileType, userHash, swarmProtocol, onProgress) {
-        return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol, onProgress);
-    }
-
-    uploadFileForPost(id, fileContent, contentType, fileName, onUploadProgress) {
-        // structure
-        // post/ID/file/[timestamp].[extension]
-        let self = this;
-        let extension = fileName.split('.').pop();
-        let timestamp = +new Date();
-        let url = this.prefix + "post/" + id + "/file/" + timestamp + "." + extension;
-
-        return this.sendRawFile(url, fileContent, contentType, null, null, onUploadProgress).then(function (response) {
-                return {
-                    response: response,
-                    url: url,
-                    fullUrl: self.swarm.getFullUrl(url, response.data)
-                };
-            }
-        );
-    }
-
-    uploadAvatar(fileContent) {
-        // structure
-        // file/avatar/original.jpg
-        let self = this;
-        let url = this.prefix + "file/avatar/original.jpg";
-
-        return this.sendRawFile(url, fileContent, 'image/jpeg')
-            .then(function (response) {
-                console.log('avatar uploaded');
-                console.log(response.data);
-                self.swarm.applicationHash = response.data;
-                self.myProfile.photo = {
-                    original: url
-                };
-
-                return self.saveProfile(self.myProfile);
-            });
-    }
-
-    createPost(id, description, attachments) {
-        let self = this;
-        // structure
-        // /post/ID/info.json - {"id":id, "description":"my super post", "attachments":[]}
-        attachments = attachments || [];
-        let info = {
-            id: id,
-            description: description,
-            attachments: attachments
-        };
-
-        return this.sendRawFile(this.prefix + "post/" + id + "/info.json", JSON.stringify(info), 'application/json')
-            .then(function (response) {
-                console.log('one');
-                console.log(response.data);
-                self.myProfile.last_post_id = id;
-                self.swarm.applicationHash = response.data;
-
-                return self.saveProfile(self.myProfile);
-            });
-    }
-
-    getPost(id, userHash) {
-        return this.swarm.get(this.prefix + 'post/' + id + '/info.json', userHash);
-    }
-
-    deletePost(id) {
-        return this.swarm.post(this.prefix + "post/" + id + "/info.json", JSON.stringify({
-            id: id,
-            is_deleted: true
-        }), 'application/json');
-    }
-
-    editPost(id, description) {
-        let self = this;
-        return this.getPost(id).then(function (response) {
-            let data = response.data;
-            data.description = description;
-            return self.swarm.post(self.prefix + "post/" + id + "/info.json", JSON.stringify(data), 'application/json');
-        });
-    }
-
-    createVideoAlbum(id, name, description, videos) {
-        let self = this;
-        // album structure
-        // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
-        // video structure
-        // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "videos":[{"preview":"file/name.jpg", "file": "123123.mp4", "type":"file|youtube", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
-        videos = videos || [];
-        let coverFile = videos.length ? videos[0].cover_file : videos;
-        let fileType = videos.length ? videos[0].type : videos;
-        let info = {
-            id: id,
-            type: fileType,
-            name: name,
-            description: description,
-            cover_file: coverFile,
-            videos: videos
-        };
-
-        let finalSave = function (data) {
-            return self.sendRawFile(self.prefix + "videoalbum/info.json", JSON.stringify(data), 'application/json')
-                .then(function (response) {
-                    console.log(response.data);
-                    self.swarm.applicationHash = response.data;
-                    self.myProfile.last_videoalbum_id = id;
-
-                    return {response: self.saveProfile(self.myProfile), info: info};
-                });
-        };
-
-        return this.sendRawFile(this.prefix + "videoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json')
-            .then(function (response) {
-                console.log('Video album info.json');
-                console.log(response.data);
-                self.swarm.applicationHash = response.data;
-                let newInfo = {
-                    id: id,
-                    type: fileType,
-                    name: name,
-                    description: description,
-                    cover_file: coverFile
-                };
-
-                return self.getVideoAlbumsInfo()
-                    .then(function (response) {
-                        let data = response.data;
-                        data = Array.isArray(data) ? data : [];
-
-                        data.push(newInfo);
-                        console.log('album info');
-                        console.log(data);
-
-                        return finalSave(data);
-                    })
-                    .catch(function () {
-                        return finalSave([newInfo]);
-                    });
-            });
-    }
-
-    getVideoAlbumsInfo() {
-        return this.swarm.get(this.prefix + 'videoalbum/info.json');
-    }
-
-    getVideoAlbumInfo(id) {
-        return this.swarm.get(this.prefix + 'videoalbum/' + id + '/info.json');
-    }
-
-    uploadVideoToAlbum(photoAlbumId, photoId, fileContent, contentType) {
-        let fileName = this.prefix + "videoalbum/" + photoAlbumId + "/" + photoId + ".mp4";
-        return this.sendRawFile(fileName, fileContent, contentType).then(function (response) {
-            return {fileName: fileName, response: response.data};
-        });
-    }
-
-    createPhotoAlbum(id, name, description, photos) {
-        let self = this;
-        // structure
-        // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
-        // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "photos":[{"file": "123123.jpg", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
-        photos = photos || [];
-        let coverFile = photos.length ? photos[0].file : photos;
-        let info = {
-            id: id,
-            name: name,
-            description: description,
-            cover_file: coverFile,
-            photos: photos
-        };
-
-        let navigateAndSaveProfile = function (response) {
-            self.swarm.applicationHash = response.data;
-            self.myProfile.last_photoalbum_id = id;
-
-            return self.saveProfile(self.myProfile);
-        };
-
-        return this.sendRawFile(this.prefix + "photoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json')
-            .then(function (response) {
-                console.log('Photoalbom info.json');
-                console.log(response.data);
-                self.swarm.applicationHash = response.data;
-                let newAlbumInfo = {
-                    id: id,
-                    name: name,
-                    description: description,
-                    cover_file: coverFile
-                };
-
-                return self.getAlbumsInfo().then(function (response) {
-                    let data = response.data;
-                    data = Array.isArray(data) ? data : [];
-                    data.push(newAlbumInfo);
-                    console.log('album info');
-                    console.log(data);
-                    return self.saveAlbumsInfo(data).then(function (response) {
-                        return navigateAndSaveProfile(response);
-                    });
-                }).catch(function () {
-                    return self.saveAlbumsInfo([newAlbumInfo]).then(function (response) {
-                        return navigateAndSaveProfile(response);
-                    });
-                });
-            });
-    }
-
-    uploadPhotoToAlbum(photoAlbumId, photoId, fileContent) {
-        //let timestamp = +new Date();
-        //let fileName = this.prefix + "photoalbum/" + photoAlbumId + "/" + timestamp + ".jpg";
-        let fileName = this.prefix + "photoalbum/" + photoAlbumId + "/" + photoId + ".jpg";
-        return this.sendRawFile(fileName, fileContent, 'image/jpeg').then(function (response) {
-            return {fileName: fileName, response: response.data};
-        });
-    }
-
-    getAlbumInfo(id) {
-        return this.swarm.get(this.prefix + 'photoalbum/' + id + '/info.json');
-    }
-
-    getAlbumsInfo() {
-        return this.swarm.get(this.prefix + 'photoalbum/info.json');
-    }
-
-    saveAlbumsInfo(data) {
-        return this.sendRawFile(this.prefix + "photoalbum/info.json", JSON.stringify(data), 'application/json');
-    }
-
-    deletePhotoAlbum(id) {
-        let self = this;
-        // todo delete all photos. Can we delete files from passed list?
-        // todo delete from photoalbum/info.json
-        return this.swarm.delete(this.prefix + 'photoalbum/' + id + '/1.jpg').then(function (response) {
-            self.swarm.applicationHash = response.data;
-            return self.getAlbumsInfo().then(function (response) {
-                let data = response.data;
-                let newAlbums = [];
-                if (data && Array.isArray(data) && data.length) {
-                    data.forEach(function (v) {
-                        if (v.id != id) {
-                            newAlbums.push(v);
-                        }
-                    });
-                }
-
-                return self.saveAlbumsInfo(newAlbums);
-            });
-        });
-    }
-
-    createMru(ownerAddress) {
-        let self = this;
-        // todo save it to profile
-        if (!ownerAddress) {
-            throw "Empty owner address";
-        }
-
-        let timestamp = +new Date();
-        let data = {
-            "name": this.mruName,
-            "frequency": 5,
-            "startTime": timestamp,
-            "ownerAddr": ownerAddress
-        };
-
-        return this.swarm.post(null, data, null, null, 'bzz-resource:').then(function (response) {
-            self.myProfile.mru = response.data;
-            return {
-                mru: response.data,
-                response: self.saveProfile(self.myProfile)
-            };
-        });
-    }
-
-    saveMru(mru, rootAddress, swarmHash) {
-        if (mru && rootAddress && swarmHash) {
-        } else {
-            throw "Empty MRU, rootAddress or SWARM hash";
-        }
-
-        let timestamp = +new Date();
-        let data = {
-            "name": this.mruName,
-            "frequency": 5,
-            "startTime": timestamp,
-            "rootAddr": rootAddress,
-            "data": "0x12a3",
-            "multiHash": false,
-            "version": 1,
-            "period": 1,
-            "signature": "0x71c54e53095466d019f9f46e34ae0b393d04a5dac7990ce65934a3944c1f39badfc8c4f3c78baaae8b2e86cd21940914c57a4dff5de45d47e35811f983991b7809"
-        };
-
-        return this.swarm.post(null, data, null, null, 'bzz-resource:');
-    }
-}
-
-module.exports = Blog;
-},{}],2:[function(require,module,exports){
-class EnsUtility {
-    constructor(main) {
-        this.networkName = {
-            '1': 'mainnet',
-            '3': 'ropsten',
-            '4': 'rinkeby'
-        };
-        this.currentNetworkTitle = null;
-        this.ens = null;
-        this.main = main;
-
-        this.init();
-    }
-
-    init() {
-        let self = this;
-        if (typeof web3 !== 'undefined') {
-            window.web3 = new Web3(web3.currentProvider);
-            console.log('current provider');
-            console.log(web3.currentProvider);
-        } else {
-            window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-        }
-
-        console.log(web3);
-        this.ens = new EthereumENS(window.web3.currentProvider);
-        web3.version.getNetwork(function (error, result) {
-            if (error) {
-                console.error(error);
-                $('.save-ens').hide();
-
-                return;
-            }
-
-            var networkId = result;
-            console.log('Network id: ' + networkId);
-            self.currentNetworkTitle = self.networkName[networkId];
-
-            web3.eth.getAccounts(function (error, result) {
-                if (error) {
-                    console.error(error);
-                }
-
-                console.log(result);
-                if (result.length === 0) {
-                    //alert('Please, select main Ethereum account, unlock MetaMask and reload this page.');
-                } else {
-                    web3.eth.defaultAccount = result[0];
-                }
-            });
-
-        });
-
-        $('.save-ens').click(function (e) {
-            e.preventDefault();
-            $('#currentHash').val(swarm.applicationHash);
-            $('#updateEnsModal').modal('show');
-        });
-
-        $('.send-ens-transaction').click(function (e) {
-            e.preventDefault();
-            if (!web3.eth.defaultAccount) {
-                alert('Please, select main Ethereum account and unlock MetaMask.');
-
-                return;
-            }
-            saveDomainHash();
-        });
-    }
-
-    isCorrectDomain(domain) {
-        var minDomainLength = 3;
-
-        return domain && domain.length >= minDomainLength;
-    }
-
-    saveDomainHash() {
-        let self = this;
-        let ensDomain = $('#ensDomain').val();
-        let swarmHash = $('#currentHash').val();
-        console.log([ensDomain, swarmHash]);
-
-        if (!isCorrectDomain(ensDomain) || !Blog.isCorrectSwarmHash(swarmHash)) {
-            alert('Incorrect domain or hash');
-
-            return;
-        }
-
-        var resultSwarmHash = '0x' + swarmHash;
-        var resolver = ens.resolver(ensDomain);
-        resolver.instancePromise.then(function () {
-            return resolver.setContent(resultSwarmHash, {from: web3.eth.defaultAccount}).then(function (result) {
-                $('#updateEnsModal').modal('hide');
-                // user complete transaction
-                var subdomain = '';
-                if (self.currentNetworkTitle && self.currentNetworkTitle !== 'mainnet') {
-                    subdomain = self.currentNetworkTitle + '.';
-                }
-
-                var shortResult = result.substring(0, 50) + '...';
-                self.main.blog.replaceUrlSwarmHash(swarmHash);
-                self.main.alert('Transaction complete. View transaction on Etherscan: <a href="https://' + subdomain + 'etherscan.io/tx/' + result + '" target="_blank">' + shortResult + '</a>');
-            }).catch(function (r) {
-                self.main.alert('Transaction rejected');
-            });
-        }).catch(function (e) {
-            self.main.alert('Domain name not found, resolver not set or it does not belong to you');
-        });
-    }
-}
-
-module.exports = EnsUtility;
-},{}],3:[function(require,module,exports){
-class FacebookImport {
-    fbCheckLoginState(data) {
-        console.log('fb data');
-        console.log(data);
-        if (data.status === 'connected') {
-
-        }
-    }
-}
-
-module.exports = FacebookImport;
-},{}],4:[function(require,module,exports){
-class ImportButtons {
-    constructor(main) {
-        this.init();
-        this.main = main;
-    }
-
-    init() {
-        let self = this;
-        $('.fake-nav a').click(function (e) {
-            e.preventDefault();
-            self.main.alert('Not implemented yet');
-        });
-
-        $('.btn-profile-import-instagram').click(function (e) {
-            e.preventDefault();
-            $('.show-insta-panel').click().hide();
-            $('.upload-photos').hide();
-            $('.upload-all-insta').hide();
-            $('#newAlbumModal').modal('show');
-        });
-
-        $('.btn-profile-import-facebook').click(function (e) {
-            e.preventDefault();
-            self.main.alert('Not implemented yet');
-            //$('#importFromFacebookModal').modal('show');
-        });
-
-
-        $('.btn-profile-import-youtube').click(function (e) {
-            e.preventDefault();
-            $('#youtubeImportContent').html('');
-            $('#youtubePlaylistVideos').html('');
-            $('#youtubeImportModal').modal('show');
-        });
-
-        $('.btn-send-crypto,.btn-receive-crypto').click(function (e) {
-            e.preventDefault();
-            self.main.alert('Not implemented yet');
-        });
-
-        $('#youtubeImportModal').on('click', '.btn-import-all-videos', function (e) {
-            e.preventDefault();
-            let videos = [];
-            let i = 1;
-            $('.youtube-video-import').each(function (k, v) {
-                let id = $(v).attr('data-id');
-                let cover_file = $(v).attr('data-cover-file');
-                videos.push({
-                    id: i,
-                    type: "youtube",
-                    file: id,
-                    cover_file: cover_file,
-                    description: '',
-                    name: ''
-                });
-                i++;
-            });
-
-            let albumId = typeof self.main.blog.myProfile.last_videoalbum_id === 'undefined' ? 1 : self.main.blog.myProfile.last_videoalbum_id + 1;
-
-            self.main.blog.createVideoAlbum(albumId, 'Videos', '', videos).then(function (preResponse) {
-                let info = preResponse.info;
-                preResponse.response.then(function (response) {
-                    console.log('album created');
-                    console.log(response.data);
-                    self.main.onAfterHashChange(response.data);
-                    $('#youtubeImportModal').modal('hide');
-                    self.main.alert('Video playlist created!', [
-                        '<button type="button" class="btn btn-success btn-share-item" data-type="videoalbum" data-info=\'' + JSON.stringify(info) + '\' data-message="Just created new video playlist!" data-id="' + albumId + '">Share</button>'
-                    ]);
-
-                    let attachments = [];
-                    videos.forEach(function (v) {
-                        attachments.push({
-                            type: 'youtube',
-                            url: "https://www.youtube.com/watch?v=" + v.file
-                        });
-                    });
-                    // todo alert
-                    /*blog.createPost(blog.myProfile.last_post_id + 1, 'Just added videos from YouTube', attachments).then(function (response) {
-                        onAfterHashChange(response.data);
-                    });*/
-                });
-
-            });
-        });
-    }
-}
-
-module.exports = ImportButtons;
-},{}],5:[function(require,module,exports){
-class Main {
-
-    constructor() {
-        this.swarm = null;
-        this.blog = null;
-        this.cropper = null;
-        this.lastLoadedPost = 0;
-        this.currentPhotoAlbum = 0;
-        this.currentPhotosForAlbum = [];
-        this.photoAlbumPhotoId = 0;
-
-        this.initDocument();
-    }
-
-    initDocument() {
-        let self = this;
-        $(document).on('click', '[data-toggle="lightbox"]', function (event) {
-            event.preventDefault();
-            $(this).ekkoLightbox();
-        });
-
-        $(document).ready(function () {
-            // hash - user id
-            //console.log('hash from local storage: ' + localStorage.getItem('applicationHash'));
-            let hash = window.location.hash.substring(1);
-            if (hash) {
-                if (Blog.isCorrectSwarmHash(hash)) {
-
-                } else {
-                    self.alert('Incorrect hash after # in url. Fix it and reload page.');
-
-                    return;
-                }
-            }
-
-            console.log('hash from window hash: ' + hash);
-            //let initHash = hash ? hash : localStorage.getItem('applicationHash');
-            let swarmHost = window.location.protocol + "//" + window.location.hostname;
-            if (window.location.hostname === "mem.lt") {
-                swarmHost = "https://swarm-gateways.net";
-            } else if (window.location.hostname === "tut.bike") {
-                swarmHost = "http://beefree.me";
-            } else if (window.location.hostname === "localhost") {
-                swarmHost = "http://127.0.0.1:8500";
-                //swarmHost = "https://swarm-gateways.net";
-            }
-
-            //swarmHost = window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500";
-            self.swarm = new SwarmApi(swarmHost, "");
-            //swarm = new SwarmApi("https://swarm-gateways.net", initHash);
-            self.blog = new Blog(self.swarm);
-            let isValid = (hash || self.blog.uploadedSwarmHash).length > 0;
-            if (isValid) {
-                $('#userRegistration').hide();
-                $('#userInfo').show();
-            } else {
-                //alert('You can\'t access this site. Add #SWARM_HASH to url and update page.');
-                //return;
-                $('#userRegistration').show();
-                //$('#importData').show();
-                $('#userInfo').hide();
-            }
-
-            let initHash = hash ? hash : self.blog.uploadedSwarmHash;
-            console.log('selected hash: ' + initHash);
-            self.swarm.applicationHash = initHash;
-            console.log(self.swarm.applicationHash);
-            if (self.swarm.applicationHash) {
-                self.updateProfile();
-            }
-
-            self.init();
-        });
-    }
-
-
-    updateProfile() {
-        let self = this;
-        return this.blog.getMyProfile()
-            .then(function (response) {
-                let data = response.data;
-                console.log(data);
-                // todo autoset profile after update?
-                self.blog.setMyProfile(data);
-                self.updateInfo(data);
-                setTimeout(function () {
-                    $('#loadModal').modal('hide');
-                }, 1000);
-            })
-            .catch(function (error) {
-                console.log(error);
-                console.log('Some error happen');
-            })
-            .then(function () {
-                // always executed
-            });
-    }
-
-    onAfterHashChange(newHash, notUpdateProfile) {
-        this.swarm.applicationHash = newHash;
-        localStorage.setItem('applicationHash', newHash);
-        window.location.hash = newHash;
-        if (notUpdateProfile) {
-            return null;
-        } else {
-            return this.updateProfile();
-        }
-    }
-
-    init() {
-        let self = this;
-        $('.additional-buttons').on('click', '.btn-share-item', function (e) {
-            let itemType = $(this).attr('data-type');
-            let itemInfo = $(this).attr('data-info');
-            let itemId = $(this).attr('data-id');
-            let message = $(this).attr('data-message');
-            $('#messageModal').modal('hide');
-            self.blog.createPost(self.blog.myProfile.last_post_id + 1, message, [{
-                type: itemType,
-                url: itemId,
-                info: itemInfo
-            }]).then(function (response) {
-                self.onAfterHashChange(response.data);
-            });
-        });
-
-        $('.publish-post').click(function (e) {
-            e.preventDefault();
-            let postContentElement = $('#postContent');
-            let description = postContentElement.val();
-            let attachments = [];
-            $('.post-attachment').each(function (k, v) {
-                let type = $(v).attr('data-type');
-                let url = $(v).attr('data-url');
-                if (type && url) {
-                    attachments.push({
-                        type: type,
-                        url: url
-                    });
-                }
-            });
-            console.log(description);
-            console.log(attachments);
-            let isContentExists = description.length || attachments.length;
-            if (!isContentExists) {
-                self.alert('Please, write text or add attachments');
-                return;
-            }
-
-            let newPostId = self.blog.myProfile.last_post_id + 1;
-            self.addPostByData({
-                id: newPostId,
-                description: description,
-                attachments: attachments
-            });
-            $('#postBlock').addClass("disabled-content");
-            self.blog.createPost(newPostId, description, attachments)
-                .then(function (response) {
-                    console.log(response.data);
-                    postContentElement.val('');
-                    $('#attached-content').html('');
-                    self.onAfterHashChange(response.data, true);
-                })
-                .catch(function (error) {
-                    console.log(error);
-                    console.log('Some error happen');
-                })
-                .then(function () {
-                    $('#postBlock').removeClass("disabled-content");
-                });
-        });
-
-        $('.go-user-hash').click(function (e) {
-            e.preventDefault();
-            let self = this;
-
-            let userHash = $('#navigateUserHash').val();
-            /*goToHash(userHash).then(function (response) {
-                $('#userInfo').show();
-                $('#mainMenu').click();
-                //reload();
-            })*/
-            self.onAfterHashChange(userHash).then(function () {
-                $('#userInfo').show();
-                $('#mainMenu').click();
-            });
-        });
-
-        $('.edit-page-info').click(function (e) {
-            let info = self.blog.myProfile;
-            if (info) {
-                $('#firstNameEdit').val(info.first_name);
-                $('#lastNameEdit').val(info.last_name);
-                $('#birthDateEdit').val(info.birth_date);
-                $('#locationEdit').val(info.location.name);
-                $('#aboutEdit').val(info.about);
-            }
-        });
-
-        $('.save-info-changes').click(function () {
-            let info = self.blog.myProfile || {
-                location: {}
-            };
-            info.first_name = $('#firstNameEdit').val();
-            info.last_name = $('#lastNameEdit').val();
-            info.birth_date = $('#birthDateEdit').val();
-            info.location.name = $('#locationEdit').val();
-            info.about = $('#aboutEdit').val();
-
-            $('#editInfoModal').modal('hide');
-            //self.showUploadModal();
-            self.blog.saveProfile(info).then(function (response) {
-                console.log(response.data);
-                self.onAfterHashChange(response.data);
-            });
-        });
-
-        $('#file-input').on('change', function () {
-            if (this.files && this.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    const image = document.getElementById('avatarUpload');
-                    image.src = e.target.result;
-                    cropper = new Cropper(image, {
-                        aspectRatio: 1,
-                        crop(event) {
-                            /*console.log(event.detail.x);
-                            console.log(event.detail.y);
-                            console.log(event.detail.width);
-                            console.log(event.detail.height);
-                            console.log(event.detail.rotate);
-                            console.log(event.detail.scaleX);
-                            console.log(event.detail.scaleY);*/
-                        },
-                    });
-                };
-                reader.readAsDataURL(this.files[0]);
-            }
-        });
-
-        $('#input-attach-file').on('change', function () {
-            if (this.files && this.files[0]) {
-                $('#postOrAttach').addClass("disabled-content");
-
-                let progressPanel = $('#progressPanel');
-                let postProgress = $('#postProgress');
-                progressPanel.show();
-                let fileType = $(this).attr('data-type');
-                let contentType = this.files[0].type;
-                let fileName = this.files[0].name;
-                let setProgress = function (val) {
-                    postProgress.css('width', val + '%').attr('aria-valuenow', val);
-                };
-                let reader = new FileReader();
-                reader.onload = function (e) {
-                    self.blog.uploadFileForPost(self.blog.myProfile.last_post_id + 1, e.target.result, contentType, fileName, function (progress) {
-                        let onePercent = progress.total / 100;
-                        let currentPercent = progress.loaded / onePercent;
-                        setProgress(currentPercent);
-                    }).then(function (data) {
-                        let url = data.url;
-                        let fullUrl = data.fullUrl;
-                        console.log(data);
-                        let postAttachmentTemplate = $('#postAttachment').clone();
-                        $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', fileType).attr('data-url', url).html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
-                        self.onAfterHashChange(data.response.data, true);
-                        progressPanel.hide();
-                        setProgress(0);
-                        $('#postOrAttach').removeClass("disabled-content");
-                    });
-                };
-                reader.readAsArrayBuffer(this.files[0]);
-            }
-        });
-
-        $('.save-avatar').click(function () {
-            if (cropper) {
-                let canvas = cropper.getCroppedCanvas();
-                const mimeType = 'image/jpg';
-                canvas.toBlob((blob) => {
-                    const reader = new FileReader();
-                    reader.addEventListener('loadend', () => {
-                        const arrayBuffer = reader.result;
-                        $('#uploadAvatarModal').modal('hide');
-                        //self.showUploadModal();
-                        self.blog.uploadAvatar(arrayBuffer).then(function (response) {
-                            console.log(response.data);
-                            self.onAfterHashChange(response.data);
-                        });
-                    });
-
-                    reader.readAsArrayBuffer(blob);
-                }, mimeType);
-            } else {
-                self.alert('Select photo before save');
-            }
-        });
-
-        $('.attach-photo').click(function (e) {
-            e.preventDefault();
-            let input = $('#input-attach-file');
-            input.attr('data-type', 'photo');
-            input.attr('accept', 'image/*');
-            input.click();
-        });
-
-        $('.attach-video').click(function (e) {
-            e.preventDefault();
-            let input = $('#input-attach-file');
-            input.attr('data-type', 'video');
-            input.attr('accept', 'video/*');
-            input.click();
-        });
-
-        $('.add-youtube-video').click(function (e) {
-            //e.preventDefault();
-            let url = $('#youtubeUrl').val();
-            if (url) {
-                $('#attachYoutubeModal').modal('hide');
-                let postAttachmentTemplate = $('#postAttachment').clone();
-                $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', 'youtube').attr('data-url', url).html('<a target="_blank" href="' + url + '">' + url + '</a>'));
-            } else {
-                self.alert('Please, enter url');
-            }
-        });
-
-        $('#userPosts')
-            .on('click', '.delete-post', function (e) {
-                e.preventDefault();
-                let id = $(this).attr('data-id');
-                if (confirm('Really delete?')) {
-                    //$('#my-post').addClass("disabled-content");
-                    $('#userPost' + id).hide('slow');
-                    self.blog.deletePost(id).then(function (response) {
-                        self.onAfterHashChange(response.data, true);
-                    });
-                }
-            })
-            .on('click', '.edit-post', function (e) {
-                e.preventDefault();
-                let id = $(this).attr('data-id');
-                $('#userPost' + id + ' .description').toggle();
-                $('#userPost' + id + ' .edit-post-block').toggle();
-            })
-            .on('click', '.save-post', function (e) {
-                e.preventDefault();
-                let id = $(this).attr('data-id');
-                let description = $(this).closest('.edit-post-block').find('textarea').val();
-                $('#userPost' + id + ' .description').text(description).toggle();
-                $('#userPost' + id + ' .edit-post-block').toggle();
-                self.blog.editPost(id, description).then(function (response) {
-                    self.onAfterHashChange(response.data, true);
-                });
-            });
-
-        $('.create-profile').click(function (e) {
-            e.preventDefault();
-
-            //localStorage.setItem('applicationHash', '');
-            // todo how to create empty hash with one file?
-            //blog.saveProfile({});
-        });
-
-        $('.load-more').click(function (e) {
-            e.preventDefault();
-            loadPosts();
-        });
-
-
-        $('.add-follower').click(function (e) {
-            e.preventDefault();
-            let followerHash = $('#followerHash');
-            let swarmHash = followerHash.val();
-            console.log(swarmHash);
-            if (Blog.isCorrectSwarmHash(swarmHash)) {
-                $('#addFollowerModal').modal('hide');
-                followerHash.val('');
-                try {
-                    self.blog.addIFollow(swarmHash).then(function (response) {
-                        self.onAfterHashChange(response.data);
-                    });
-                } catch (e) {
-                    self.alert(e);
-                }
-            } else {
-                self.alert('Please, enter correct SWARM hash');
-            }
-        });
-
-        $('#iFollowUsers')
-            .on('click', '.load-profile', function (e) {
-                e.preventDefault();
-                let swarmProfileHash = $(this).attr('data-profile-id');
-                // todo go to profile
-                self.goToHash(swarmProfileHash).then(function (response) {
-                    //reload();
-                });
-            })
-            .on('click', '.delete-i-follow', function (e) {
-                e.preventDefault();
-                let id = $(this).attr('data-profile-id');
-                if (confirm('Really delete?')) {
-                    self.blog.deleteIFollow(id).then(function (response) {
-                        self.onAfterHashChange(response.data);
-                    });
-                }
-            });
-
-        $('.btn-delete-album').click(function (e) {
-            e.preventDefault();
-            let id = $(this).attr('data-album-id');
-            if (confirm('Really delete?')) {
-                $('#viewAlbumModal').modal('hide');
-
-                self.blog.deletePhotoAlbum(id).then(function (response) {
-                    self.onAfterHashChange(response.data);
-                });
-            }
-        });
-
-        $('body').on('click', '.load-photoalbum', function (e) {
-            e.preventDefault();
-            let albumId = $(this).attr('data-album-id');
-            let viewAlbumContent = $('#viewAlbumContent');
-            $('.btn-delete-album').attr('data-album-id', albumId);
-            $('#viewAlbumModal').modal('show');
-            viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-            self.blog.getAlbumInfo(albumId).then(function (response) {
-                let data = response.data;
-                console.log(data);
-                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
-                data.photos.forEach(function (v) {
-                    viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
-                });
-                viewAlbumContent.append('</ul>');
-            });
-        });
-
-        $('html').on('click', '.load-videoalbum', function (e) {
-            e.preventDefault();
-            let albumId = $(this).attr('data-album-id');
-            let viewAlbumContent = $('#viewVideoAlbumContent');
-            $('.btn-delete-album').attr('data-album-id', albumId);
-            $('#viewVideoAlbumModal').modal('show');
-            viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-            self.blog.getVideoAlbumInfo(albumId).then(function (response) {
-                let data = response.data;
-                console.log(data);
-                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
-                data.videos.forEach(function (v) {
-                    if (v.type === "youtube") {
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
-                    } else {
-                        viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + self.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + self.swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
-                    }
-                });
-                viewAlbumContent.append('</ul>');
-            });
-        });
-
-        $('.show-insta-panel').click(function (e) {
-            e.preventDefault();
-            $('.import-insta-panel').show('fast');
-        });
-
-        $('.import-instagram').click(function (e) {
-            e.preventDefault();
-            let instaNick = $('#instaNick').val();
-            if (!instaNick) {
-                self.alert('Incorrect nickname');
-
-                return;
-            }
-
-            $('.import-insta-panel').hide('fast');
-
-            let uploaderPhotos = $('#uploaded-photos');
-            uploaderPhotos.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-            self.swarm.axios.get('https://mem.lt/insta/go.php?limit=1&login=' + instaNick).then(function (response) {
-                let data = response.data;
-                $('.upload-all-insta').show();
-                uploaderPhotos.html('');
-
-                if (data && data.length && typeof data === 'object') {
-
-                } else {
-                    $('#newAlbumModal').modal('hide');
-                    self.alert('Incorrect login or error while retrieving data');
-                    return;
-                }
-
-                uploaderPhotos.html('<ul id="preview-insta-album" class="list-inline">');
-                data.forEach(function (v) {
-                    uploaderPhotos.append('<li class="list-inline-item"><img data-type="insta-photo" style="max-width: 100px; max-height: 100px;" src="' + v.fullsize + '"></li>');
-                });
-                uploaderPhotos.append('</ul>');
-            }).catch(function (error) {
-                console.log(error);
-                console.log('Insta error');
-            });
-
-            $('#addFromInstaModal').modal('hide');
-            $('#newAlbumModal').modal('show');
-
-        });
-
-        $('.create-album').click(function (e) {
-            e.preventDefault();
-            $('#uploaded-photos').html('');
-            $('.upload-all-insta').hide();
-            $('.upload-photos').show();
-            $('.show-insta-panel').show();
-            $('#newAlbumModal').modal('show');
-        });
-
-        $('.upload-all-insta').click(function (e) {
-            e.preventDefault();
-            let photos = $('img[data-type=insta-photo]');
-            if (photos.length) {
-                $(this).hide();
-                self.currentPhotosForAlbum = [];
-                self.currentPhotoAlbum = self.blog.myProfile.last_photoalbum_id + 1;
-                self.photoAlbumPhotoId = 1;
-                self.uploadAllInstaPhotos();
-            } else {
-                self.alert('Photos not found');
-            }
-        });
-
-        $('.import-instagram-cancel').click(function () {
-            $('.import-insta-panel').hide('fast');
-        });
-    }
-
-    uploadAllInstaPhotos() {
-        let self = this;
-        let photos = $('img[data-type=insta-photo]');
-        if (photos.length) {
-            let currentElement = $(photos[0]);
-            let src = currentElement.attr('src');
-            console.log(src);
-            self.swarm.axios.request({
-                url: src,
-                method: 'GET',
-                responseType: 'blob',
-            }).then(function (response) {
-                console.log('Photo downloaded');
-                currentElement.attr('data-type', '');
-                currentElement.addClass('photo-uploaded-insta');
-                console.log('album id ' + self.currentPhotoAlbum);
-                self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId, response.data).then(function (data) {
-                    console.log('Photo uploaded');
-                    console.log(data);
-                    self.currentPhotosForAlbum.push({
-                        file: data.fileName,
-                        description: ""
-                    });
-                    self.photoAlbumPhotoId++;
-                    self.onAfterHashChange(data.response, true);
-                    self.uploadAllInstaPhotos();
-                });
-            });
-        } else {
-            self.blog.createPhotoAlbum(self.currentPhotoAlbum, 'Insta', '', self.currentPhotosForAlbum).then(function (response) {
-                console.log('album created');
-                console.log(response.data);
-                self.onAfterHashChange(response.data);
-                $('#newAlbumModal').modal('hide');
-                self.alert('Album created!', [
-                    '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum from Instagram!" data-id="' + self.currentPhotoAlbum + '">Share</button>'
-                ]);
-            });
-        }
-    }
-
-    goToHash(userHash) {
-        let self = this;
-        //swarm.applicationHash = userHash;
-        //localStorage.setItem('applicationHash', userHash);
-        self.onAfterHashChange(userHash);
-        /*showUploadModal();
-        // todo check it before load
-        console.log(userHash);
-        return blog.getProfile(userHash)
-            .then(function (response) {
-                console.log('ok, hide');
-                setTimeout(function () {
-                    $('#loadModal').modal('hide');
-                }, 1000);
-
-                console.log(response.data);
-                updateInfo(response.data);
-            })
-            .catch(function (error) {
-                // handle error
-                console.log(error);
-                console.log('Some error happen');
-            })*/
-    }
-
-    youtube_parser(url) {
-        var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
-        var match = url.match(regExp);
-        return (match && match[7].length == 11) ? match[7] : false;
-    }
-
-    updateInfo(data) {
-        let self = this;
-        self.blog.myProfile = data;
-        $('#firstName').text(data.first_name);
-        $('#lastName').text(data.last_name);
-        $('#birthDate').text(data.birth_date);
-        if (data.location && data.location.name) {
-            $('#locationName').text(data.location.name);
-        }
-
-        if (data.photo && data.photo.original) {
-            let url = self.swarm.getFullUrl(data.photo.original);
-            $('#bigAvatar').attr('src', url);
-        }
-
-        $('#about').text(data.about);
-        self.lastLoadedPost = 0;
-        $('#userPosts').html('');
-        $('#iFollowUsers').html('');
-        if (data.last_post_id > 0) {
-            self.loadPosts();
-        } else {
-            $('#loadMore').hide();
-        }
-
-        self.loadIFollow();
-        self.loadPhotoAlbums(3, 'desc');
-        self.loadVideoPlaylists(3, 'desc');
-    }
-
-    loadPhotoAlbums(limit, sorting) {
-        let self = this;
-        // todo move limits and sorting to api
-        limit = limit || 'all';
-        sorting = sorting || 'asc';
-        let data = self.blog.myProfile;
-        if (data.last_photoalbum_id && data.last_photoalbum_id > 0) {
-            let photoAlbums = $('#photoAlbums');
-            photoAlbums.html('');
-            self.blog.getAlbumsInfo().then(function (response) {
-                let data = response.data;
-                if (sorting === 'desc') {
-                    data.reverse();
-                }
-
-                let i = 0;
-                data.forEach(function (v) {
-                    if (limit !== 'all' && i >= limit) {
-                        return;
-                    }
-
-                    let id = v.id;
-                    photoAlbums.append('<li class="list-inline-item col-sm-4 photoalbum-item">' +
-                        '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img class="photoalbum-img" src="' + self.swarm.getFullUrl('social/photoalbum/' + id + '/1.jpg') + '" ></a></li>');
-                    i++;
-                });
-            }).catch(function (error) {
-
-            });
-        }
-    }
-
-    loadVideoPlaylists(limit, sorting) {
-        let self = this;
-        // todo move limits and sorting to api
-        limit = limit || 'all';
-        sorting = sorting || 'asc';
-        let data = self.blog.myProfile;
-        if (data.last_videoalbum_id && data.last_videoalbum_id > 0) {
-            let videoPlaylists = $('#videoPlaylists');
-            videoPlaylists.html('');
-            self.blog.getVideoAlbumsInfo().then(function (response) {
-                let data = response.data;
-                console.log(data);
-                if (sorting === 'desc') {
-                    data.reverse();
-                }
-
-                let i = 0;
-                data.forEach(function (v) {
-                    if (limit !== 'all' && i >= limit) {
-                        return;
-                    }
-
-                    let id = v.id;
-                    if (v.type === "youtube") {
-                        videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                            '<a href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
-                    } else {
-                        videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                            '<a data-type="video" href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
-                    }
-
-
-                    i++;
-                });
-            }).catch(function () {
-
-            });
-        }
-    }
-
-    loadIFollow() {
-        let self = this;
-        let data = self.blog.myProfile;
-        let iFollowBlock = $('#iFollowUsers');
-        if ('i_follow' in data && data.i_follow.length) {
-            data.i_follow.forEach(function (v) {
-                //iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
-                iFollowBlock.append('<li class="i-follow-li">' +
-                    //'<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
-                    '<a onclick="return false;" href="' + self.swarm.getFullUrl('', v) + '" class="load-profile--" data-profile-id="' + v + '"><img src="' + self.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 30px"></a> <a href="#" onclick="return false;"><span style="margin-left: 8px">iii aaa</span></a></li>');
-            });
-        }
-    }
-
-    loadPosts() {
-        let self = this;
-        let maxReceivedPosts = 10;
-        let data = self.blog.myProfile;
-        let meetPostId = data.last_post_id - self.lastLoadedPost;
-        for (let i = meetPostId; i > meetPostId - maxReceivedPosts && i > 0; i--) {
-            self.addPostTemplate(i);
-            self.lastLoadedPost++;
-
-            if (self.lastLoadedPost >= data.last_post_id) {
-                $('#loadMore').hide();
-            } else {
-                $('#loadMore').show();
-            }
-
-            self.blog.getPost(i, self.swarm.applicationHash).then(function (response) {
-                let data = response.data;
-                self.addPostByData(data);
-            });
-        }
-    }
-
-    addPostTemplate(id, addToTop) {
-        let userPostTemplate = $('#userPost');
-        let userPosts = $('#userPosts');
-        let newPost = userPostTemplate.clone().attr('id', 'userPost' + id).attr('style', '').attr('data-id', id);
-        newPost.find('.description').text('Loading');
-        if (addToTop) {
-            userPosts.prepend(newPost);
-        } else {
-            userPosts.append(newPost);
-        }
-
-        return newPost;
-    }
-
-    addPostByData(data) {
-        let self = this;
-        let userPost = $('#userPost' + data.id);
-        if (userPost.length <= 0) {
-            userPost = self.addPostTemplate(data.id, true);
-        }
-
-        if (data.is_deleted) {
-            userPost.remove();
-
-            return;
-        }
-
-        userPost.find('.description').text(data.description);
-        userPost.find('.edit-post-block textarea').val(data.description);
-        userPost.find('.delete-post').attr('data-id', data.id);
-        userPost.find('.edit-post').attr('data-id', data.id);
-        userPost.find('.save-post').attr('data-id', data.id);
-        if (data.attachments && data.attachments.length) {
-            let youtubeAttachment = $('#wallYoutubeAttachment');
-            let photoAttachment = $('#photoAttachment');
-            let videoAttachment = $('#videoAttachment');
-            let photoalbumAttachment = $('#photoalbumAttachment');
-            let videoalbumAttachment = $('#videoalbumAttachment');
-            data.attachments.forEach(function (v) {
-                if (v.type === "youtube") {
-                    let videoId = youtube_parser(v.url);
-                    userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
-                        '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
-                        '</div>'));
-                } else if (v.type === "photo") {
-                    userPost.append(photoAttachment.clone().attr('style', '').html('<img src="' + self.swarm.getFullUrl(v.url) + '">'));
-                } else if (v.type === "video") {
-                    // todo move to html
-                    userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
-                } else if (v.type === "photoalbum") {
-                    // todo move to html
-                    userPost.append(photoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1.jpg") + '"></a></li>'));
-                } else if (v.type === "videoalbum") {
-                    // todo move to html
-                    let info;
-                    let cover;
-
-                    try {
-                        info = JSON.parse(v.info);
-                        if (info.type === "video") {
-                            cover = self.swarm.getFullUrl(info.cover_file);
-                        } else {
-                            cover = info.cover_file;
-                        }
-                    } catch (ex) {
-                        cover = self.swarm.getFullUrl('img/video-cover.jpg');
-                    }
-
-                    userPost.append(videoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 videoalbum-item post-videoalbum-item"><a href="#" class="load-videoalbum" data-album-id="' + v.url + '"><img class="videoalbum-img" src="' + cover + '"></a></li>'));
-                }
-            });
-        }
-    }
-
-    alert(message, buttons) {
-        let messageModal = $('#messageModal');
-        $('#messageBody').html(message);
-        messageModal.modal('show');
-        let btns = messageModal.find('.additional-buttons');
-        btns.html('');
-        if (buttons && buttons.length) {
-            buttons.forEach(function (v) {
-                btns.append(v);
-            });
-        }
-    }
-}
-
-module.exports = Main;
-},{}],6:[function(require,module,exports){
-class Photoalbum {
-    constructor() {
-        this.photoalbumInfo = {
-            files: [],
-            uploadedInfo: [],
-            uploadedId: 0
-        };
-
-        // todo what the correct form for init?
-        this.init();
-    }
-
-    init() {
-        let self = this;
-        $('.upload-photos, .upload-photos-preview').click(function (e) {
-            e.preventDefault();
-
-            let input = $('#input-upload-photo-album');
-            input.click();
-        });
-
-        $('#input-upload-photo-album').on('change', function () {
-            if (this.files && this.files.length > 0) {
-                this.photoalbumInfo.files = Array.from(this.files);
-                this.photoalbumInfo.uploadedInfo = [];
-                this.photoalbumInfo.uploadedId = 1;
-                self.sendNextFile();
-            }
-        });
-
-        $('.show-all-photoalbums').click(function (e) {
-            e.preventDefault();
-            $('#showAllPhotoalbumsModal').modal('show');
-        });
-    }
-
-    sendNextFile() {
-        let self = this;
-        if (this.photoalbumInfo.files.length <= 0) {
-            return;
-        }
-
-        let currentFile = this.photoalbumInfo.files.shift();
-        let progressPanel = $('#progressPanelAlbum');
-        let postProgress = $('#postProgressAlbum');
-        progressPanel.show();
-        let setProgress = function (val) {
-            postProgress.css('width', val + '%').attr('aria-valuenow', val);
-        };
-        let reader = new FileReader();
-        reader.onload = function (e) {
-            blog.uploadPhotoToAlbum(blog.myProfile.last_photoalbum_id + 1, this.photoalbumInfo.uploadedId, e.target.result, function (progress) {
-                let onePercent = progress.total / 100;
-                let currentPercent = progress.loaded / onePercent;
-                setProgress(currentPercent);
-            }).then(function (data) {
-                console.log(data);
-                self.photoalbumInfo.uploadedId++;
-                onAfterHashChange(data.response);
-                progressPanel.hide();
-                setProgress(0);
-                self.photoalbumInfo.uploadedInfo.push({
-                    file: data.fileName,
-                    description: ""
-                });
-
-                if (self.photoalbumInfo.files.length > 0) {
-                    self.sendNextFile();
-                } else {
-                    let newAlbumId = blog.myProfile.last_photoalbum_id + 1;
-                    blog.createPhotoAlbum(newAlbumId, 'Uploaded', '', self.photoalbumInfo.uploadedInfo).then(function (response) {
-                        console.log('album created');
-                        console.log(response.data);
-                        onAfterHashChange(response.data);
-                        $('#newAlbumModal').modal('hide');
-                        alert('Album created!', [
-                            '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + newAlbumId + '">Share</button>'
-                        ]);
-                    });
-                }
-            });
-        };
-
-        reader.readAsArrayBuffer(currentFile);
-    }
-}
-
-module.exports = Photoalbum;
-},{}],7:[function(require,module,exports){
-class StartNow {
-    constructor() {
-        this.init();
-    }
-
-    init() {
-        let self = this;
-        $('.btn-start-now').click(function (e) {
-            e.preventDefault();
-            $('#userRegistration').fadeOut('slow');
-            $('#importData').show('fast');
-        });
-
-        $('.btn-create-empty').click(function (e) {
-            e.preventDefault();
-            $('.edit-page-info').click();
-            self.showContent();
-
-        });
-
-        $('.btn-import-instagram').click(function (e) {
-            e.preventDefault();
-            $('.show-insta-panel').click();
-            $('.upload-photos').hide();
-            $('.show-insta-panel').hide();
-            $('.upload-all-insta').hide();
-            $('#newAlbumModal').modal('show');
-
-            self.showContent();
-        });
-    }
-
-    showContent() {
-        $('#importData').hide('fast');
-        $('#userRegistration').hide('fast');
-        $('#userInfo').show();
-    }
-}
-
-module.exports = StartNow;
-},{}],8:[function(require,module,exports){
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 class SwarmApi {
     constructor(apiUrl, applicationHash) {
         this.isWeb = typeof window !== undefined;
@@ -2653,226 +160,7 @@ class SwarmApi {
 }
 
 module.exports = SwarmApi;
-},{"axios":12}],9:[function(require,module,exports){
-class VKImport {
-    constructor(main) {
-        this.vkSettings = {
-            vkPhotoUrls: [],
-            photosForAlbum: [],
-            uploadedPhotoId: 1,
-            currentPhotoAlbum: 0
-        };
-        this.main = main;
-        this.init()
-    }
-
-    init() {
-        let self = this;
-        $('.btn-profile-import-vk').click(function (e) {
-            e.preventDefault();
-            $('#receiveVkPhotos').text('');
-            $('#importFromVKModal').modal('show');
-        });
-
-        $('.vk-list').on('click', '.btn-import-vk-album', function (e) {
-            e.preventDefault();
-            $(this).attr('disabled', 'disabled');
-            let albumId = $(this).attr('data-album-id');
-            let ownerId = $(this).attr('data-owner-id');
-            VK.Api.call('photos.get', {owner_id: ownerId, album_id: albumId, v: '5.80'}, function (r) {
-                console.log(r);
-                if (r.response) {
-                    let items = r.response.items;
-                    self.vkSettings.vkPhotoUrls = [];
-                    self.vkSettings.photosForAlbum = [];
-                    self.vkSettings.uploadedPhotoId = 1;
-                    self.vkSettings.currentPhotoAlbum = self.main.blog.myProfile.last_photoalbum_id + 1;
-                    items.forEach(function (v) {
-                        let url = v.sizes[v.sizes.length - 1].url;
-                        self.vkSettings.vkPhotoUrls.push(url);
-                    });
-                    self.importNextVkPhoto();
-                }
-            });
-        });
-    }
-
-    importNextVkPhoto() {
-        let self = this;
-        let textHolder = $('#receiveVkPhotos');
-        if (self.vkSettings.uploadedPhotoId >= self.vkSettings.vkPhotoUrls.length) {
-            textHolder.text('All photos imported!');
-
-            self.main.blog.createPhotoAlbum(self.vkSettings.currentPhotoAlbum, 'VK', '', self.vkSettings.photosForAlbum).then(function (response) {
-                console.log('album created');
-                console.log(response.data);
-                self.main.onAfterHashChange(response.data);
-                $('#importFromVKModal').modal('hide');
-                self.main.alert('Album created!', [
-                    '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum from Instagram!" data-id="' + self.vkSettings.currentPhotoAlbum + '">Share</button>'
-                ]);
-            });
-
-            return;
-        }
-
-        textHolder.text('Receiving ' + self.vkSettings.uploadedPhotoId + '/' + self.vkSettings.vkPhotoUrls.length + ' photo..');
-        let url = self.vkSettings.vkPhotoUrls[self.vkSettings.uploadedPhotoId - 1];
-        console.log(url);
-        self.main.swarm.axios.request({
-            url: url,
-            method: 'GET',
-            responseType: 'blob',
-        }).then(function (response) {
-            console.log('VK photo downloaded ');
-            //console.log(response);
-            self.main.blog.uploadPhotoToAlbum(self.vkSettings.currentPhotoAlbum, self.vkSettings.uploadedPhotoId, response.data).then(function (data) {
-                console.log('Photo uploaded');
-                console.log(data);
-                self.vkSettings.photosForAlbum.push({
-                    file: data.fileName,
-                    description: ""
-                });
-                self.vkSettings.uploadedPhotoId++;
-                self.main.onAfterHashChange(data.response, true);
-                self.importNextVkPhoto();
-            });
-        });
-    }
-
-    static vkAuthInfo(response) {
-        if (response.session) {
-            console.log(response);
-            let id = response.session.mid;
-            console.log(id);
-            let vkContent = $('.vk-list');
-            VK.Api.call('photos.getAlbums', {owner_id: id, photo_sizes: 1, need_covers: '1', v: '5.80'}, function (r) {
-                console.log(r);
-                if (r.response) {
-                    let albums = r.response.items;
-                    vkContent.html();
-                    albums.forEach(function (v) {
-                        let thumb = v.sizes.length >= 4 ? v.sizes[3].src : v.sizes[v.sizes.length - 1].src;
-                        vkContent.append('<li class="list-inline-item col-sm-3">' +
-                            '<p><img class="vk-album-img" src="' + thumb + '"></p>' +
-                            '<p><button type="button" class="btn btn-primary btn-sm btn-import-vk-album" data-album-id="' + v.id + '" data-owner-id="' + v.owner_id + '">Import</button></p>' +
-                            '</li>');
-                    });
-                }
-            });
-        } else {
-            alert("Not authorized");
-        }
-    }
-}
-
-module.exports = VKImport;
-},{}],10:[function(require,module,exports){
-class Videoplaylist {
-    constructor(main) {
-        this.main = main;
-        this.videoInfo = {
-            files: [],
-            uploadedInfo: [],
-            uploadedId: 0
-        };
-
-        this.initVideoPlaylist();
-    }
-
-    initVideoPlaylist() {
-        let self = this;
-        $('.upload-videos-preview').click(function (e) {
-            e.preventDefault();
-
-            $('#newVideoModal').modal('show');
-        });
-
-        $('.upload-videos').click(function (e) {
-            e.preventDefault();
-
-            let input = $('#input-upload-video-album');
-            input.click();
-        });
-
-        $('#input-upload-video-album').on('change', function () {
-            if (this.files && this.files.length > 0) {
-                self.videoInfo.files = Array.from(this.files);
-                self.videoInfo.uploadedInfo = [];
-                self.videoInfo.uploadedId = 1;
-                self.sendNextVideoFile();
-            }
-        });
-
-        $('.show-all-videoalbums').click(function (e) {
-            e.preventDefault();
-            //$('#showAllPhotoalbumsModal').modal('show');
-        });
-    }
-
-    sendNextVideoFile() {
-        let self = this;
-
-        if (self.videoInfo.files.length <= 0) {
-            return;
-        }
-
-        let currentFile = self.videoInfo.files.shift();
-        let contentType = currentFile.type;
-        let progressPanel = $('#progressPanelVideoAlbum');
-        let postProgress = $('#postProgressVideoAlbum');
-        progressPanel.show();
-        let setProgress = function (val) {
-            postProgress.css('width', val + '%').attr('aria-valuenow', val);
-        };
-        let reader = new FileReader();
-        reader.onload = function (e) {
-            self.main.blog.uploadVideoToAlbum(self.main.blog.myProfile.last_photoalbum_id + 1, self.videoInfo.uploadedId, e.target.result, contentType, function (progress) {
-                let onePercent = progress.total / 100;
-                let currentPercent = progress.loaded / onePercent;
-                setProgress(currentPercent);
-            }).then(function (data) {
-                console.log(data);
-                self.main.onAfterHashChange(data.response);
-                progressPanel.hide();
-                setProgress(0);
-                self.videoInfo.uploadedInfo.push({
-                    id: self.videoInfo.uploadedId,
-                    name: "",
-                    description: "",
-                    cover_file: "img/video-cover.jpg",
-                    file: data.fileName,
-                    type: "video",
-                });
-                self.videoInfo.uploadedId++;
-                if (self.videoInfo.files.length > 0) {
-                    self.sendNextVideoFile();
-                } else {
-                    let newAlbumId = self.main.blog.myProfile.last_videoalbum_id + 1;
-                    self.main.blog.createVideoAlbum(newAlbumId, 'Uploaded', '', self.videoInfo.uploadedInfo).then(function (preResponse) {
-                        let info = preResponse.info;
-                        preResponse.response.then(function (response) {
-                            console.log('album created');
-                            console.log(response);
-                            self.main.onAfterHashChange(response.data);
-                            $('#newVideoModal').modal('hide');
-                            self.main.alert('Video playlist created!', [
-                                '<button type="button" class="btn btn-success btn-share-item" data-type="videoalbum" data-info=\'' + JSON.stringify(info) + '\' data-message="Just created new video playlist!" data-id="' + newAlbumId + '">Share</button>'
-                            ]);
-                        });
-
-                    });
-                }
-            });
-        };
-
-        reader.readAsArrayBuffer(currentFile);
-    }
-}
-
-module.exports = Videoplaylist;
-},{}],11:[function(require,module,exports){
-/* All scripts for production */
+},{"axios":3}],2:[function(require,module,exports){
 window.$ = require('jquery');
 window.jQuery = require('jquery');
 window.SwarmApi = require('./SwarmApi');
@@ -2880,32 +168,9 @@ window.EthereumENS = require('ethereum-ens');
 window.Cropper = require('cropperjs');
 require('bootstrap');
 require('ekko-lightbox');
-
-let Main = require('./Main');
-window.Blog = require('./Blog.js');
-let Photoalbum = require('./Photoalbum.js');
-let VKImport = require('./VKImport.js');
-let Videoplaylist = require('./Videoplaylist.js');
-let EnsUtility = require('./EnsUtility.js');
-let FacebookImport = require('./FacebookImport.js');
-let StartNow = require('./StartNow.js');
-//let YoutubeImport = require('./YoutubeImport.js');
-let ImportButtons = require('./ImportButtons.js');
-
-/* todo use one init section for dev and production */
-//window.youtubeImport = new YoutubeImport();
-let myMain = new Main();
-new Photoalbum();
-window.vkImport = new VKImport(myMain);
-new Videoplaylist(myMain);
-new EnsUtility(myMain);
-new FacebookImport();
-new StartNow();
-new ImportButtons(myMain);
-
-},{"./Blog.js":1,"./EnsUtility.js":2,"./FacebookImport.js":3,"./ImportButtons.js":4,"./Main":5,"./Photoalbum.js":6,"./StartNow.js":7,"./SwarmApi":8,"./VKImport.js":9,"./Videoplaylist.js":10,"bootstrap":39,"cropperjs":40,"ekko-lightbox":75,"ethereum-ens":77,"jquery":81}],12:[function(require,module,exports){
+},{"./SwarmApi":1,"bootstrap":30,"cropperjs":31,"ekko-lightbox":66,"ethereum-ens":68,"jquery":72}],3:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":14}],13:[function(require,module,exports){
+},{"./lib/axios":5}],4:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3089,7 +354,7 @@ module.exports = function xhrAdapter(config) {
 };
 
 }).call(this,require('_process'))
-},{"../core/createError":20,"./../core/settle":23,"./../helpers/btoa":27,"./../helpers/buildURL":28,"./../helpers/cookies":30,"./../helpers/isURLSameOrigin":32,"./../helpers/parseHeaders":34,"./../utils":36,"_process":159}],14:[function(require,module,exports){
+},{"../core/createError":11,"./../core/settle":14,"./../helpers/btoa":18,"./../helpers/buildURL":19,"./../helpers/cookies":21,"./../helpers/isURLSameOrigin":23,"./../helpers/parseHeaders":25,"./../utils":27,"_process":150}],5:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -3143,7 +408,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":15,"./cancel/CancelToken":16,"./cancel/isCancel":17,"./core/Axios":18,"./defaults":25,"./helpers/bind":26,"./helpers/spread":35,"./utils":36}],15:[function(require,module,exports){
+},{"./cancel/Cancel":6,"./cancel/CancelToken":7,"./cancel/isCancel":8,"./core/Axios":9,"./defaults":16,"./helpers/bind":17,"./helpers/spread":26,"./utils":27}],6:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3164,7 +429,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],16:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -3223,14 +488,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":15}],17:[function(require,module,exports){
+},{"./Cancel":6}],8:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],18:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var defaults = require('./../defaults');
@@ -3311,7 +576,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"./../defaults":25,"./../utils":36,"./InterceptorManager":19,"./dispatchRequest":21}],19:[function(require,module,exports){
+},{"./../defaults":16,"./../utils":27,"./InterceptorManager":10,"./dispatchRequest":12}],10:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3365,7 +630,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":36}],20:[function(require,module,exports){
+},{"./../utils":27}],11:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -3385,7 +650,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":22}],21:[function(require,module,exports){
+},{"./enhanceError":13}],12:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3473,7 +738,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":17,"../defaults":25,"./../helpers/combineURLs":29,"./../helpers/isAbsoluteURL":31,"./../utils":36,"./transformData":24}],22:[function(require,module,exports){
+},{"../cancel/isCancel":8,"../defaults":16,"./../helpers/combineURLs":20,"./../helpers/isAbsoluteURL":22,"./../utils":27,"./transformData":15}],13:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3496,7 +761,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],23:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -3524,7 +789,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":20}],24:[function(require,module,exports){
+},{"./createError":11}],15:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3546,7 +811,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":36}],25:[function(require,module,exports){
+},{"./../utils":27}],16:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3646,7 +911,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this,require('_process'))
-},{"./adapters/http":13,"./adapters/xhr":13,"./helpers/normalizeHeaderName":33,"./utils":36,"_process":159}],26:[function(require,module,exports){
+},{"./adapters/http":4,"./adapters/xhr":4,"./helpers/normalizeHeaderName":24,"./utils":27,"_process":150}],17:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -3659,7 +924,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],27:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 // btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
@@ -3697,7 +962,7 @@ function btoa(input) {
 
 module.exports = btoa;
 
-},{}],28:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3765,7 +1030,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":36}],29:[function(require,module,exports){
+},{"./../utils":27}],20:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3781,7 +1046,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],30:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3836,7 +1101,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":36}],31:[function(require,module,exports){
+},{"./../utils":27}],22:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3852,7 +1117,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],32:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3922,7 +1187,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":36}],33:[function(require,module,exports){
+},{"./../utils":27}],24:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -3936,7 +1201,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":36}],34:[function(require,module,exports){
+},{"../utils":27}],25:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3991,7 +1256,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":36}],35:[function(require,module,exports){
+},{"./../utils":27}],26:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4020,7 +1285,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],36:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -4325,7 +1590,7 @@ module.exports = {
   trim: trim
 };
 
-},{"./helpers/bind":26,"is-buffer":80}],37:[function(require,module,exports){
+},{"./helpers/bind":17,"is-buffer":71}],28:[function(require,module,exports){
 /*! bignumber.js v4.1.0 https://github.com/MikeMcl/bignumber.js/LICENCE */
 
 ;(function (globalObj) {
@@ -7061,7 +4326,7 @@ module.exports = {
     }
 })(this);
 
-},{}],38:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 (function (process,global,setImmediate){
 /* @preserve
  * The MIT License (MIT)
@@ -12687,7 +9952,7 @@ module.exports = ret;
 },{"./es5":13}]},{},[4])(4)
 });                    ;if (typeof window !== 'undefined' && window !== null) {                               window.P = window.Promise;                                                     } else if (typeof self !== 'undefined' && self !== null) {                             self.P = self.Promise;                                                         }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":159,"timers":161}],39:[function(require,module,exports){
+},{"_process":150,"timers":152}],30:[function(require,module,exports){
 /*!
   * Bootstrap v4.1.3 (https://getbootstrap.com/)
   * Copyright 2011-2018 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
@@ -16633,7 +13898,7 @@ module.exports = ret;
 })));
 
 
-},{"jquery":81,"popper.js":99}],40:[function(require,module,exports){
+},{"jquery":72,"popper.js":90}],31:[function(require,module,exports){
 /*!
  * Cropper.js v1.4.1
  * https://fengyuanchen.github.io/cropperjs
@@ -20353,7 +17618,7 @@ assign(Cropper.prototype, render, preview, events, handlers, change, methods);
 
 module.exports = Cropper;
 
-},{}],41:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -20586,7 +17851,7 @@ module.exports = Cropper;
 	return CryptoJS.AES;
 
 }));
-},{"./cipher-core":42,"./core":43,"./enc-base64":44,"./evpkdf":46,"./md5":51}],42:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34,"./enc-base64":35,"./evpkdf":37,"./md5":42}],33:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -21462,7 +18727,7 @@ module.exports = Cropper;
 
 
 }));
-},{"./core":43}],43:[function(require,module,exports){
+},{"./core":34}],34:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22223,7 +19488,7 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{}],44:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22359,7 +19624,7 @@ module.exports = Cropper;
 	return CryptoJS.enc.Base64;
 
 }));
-},{"./core":43}],45:[function(require,module,exports){
+},{"./core":34}],36:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22509,7 +19774,7 @@ module.exports = Cropper;
 	return CryptoJS.enc.Utf16;
 
 }));
-},{"./core":43}],46:[function(require,module,exports){
+},{"./core":34}],37:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22642,7 +19907,7 @@ module.exports = Cropper;
 	return CryptoJS.EvpKDF;
 
 }));
-},{"./core":43,"./hmac":48,"./sha1":67}],47:[function(require,module,exports){
+},{"./core":34,"./hmac":39,"./sha1":58}],38:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22709,7 +19974,7 @@ module.exports = Cropper;
 	return CryptoJS.format.Hex;
 
 }));
-},{"./cipher-core":42,"./core":43}],48:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],39:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22853,7 +20118,7 @@ module.exports = Cropper;
 
 
 }));
-},{"./core":43}],49:[function(require,module,exports){
+},{"./core":34}],40:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22872,7 +20137,7 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{"./aes":41,"./cipher-core":42,"./core":43,"./enc-base64":44,"./enc-utf16":45,"./evpkdf":46,"./format-hex":47,"./hmac":48,"./lib-typedarrays":50,"./md5":51,"./mode-cfb":52,"./mode-ctr":54,"./mode-ctr-gladman":53,"./mode-ecb":55,"./mode-ofb":56,"./pad-ansix923":57,"./pad-iso10126":58,"./pad-iso97971":59,"./pad-nopadding":60,"./pad-zeropadding":61,"./pbkdf2":62,"./rabbit":64,"./rabbit-legacy":63,"./rc4":65,"./ripemd160":66,"./sha1":67,"./sha224":68,"./sha256":69,"./sha3":70,"./sha384":71,"./sha512":72,"./tripledes":73,"./x64-core":74}],50:[function(require,module,exports){
+},{"./aes":32,"./cipher-core":33,"./core":34,"./enc-base64":35,"./enc-utf16":36,"./evpkdf":37,"./format-hex":38,"./hmac":39,"./lib-typedarrays":41,"./md5":42,"./mode-cfb":43,"./mode-ctr":45,"./mode-ctr-gladman":44,"./mode-ecb":46,"./mode-ofb":47,"./pad-ansix923":48,"./pad-iso10126":49,"./pad-iso97971":50,"./pad-nopadding":51,"./pad-zeropadding":52,"./pbkdf2":53,"./rabbit":55,"./rabbit-legacy":54,"./rc4":56,"./ripemd160":57,"./sha1":58,"./sha224":59,"./sha256":60,"./sha3":61,"./sha384":62,"./sha512":63,"./tripledes":64,"./x64-core":65}],41:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22949,7 +20214,7 @@ module.exports = Cropper;
 	return CryptoJS.lib.WordArray;
 
 }));
-},{"./core":43}],51:[function(require,module,exports){
+},{"./core":34}],42:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23218,7 +20483,7 @@ module.exports = Cropper;
 	return CryptoJS.MD5;
 
 }));
-},{"./core":43}],52:[function(require,module,exports){
+},{"./core":34}],43:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23297,7 +20562,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CFB;
 
 }));
-},{"./cipher-core":42,"./core":43}],53:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],44:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23414,7 +20679,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CTRGladman;
 
 }));
-},{"./cipher-core":42,"./core":43}],54:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],45:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23473,7 +20738,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CTR;
 
 }));
-},{"./cipher-core":42,"./core":43}],55:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],46:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23514,7 +20779,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.ECB;
 
 }));
-},{"./cipher-core":42,"./core":43}],56:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],47:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23569,7 +20834,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.OFB;
 
 }));
-},{"./cipher-core":42,"./core":43}],57:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],48:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23619,7 +20884,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Ansix923;
 
 }));
-},{"./cipher-core":42,"./core":43}],58:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],49:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23664,7 +20929,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Iso10126;
 
 }));
-},{"./cipher-core":42,"./core":43}],59:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],50:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23705,7 +20970,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Iso97971;
 
 }));
-},{"./cipher-core":42,"./core":43}],60:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],51:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23736,7 +21001,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.NoPadding;
 
 }));
-},{"./cipher-core":42,"./core":43}],61:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],52:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23782,7 +21047,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.ZeroPadding;
 
 }));
-},{"./cipher-core":42,"./core":43}],62:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34}],53:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23928,7 +21193,7 @@ module.exports = Cropper;
 	return CryptoJS.PBKDF2;
 
 }));
-},{"./core":43,"./hmac":48,"./sha1":67}],63:[function(require,module,exports){
+},{"./core":34,"./hmac":39,"./sha1":58}],54:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24119,7 +21384,7 @@ module.exports = Cropper;
 	return CryptoJS.RabbitLegacy;
 
 }));
-},{"./cipher-core":42,"./core":43,"./enc-base64":44,"./evpkdf":46,"./md5":51}],64:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34,"./enc-base64":35,"./evpkdf":37,"./md5":42}],55:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24312,7 +21577,7 @@ module.exports = Cropper;
 	return CryptoJS.Rabbit;
 
 }));
-},{"./cipher-core":42,"./core":43,"./enc-base64":44,"./evpkdf":46,"./md5":51}],65:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34,"./enc-base64":35,"./evpkdf":37,"./md5":42}],56:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24452,7 +21717,7 @@ module.exports = Cropper;
 	return CryptoJS.RC4;
 
 }));
-},{"./cipher-core":42,"./core":43,"./enc-base64":44,"./evpkdf":46,"./md5":51}],66:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34,"./enc-base64":35,"./evpkdf":37,"./md5":42}],57:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24720,7 +21985,7 @@ module.exports = Cropper;
 	return CryptoJS.RIPEMD160;
 
 }));
-},{"./core":43}],67:[function(require,module,exports){
+},{"./core":34}],58:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24871,7 +22136,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA1;
 
 }));
-},{"./core":43}],68:[function(require,module,exports){
+},{"./core":34}],59:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24952,7 +22217,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA224;
 
 }));
-},{"./core":43,"./sha256":69}],69:[function(require,module,exports){
+},{"./core":34,"./sha256":60}],60:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25152,7 +22417,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA256;
 
 }));
-},{"./core":43}],70:[function(require,module,exports){
+},{"./core":34}],61:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25476,7 +22741,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA3;
 
 }));
-},{"./core":43,"./x64-core":74}],71:[function(require,module,exports){
+},{"./core":34,"./x64-core":65}],62:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25560,7 +22825,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA384;
 
 }));
-},{"./core":43,"./sha512":72,"./x64-core":74}],72:[function(require,module,exports){
+},{"./core":34,"./sha512":63,"./x64-core":65}],63:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25884,7 +23149,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA512;
 
 }));
-},{"./core":43,"./x64-core":74}],73:[function(require,module,exports){
+},{"./core":34,"./x64-core":65}],64:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -26655,7 +23920,7 @@ module.exports = Cropper;
 	return CryptoJS.TripleDES;
 
 }));
-},{"./cipher-core":42,"./core":43,"./enc-base64":44,"./evpkdf":46,"./md5":51}],74:[function(require,module,exports){
+},{"./cipher-core":33,"./core":34,"./enc-base64":35,"./evpkdf":37,"./md5":42}],65:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -26960,10 +24225,10 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{"./core":43}],75:[function(require,module,exports){
+},{"./core":34}],66:[function(require,module,exports){
 +function(a){"use strict";function b(a,b){if(!(a instanceof b))throw new TypeError("Cannot call a class as a function")}var c=function(){function a(a,b){for(var c=0;c<b.length;c++){var d=b[c];d.enumerable=d.enumerable||!1,d.configurable=!0,"value"in d&&(d.writable=!0),Object.defineProperty(a,d.key,d)}}return function(b,c,d){return c&&a(b.prototype,c),d&&a(b,d),b}}();(function(a){var d="ekkoLightbox",e=a.fn[d],f={title:"",footer:"",maxWidth:9999,maxHeight:9999,showArrows:!0,wrapping:!0,type:null,alwaysShowClose:!1,loadingMessage:'<div class="ekko-lightbox-loader"><div><div></div><div></div></div></div>',leftArrow:"<span>&#10094;</span>",rightArrow:"<span>&#10095;</span>",strings:{close:"Close",fail:"Failed to load image:",type:"Could not detect remote target type. Force the type using data-type"},doc:document,onShow:function(){},onShown:function(){},onHide:function(){},onHidden:function(){},onNavigate:function(){},onContentLoaded:function(){}},g=function(){function d(c,e){var g=this;b(this,d),this._config=a.extend({},f,e),this._$modalArrows=null,this._galleryIndex=0,this._galleryName=null,this._padding=null,this._border=null,this._titleIsShown=!1,this._footerIsShown=!1,this._wantedWidth=0,this._wantedHeight=0,this._touchstartX=0,this._touchendX=0,this._modalId="ekkoLightbox-"+Math.floor(1e3*Math.random()+1),this._$element=c instanceof jQuery?c:a(c),this._isBootstrap3=3==a.fn.modal.Constructor.VERSION[0];var h='<h4 class="modal-title">'+(this._config.title||"&nbsp;")+"</h4>",i='<button type="button" class="close" data-dismiss="modal" aria-label="'+this._config.strings.close+'"><span aria-hidden="true">&times;</span></button>',j='<div class="modal-header'+(this._config.title||this._config.alwaysShowClose?"":" hide")+'">'+(this._isBootstrap3?i+h:h+i)+"</div>",k='<div class="modal-footer'+(this._config.footer?"":" hide")+'">'+(this._config.footer||"&nbsp;")+"</div>",l='<div class="modal-body"><div class="ekko-lightbox-container"><div class="ekko-lightbox-item fade in show"></div><div class="ekko-lightbox-item fade"></div></div></div>',m='<div class="modal-dialog" role="document"><div class="modal-content">'+j+l+k+"</div></div>";a(this._config.doc.body).append('<div id="'+this._modalId+'" class="ekko-lightbox modal fade" tabindex="-1" tabindex="-1" role="dialog" aria-hidden="true">'+m+"</div>"),this._$modal=a("#"+this._modalId,this._config.doc),this._$modalDialog=this._$modal.find(".modal-dialog").first(),this._$modalContent=this._$modal.find(".modal-content").first(),this._$modalBody=this._$modal.find(".modal-body").first(),this._$modalHeader=this._$modal.find(".modal-header").first(),this._$modalFooter=this._$modal.find(".modal-footer").first(),this._$lightboxContainer=this._$modalBody.find(".ekko-lightbox-container").first(),this._$lightboxBodyOne=this._$lightboxContainer.find("> div:first-child").first(),this._$lightboxBodyTwo=this._$lightboxContainer.find("> div:last-child").first(),this._border=this._calculateBorders(),this._padding=this._calculatePadding(),this._galleryName=this._$element.data("gallery"),this._galleryName&&(this._$galleryItems=a(document.body).find('*[data-gallery="'+this._galleryName+'"]'),this._galleryIndex=this._$galleryItems.index(this._$element),a(document).on("keydown.ekkoLightbox",this._navigationalBinder.bind(this)),this._config.showArrows&&this._$galleryItems.length>1&&(this._$lightboxContainer.append('<div class="ekko-lightbox-nav-overlay"><a href="#">'+this._config.leftArrow+'</a><a href="#">'+this._config.rightArrow+"</a></div>"),this._$modalArrows=this._$lightboxContainer.find("div.ekko-lightbox-nav-overlay").first(),this._$lightboxContainer.on("click","a:first-child",function(a){return a.preventDefault(),g.navigateLeft()}),this._$lightboxContainer.on("click","a:last-child",function(a){return a.preventDefault(),g.navigateRight()}),this.updateNavigation())),this._$modal.on("show.bs.modal",this._config.onShow.bind(this)).on("shown.bs.modal",function(){return g._toggleLoading(!0),g._handle(),g._config.onShown.call(g)}).on("hide.bs.modal",this._config.onHide.bind(this)).on("hidden.bs.modal",function(){return g._galleryName&&(a(document).off("keydown.ekkoLightbox"),a(window).off("resize.ekkoLightbox")),g._$modal.remove(),g._config.onHidden.call(g)}).modal(this._config),a(window).on("resize.ekkoLightbox",function(){g._resize(g._wantedWidth,g._wantedHeight)}),this._$lightboxContainer.on("touchstart",function(){g._touchstartX=event.changedTouches[0].screenX}).on("touchend",function(){g._touchendX=event.changedTouches[0].screenX,g._swipeGesure()})}return c(d,null,[{key:"Default",get:function(){return f}}]),c(d,[{key:"element",value:function(){return this._$element}},{key:"modal",value:function(){return this._$modal}},{key:"navigateTo",value:function(b){return b<0||b>this._$galleryItems.length-1?this:(this._galleryIndex=b,this.updateNavigation(),this._$element=a(this._$galleryItems.get(this._galleryIndex)),void this._handle())}},{key:"navigateLeft",value:function(){if(this._$galleryItems&&1!==this._$galleryItems.length){if(0===this._galleryIndex){if(!this._config.wrapping)return;this._galleryIndex=this._$galleryItems.length-1}else this._galleryIndex--;return this._config.onNavigate.call(this,"left",this._galleryIndex),this.navigateTo(this._galleryIndex)}}},{key:"navigateRight",value:function(){if(this._$galleryItems&&1!==this._$galleryItems.length){if(this._galleryIndex===this._$galleryItems.length-1){if(!this._config.wrapping)return;this._galleryIndex=0}else this._galleryIndex++;return this._config.onNavigate.call(this,"right",this._galleryIndex),this.navigateTo(this._galleryIndex)}}},{key:"updateNavigation",value:function(){if(!this._config.wrapping){var a=this._$lightboxContainer.find("div.ekko-lightbox-nav-overlay");0===this._galleryIndex?a.find("a:first-child").addClass("disabled"):a.find("a:first-child").removeClass("disabled"),this._galleryIndex===this._$galleryItems.length-1?a.find("a:last-child").addClass("disabled"):a.find("a:last-child").removeClass("disabled")}}},{key:"close",value:function(){return this._$modal.modal("hide")}},{key:"_navigationalBinder",value:function(a){return a=a||window.event,39===a.keyCode?this.navigateRight():37===a.keyCode?this.navigateLeft():void 0}},{key:"_detectRemoteType",value:function(a,b){return b=b||!1,!b&&this._isImage(a)&&(b="image"),!b&&this._getYoutubeId(a)&&(b="youtube"),!b&&this._getVimeoId(a)&&(b="vimeo"),!b&&this._getInstagramId(a)&&(b="instagram"),(!b||["image","youtube","vimeo","instagram","video","url"].indexOf(b)<0)&&(b="url"),b}},{key:"_isImage",value:function(a){return a&&a.match(/(^data:image\/.*,)|(\.(jp(e|g|eg)|gif|png|bmp|webp|svg)((\?|#).*)?$)/i)}},{key:"_containerToUse",value:function(){var a=this,b=this._$lightboxBodyTwo,c=this._$lightboxBodyOne;return this._$lightboxBodyTwo.hasClass("in")&&(b=this._$lightboxBodyOne,c=this._$lightboxBodyTwo),c.removeClass("in show"),setTimeout(function(){a._$lightboxBodyTwo.hasClass("in")||a._$lightboxBodyTwo.empty(),a._$lightboxBodyOne.hasClass("in")||a._$lightboxBodyOne.empty()},500),b.addClass("in show"),b}},{key:"_handle",value:function(){var a=this._containerToUse();this._updateTitleAndFooter();var b=this._$element.attr("data-remote")||this._$element.attr("href"),c=this._detectRemoteType(b,this._$element.attr("data-type")||!1);if(["image","youtube","vimeo","instagram","video","url"].indexOf(c)<0)return this._error(this._config.strings.type);switch(c){case"image":this._preloadImage(b,a),this._preloadImageByIndex(this._galleryIndex,3);break;case"youtube":this._showYoutubeVideo(b,a);break;case"vimeo":this._showVimeoVideo(this._getVimeoId(b),a);break;case"instagram":this._showInstagramVideo(this._getInstagramId(b),a);break;case"video":this._showHtml5Video(b,a);break;default:this._loadRemoteContent(b,a)}return this}},{key:"_getYoutubeId",value:function(a){if(!a)return!1;var b=a.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);return!(!b||11!==b[2].length)&&b[2]}},{key:"_getVimeoId",value:function(a){return!!(a&&a.indexOf("vimeo")>0)&&a}},{key:"_getInstagramId",value:function(a){return!!(a&&a.indexOf("instagram")>0)&&a}},{key:"_toggleLoading",value:function(b){return b=b||!1,b?(this._$modalDialog.css("display","none"),this._$modal.removeClass("in show"),a(".modal-backdrop").append(this._config.loadingMessage)):(this._$modalDialog.css("display","block"),this._$modal.addClass("in show"),a(".modal-backdrop").find(".ekko-lightbox-loader").remove()),this}},{key:"_calculateBorders",value:function(){return{top:this._totalCssByAttribute("border-top-width"),right:this._totalCssByAttribute("border-right-width"),bottom:this._totalCssByAttribute("border-bottom-width"),left:this._totalCssByAttribute("border-left-width")}}},{key:"_calculatePadding",value:function(){return{top:this._totalCssByAttribute("padding-top"),right:this._totalCssByAttribute("padding-right"),bottom:this._totalCssByAttribute("padding-bottom"),left:this._totalCssByAttribute("padding-left")}}},{key:"_totalCssByAttribute",value:function(a){return parseInt(this._$modalDialog.css(a),10)+parseInt(this._$modalContent.css(a),10)+parseInt(this._$modalBody.css(a),10)}},{key:"_updateTitleAndFooter",value:function(){var a=this._$element.data("title")||"",b=this._$element.data("footer")||"";return this._titleIsShown=!1,a||this._config.alwaysShowClose?(this._titleIsShown=!0,this._$modalHeader.css("display","").find(".modal-title").html(a||"&nbsp;")):this._$modalHeader.css("display","none"),this._footerIsShown=!1,b?(this._footerIsShown=!0,this._$modalFooter.css("display","").html(b)):this._$modalFooter.css("display","none"),this}},{key:"_showYoutubeVideo",value:function(a,b){var c=this._getYoutubeId(a),d=a.indexOf("&")>0?a.substr(a.indexOf("&")):"",e=this._$element.data("width")||560,f=this._$element.data("height")||e/(560/315);return this._showVideoIframe("//www.youtube.com/embed/"+c+"?badge=0&autoplay=1&html5=1"+d,e,f,b)}},{key:"_showVimeoVideo",value:function(a,b){var c=this._$element.data("width")||500,d=this._$element.data("height")||c/(560/315);return this._showVideoIframe(a+"?autoplay=1",c,d,b)}},{key:"_showInstagramVideo",value:function(a,b){var c=this._$element.data("width")||612,d=c+80;return a="/"!==a.substr(-1)?a+"/":a,b.html('<iframe width="'+c+'" height="'+d+'" src="'+a+'embed/" frameborder="0" allowfullscreen></iframe>'),this._resize(c,d),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_showVideoIframe",value:function(a,b,c,d){return c=c||b,d.html('<div class="embed-responsive embed-responsive-16by9"><iframe width="'+b+'" height="'+c+'" src="'+a+'" frameborder="0" allowfullscreen class="embed-responsive-item"></iframe></div>'),this._resize(b,c),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_showHtml5Video",value:function(a,b){var c=this._$element.data("width")||560,d=this._$element.data("height")||c/(560/315);return b.html('<div class="embed-responsive embed-responsive-16by9"><video width="'+c+'" height="'+d+'" src="'+a+'" preload="auto" autoplay controls class="embed-responsive-item"></video></div>'),this._resize(c,d),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_loadRemoteContent",value:function(b,c){var d=this,e=this._$element.data("width")||560,f=this._$element.data("height")||560,g=this._$element.data("disableExternalCheck")||!1;return this._toggleLoading(!1),g||this._isExternal(b)?(c.html('<iframe src="'+b+'" frameborder="0" allowfullscreen></iframe>'),this._config.onContentLoaded.call(this)):c.load(b,a.proxy(function(){return d._$element.trigger("loaded.bs.modal")})),this._$modalArrows&&this._$modalArrows.css("display","none"),this._resize(e,f),this}},{key:"_isExternal",value:function(a){var b=a.match(/^([^:\/?#]+:)?(?:\/\/([^\/?#]*))?([^?#]+)?(\?[^#]*)?(#.*)?/);return"string"==typeof b[1]&&b[1].length>0&&b[1].toLowerCase()!==location.protocol||"string"==typeof b[2]&&b[2].length>0&&b[2].replace(new RegExp(":("+{"http:":80,"https:":443}[location.protocol]+")?$"),"")!==location.host}},{key:"_error",value:function(a){return console.error(a),this._containerToUse().html(a),this._resize(300,300),this}},{key:"_preloadImageByIndex",value:function(b,c){if(this._$galleryItems){var d=a(this._$galleryItems.get(b),!1);if("undefined"!=typeof d){var e=d.attr("data-remote")||d.attr("href");return("image"===d.attr("data-type")||this._isImage(e))&&this._preloadImage(e,!1),c>0?this._preloadImageByIndex(b+1,c-1):void 0}}}},{key:"_preloadImage",value:function(b,c){var d=this;c=c||!1;var e=new Image;return c&&!function(){var f=setTimeout(function(){c.append(d._config.loadingMessage)},200);e.onload=function(){f&&clearTimeout(f),f=null;var b=a("<img />");return b.attr("src",e.src),b.addClass("img-fluid"),b.css("width","100%"),c.html(b),d._$modalArrows&&d._$modalArrows.css("display",""),d._resize(e.width,e.height),d._toggleLoading(!1),d._config.onContentLoaded.call(d)},e.onerror=function(){return d._toggleLoading(!1),d._error(d._config.strings.fail+("  "+b))}}(),e.src=b,e}},{key:"_swipeGesure",value:function(){return this._touchendX<this._touchstartX?this.navigateRight():this._touchendX>this._touchstartX?this.navigateLeft():void 0}},{key:"_resize",value:function(b,c){c=c||b,this._wantedWidth=b,this._wantedHeight=c;var d=b/c,e=this._padding.left+this._padding.right+this._border.left+this._border.right,f=this._config.doc.body.clientWidth>575?20:0,g=this._config.doc.body.clientWidth>575?0:20,h=Math.min(b+e,this._config.doc.body.clientWidth-f,this._config.maxWidth);b+e>h?(c=(h-e-g)/d,b=h):b+=e;var i=0,j=0;this._footerIsShown&&(j=this._$modalFooter.outerHeight(!0)||55),this._titleIsShown&&(i=this._$modalHeader.outerHeight(!0)||67);var k=this._padding.top+this._padding.bottom+this._border.bottom+this._border.top,l=parseFloat(this._$modalDialog.css("margin-top"))+parseFloat(this._$modalDialog.css("margin-bottom")),m=Math.min(c,a(window).height()-k-l-i-j,this._config.maxHeight-k-i-j);c>m&&(b=Math.ceil(m*d)+e),this._$lightboxContainer.css("height",m),this._$modalDialog.css("flex",1).css("maxWidth",b);var n=this._$modal.data("bs.modal");if(n)try{n._handleUpdate()}catch(o){n.handleUpdate()}return this}}],[{key:"_jQueryInterface",value:function(b){var c=this;return b=b||{},this.each(function(){var e=a(c),f=a.extend({},d.Default,e.data(),"object"==typeof b&&b);new d(c,f)})}}]),d}();return a.fn[d]=g._jQueryInterface,a.fn[d].Constructor=g,a.fn[d].noConflict=function(){return a.fn[d]=e,g._jQueryInterface},g})(jQuery)}(jQuery);
 
-},{}],76:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 (function (Buffer){
 var sha3 = require('js-sha3').keccak_256
 var uts46 = require('idna-uts46-hx')
@@ -26997,7 +24262,7 @@ exports.hash = namehash
 exports.normalize = normalize
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":157,"idna-uts46-hx":79,"js-sha3":82}],77:[function(require,module,exports){
+},{"buffer":148,"idna-uts46-hx":70,"js-sha3":73}],68:[function(require,module,exports){
 /*
     This file is part of ethereum-ens.
     ethereum-ens is free software: you can redistribute it and/or modify
@@ -27541,7 +24806,7 @@ ENS.prototype.setSubnodeOwner = function(name, addr, params) {
 
 module.exports = ENS;
 
-},{"bluebird":38,"eth-ens-namehash":76,"js-sha3":82,"pako":83,"text-encoding":100,"underscore":103,"web3":105}],78:[function(require,module,exports){
+},{"bluebird":29,"eth-ens-namehash":67,"js-sha3":73,"pako":74,"text-encoding":91,"underscore":94,"web3":96}],69:[function(require,module,exports){
 /* This file is generated from the Unicode IDNA table, using
    the build-unicode-tables.py script. Please edit that
    script instead of this file. */
@@ -28300,7 +25565,7 @@ return {
 };
 }));
 
-},{}],79:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 (function(root, factory) {
   /* istanbul ignore next */
   if (typeof define === 'function' && define.amd) {
@@ -28434,7 +25699,7 @@ return {
   };
 }));
 
-},{"./idna-map":78,"punycode":160}],80:[function(require,module,exports){
+},{"./idna-map":69,"punycode":151}],71:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -28457,7 +25722,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],81:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.3.1
  * https://jquery.com/
@@ -38823,7 +36088,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],82:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 (function (process,global){
 /**
  * [js-sha3]{@link https://github.com/emn178/js-sha3}
@@ -39302,7 +36567,7 @@ return jQuery;
 })();
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":159}],83:[function(require,module,exports){
+},{"_process":150}],74:[function(require,module,exports){
 // Top level file is just a mixin of submodules & constants
 'use strict';
 
@@ -39318,7 +36583,7 @@ assign(pako, deflate, inflate, constants);
 
 module.exports = pako;
 
-},{"./lib/deflate":84,"./lib/inflate":85,"./lib/utils/common":86,"./lib/zlib/constants":89}],84:[function(require,module,exports){
+},{"./lib/deflate":75,"./lib/inflate":76,"./lib/utils/common":77,"./lib/zlib/constants":80}],75:[function(require,module,exports){
 'use strict';
 
 
@@ -39720,7 +36985,7 @@ exports.deflate = deflate;
 exports.deflateRaw = deflateRaw;
 exports.gzip = gzip;
 
-},{"./utils/common":86,"./utils/strings":87,"./zlib/deflate":91,"./zlib/messages":96,"./zlib/zstream":98}],85:[function(require,module,exports){
+},{"./utils/common":77,"./utils/strings":78,"./zlib/deflate":82,"./zlib/messages":87,"./zlib/zstream":89}],76:[function(require,module,exports){
 'use strict';
 
 
@@ -40140,7 +37405,7 @@ exports.inflate = inflate;
 exports.inflateRaw = inflateRaw;
 exports.ungzip  = inflate;
 
-},{"./utils/common":86,"./utils/strings":87,"./zlib/constants":89,"./zlib/gzheader":92,"./zlib/inflate":94,"./zlib/messages":96,"./zlib/zstream":98}],86:[function(require,module,exports){
+},{"./utils/common":77,"./utils/strings":78,"./zlib/constants":80,"./zlib/gzheader":83,"./zlib/inflate":85,"./zlib/messages":87,"./zlib/zstream":89}],77:[function(require,module,exports){
 'use strict';
 
 
@@ -40247,7 +37512,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],87:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 // String encode/decode helpers
 'use strict';
 
@@ -40434,7 +37699,7 @@ exports.utf8border = function (buf, max) {
   return (pos + _utf8len[buf[pos]] > max) ? pos : max;
 };
 
-},{"./common":86}],88:[function(require,module,exports){
+},{"./common":77}],79:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -40487,7 +37752,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],89:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -40557,7 +37822,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],90:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -40618,7 +37883,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],91:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -42494,7 +39759,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":86,"./adler32":88,"./crc32":90,"./messages":96,"./trees":97}],92:[function(require,module,exports){
+},{"../utils/common":77,"./adler32":79,"./crc32":81,"./messages":87,"./trees":88}],83:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -42554,7 +39819,7 @@ function GZheader() {
 
 module.exports = GZheader;
 
-},{}],93:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -42901,7 +40166,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],94:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -44459,7 +41724,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":86,"./adler32":88,"./crc32":90,"./inffast":93,"./inftrees":95}],95:[function(require,module,exports){
+},{"../utils/common":77,"./adler32":79,"./crc32":81,"./inffast":84,"./inftrees":86}],86:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -44804,7 +42069,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":86}],96:[function(require,module,exports){
+},{"../utils/common":77}],87:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -44838,7 +42103,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],97:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -46060,7 +43325,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":86}],98:[function(require,module,exports){
+},{"../utils/common":77}],89:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -46109,7 +43374,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],99:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 (function (global){
 /**!
  * @fileOverview Kickass library to create and place poppers near their reference elements.
@@ -48653,7 +45918,7 @@ return Popper;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],100:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 // This is free and unencumbered software released into the public domain.
 // See LICENSE.md for more information.
 
@@ -48664,7 +45929,7 @@ module.exports = {
   TextDecoder: encoding.TextDecoder,
 };
 
-},{"./lib/encoding.js":102}],101:[function(require,module,exports){
+},{"./lib/encoding.js":93}],92:[function(require,module,exports){
 (function(global) {
   'use strict';
 
@@ -48712,7 +45977,7 @@ module.exports = {
 // For strict environments where `this` inside the global scope
 // is `undefined`, take a pure object instead
 }(this || {}));
-},{}],102:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 // This is free and unencumbered software released into the public domain.
 // See LICENSE.md for more information.
 
@@ -52026,7 +49291,7 @@ module.exports = {
 // For strict environments where `this` inside the global scope
 // is `undefined`, take a pure object instead
 }(this || {}));
-},{"./encoding-indexes.js":101}],103:[function(require,module,exports){
+},{"./encoding-indexes.js":92}],94:[function(require,module,exports){
 (function (global){
 //     Underscore.js 1.9.1
 //     http://underscorejs.org
@@ -53722,7 +50987,7 @@ module.exports = {
 }());
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],104:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/utf8js v2.1.2 by @mathias */
 ;(function(root) {
@@ -53970,7 +51235,7 @@ module.exports = {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],105:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 var Web3 = require('./lib/web3');
 
 // dont override global variable
@@ -53980,7 +51245,7 @@ if (typeof window !== 'undefined' && typeof window.Web3 === 'undefined') {
 
 module.exports = Web3;
 
-},{"./lib/web3":127}],106:[function(require,module,exports){
+},{"./lib/web3":118}],97:[function(require,module,exports){
 module.exports=[
   {
     "constant": true,
@@ -54236,7 +51501,7 @@ module.exports=[
   }
 ]
 
-},{}],107:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 module.exports=[
   {
     "constant": true,
@@ -54346,7 +51611,7 @@ module.exports=[
   }
 ]
 
-},{}],108:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 module.exports=[
   {
     "constant": false,
@@ -54495,7 +51760,7 @@ module.exports=[
   }
 ]
 
-},{}],109:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -54523,7 +51788,7 @@ SolidityTypeAddress.prototype.isType = function (name) {
 
 module.exports = SolidityTypeAddress;
 
-},{"./formatters":114,"./type":119}],110:[function(require,module,exports){
+},{"./formatters":105,"./type":110}],101:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -54551,7 +51816,7 @@ SolidityTypeBool.prototype.isType = function (name) {
 
 module.exports = SolidityTypeBool;
 
-},{"./formatters":114,"./type":119}],111:[function(require,module,exports){
+},{"./formatters":105,"./type":110}],102:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -54582,7 +51847,7 @@ SolidityTypeBytes.prototype.isType = function (name) {
 
 module.exports = SolidityTypeBytes;
 
-},{"./formatters":114,"./type":119}],112:[function(require,module,exports){
+},{"./formatters":105,"./type":110}],103:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -54847,7 +52112,7 @@ var coder = new SolidityCoder([
 
 module.exports = coder;
 
-},{"./address":109,"./bool":110,"./bytes":111,"./dynamicbytes":113,"./formatters":114,"./int":115,"./real":117,"./string":118,"./uint":120,"./ureal":121}],113:[function(require,module,exports){
+},{"./address":100,"./bool":101,"./bytes":102,"./dynamicbytes":104,"./formatters":105,"./int":106,"./real":108,"./string":109,"./uint":111,"./ureal":112}],104:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -54869,7 +52134,7 @@ SolidityTypeDynamicBytes.prototype.isDynamicType = function () {
 
 module.exports = SolidityTypeDynamicBytes;
 
-},{"./formatters":114,"./type":119}],114:[function(require,module,exports){
+},{"./formatters":105,"./type":110}],105:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -55123,7 +52388,7 @@ module.exports = {
     formatOutputAddress: formatOutputAddress
 };
 
-},{"../utils/config":123,"../utils/utils":125,"./param":116,"bignumber.js":37}],115:[function(require,module,exports){
+},{"../utils/config":114,"../utils/utils":116,"./param":107,"bignumber.js":28}],106:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -55157,7 +52422,7 @@ SolidityTypeInt.prototype.isType = function (name) {
 
 module.exports = SolidityTypeInt;
 
-},{"./formatters":114,"./type":119}],116:[function(require,module,exports){
+},{"./formatters":105,"./type":110}],107:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -55311,7 +52576,7 @@ SolidityParam.encodeList = function (params) {
 module.exports = SolidityParam;
 
 
-},{"../utils/utils":125}],117:[function(require,module,exports){
+},{"../utils/utils":116}],108:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -55345,7 +52610,7 @@ SolidityTypeReal.prototype.isType = function (name) {
 
 module.exports = SolidityTypeReal;
 
-},{"./formatters":114,"./type":119}],118:[function(require,module,exports){
+},{"./formatters":105,"./type":110}],109:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -55367,7 +52632,7 @@ SolidityTypeString.prototype.isDynamicType = function () {
 
 module.exports = SolidityTypeString;
 
-},{"./formatters":114,"./type":119}],119:[function(require,module,exports){
+},{"./formatters":105,"./type":110}],110:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityParam = require('./param');
 
@@ -55624,7 +52889,7 @@ SolidityType.prototype.decode = function (bytes, offset, name) {
 
 module.exports = SolidityType;
 
-},{"./formatters":114,"./param":116}],120:[function(require,module,exports){
+},{"./formatters":105,"./param":107}],111:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -55658,7 +52923,7 @@ SolidityTypeUInt.prototype.isType = function (name) {
 
 module.exports = SolidityTypeUInt;
 
-},{"./formatters":114,"./type":119}],121:[function(require,module,exports){
+},{"./formatters":105,"./type":110}],112:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -55692,7 +52957,7 @@ SolidityTypeUReal.prototype.isType = function (name) {
 
 module.exports = SolidityTypeUReal;
 
-},{"./formatters":114,"./type":119}],122:[function(require,module,exports){
+},{"./formatters":105,"./type":110}],113:[function(require,module,exports){
 'use strict';
 
 // go env doesn't have and need XMLHttpRequest
@@ -55703,7 +52968,7 @@ if (typeof XMLHttpRequest === 'undefined') {
 }
 
 
-},{}],123:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -55784,7 +53049,7 @@ module.exports = {
 };
 
 
-},{"bignumber.js":37}],124:[function(require,module,exports){
+},{"bignumber.js":28}],115:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -55824,7 +53089,7 @@ module.exports = function (value, options) {
 };
 
 
-},{"crypto-js":49,"crypto-js/sha3":70}],125:[function(require,module,exports){
+},{"crypto-js":40,"crypto-js/sha3":61}],116:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -56455,12 +53720,12 @@ module.exports = {
     isTopic: isTopic,
 };
 
-},{"./sha3.js":124,"bignumber.js":37,"utf8":104}],126:[function(require,module,exports){
+},{"./sha3.js":115,"bignumber.js":28,"utf8":95}],117:[function(require,module,exports){
 module.exports={
     "version": "0.19.1"
 }
 
-},{}],127:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -56614,7 +53879,7 @@ Web3.prototype.createBatch = function () {
 module.exports = Web3;
 
 
-},{"./utils/sha3":124,"./utils/utils":125,"./version.json":126,"./web3/batch":129,"./web3/extend":133,"./web3/httpprovider":137,"./web3/iban":138,"./web3/ipcprovider":139,"./web3/methods/db":142,"./web3/methods/eth":143,"./web3/methods/net":144,"./web3/methods/personal":145,"./web3/methods/shh":146,"./web3/methods/swarm":147,"./web3/property":150,"./web3/requestmanager":151,"./web3/settings":152,"bignumber.js":37}],128:[function(require,module,exports){
+},{"./utils/sha3":115,"./utils/utils":116,"./version.json":117,"./web3/batch":120,"./web3/extend":124,"./web3/httpprovider":128,"./web3/iban":129,"./web3/ipcprovider":130,"./web3/methods/db":133,"./web3/methods/eth":134,"./web3/methods/net":135,"./web3/methods/personal":136,"./web3/methods/shh":137,"./web3/methods/swarm":138,"./web3/property":141,"./web3/requestmanager":142,"./web3/settings":143,"bignumber.js":28}],119:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -56704,7 +53969,7 @@ AllSolidityEvents.prototype.attachToContract = function (contract) {
 module.exports = AllSolidityEvents;
 
 
-},{"../utils/sha3":124,"../utils/utils":125,"./event":132,"./filter":134,"./formatters":135,"./methods/watches":148}],129:[function(require,module,exports){
+},{"../utils/sha3":115,"../utils/utils":116,"./event":123,"./filter":125,"./formatters":126,"./methods/watches":139}],120:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -56772,7 +54037,7 @@ Batch.prototype.execute = function () {
 module.exports = Batch;
 
 
-},{"./errors":131,"./jsonrpc":140}],130:[function(require,module,exports){
+},{"./errors":122,"./jsonrpc":131}],121:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -57084,7 +54349,7 @@ var Contract = function (eth, abi, address) {
 
 module.exports = ContractFactory;
 
-},{"../solidity/coder":112,"../utils/utils":125,"./allevents":128,"./event":132,"./function":136}],131:[function(require,module,exports){
+},{"../solidity/coder":103,"../utils/utils":116,"./allevents":119,"./event":123,"./function":127}],122:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -57129,7 +54394,7 @@ module.exports = {
     }
 };
 
-},{}],132:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -57339,7 +54604,7 @@ SolidityEvent.prototype.attachToContract = function (contract) {
 module.exports = SolidityEvent;
 
 
-},{"../solidity/coder":112,"../utils/sha3":124,"../utils/utils":125,"./filter":134,"./formatters":135,"./methods/watches":148}],133:[function(require,module,exports){
+},{"../solidity/coder":103,"../utils/sha3":115,"../utils/utils":116,"./filter":125,"./formatters":126,"./methods/watches":139}],124:[function(require,module,exports){
 var formatters = require('./formatters');
 var utils = require('./../utils/utils');
 var Method = require('./method');
@@ -57389,7 +54654,7 @@ var extend = function (web3) {
 module.exports = extend;
 
 
-},{"./../utils/utils":125,"./formatters":135,"./method":141,"./property":150}],134:[function(require,module,exports){
+},{"./../utils/utils":116,"./formatters":126,"./method":132,"./property":141}],125:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -57628,7 +54893,7 @@ Filter.prototype.get = function (callback) {
 module.exports = Filter;
 
 
-},{"../utils/utils":125,"./formatters":135}],135:[function(require,module,exports){
+},{"../utils/utils":116,"./formatters":126}],126:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -57933,7 +55198,7 @@ module.exports = {
 };
 
 
-},{"../utils/config":123,"../utils/utils":125,"./iban":138}],136:[function(require,module,exports){
+},{"../utils/config":114,"../utils/utils":116,"./iban":129}],127:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -58215,7 +55480,7 @@ SolidityFunction.prototype.attachToContract = function (contract) {
 
 module.exports = SolidityFunction;
 
-},{"../solidity/coder":112,"../utils/sha3":124,"../utils/utils":125,"./errors":131,"./formatters":135}],137:[function(require,module,exports){
+},{"../solidity/coder":103,"../utils/sha3":115,"../utils/utils":116,"./errors":122,"./formatters":126}],128:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -58370,7 +55635,7 @@ HttpProvider.prototype.isConnected = function() {
 
 module.exports = HttpProvider;
 
-},{"./errors":131,"xhr2":155,"xmlhttprequest":122}],138:[function(require,module,exports){
+},{"./errors":122,"xhr2":146,"xmlhttprequest":113}],129:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -58599,7 +55864,7 @@ Iban.prototype.toString = function () {
 module.exports = Iban;
 
 
-},{"bignumber.js":37}],139:[function(require,module,exports){
+},{"bignumber.js":28}],130:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -58808,7 +56073,7 @@ IpcProvider.prototype.sendAsync = function (payload, callback) {
 module.exports = IpcProvider;
 
 
-},{"../utils/utils":125,"./errors":131}],140:[function(require,module,exports){
+},{"../utils/utils":116,"./errors":122}],131:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -58895,7 +56160,7 @@ Jsonrpc.toBatchPayload = function (messages) {
 module.exports = Jsonrpc;
 
 
-},{}],141:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -59061,7 +56326,7 @@ Method.prototype.request = function () {
 
 module.exports = Method;
 
-},{"../utils/utils":125,"./errors":131}],142:[function(require,module,exports){
+},{"../utils/utils":116,"./errors":122}],133:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -59129,7 +56394,7 @@ var methods = function () {
 
 module.exports = DB;
 
-},{"../method":141}],143:[function(require,module,exports){
+},{"../method":132}],134:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -59485,7 +56750,7 @@ Eth.prototype.isSyncing = function (callback) {
 
 module.exports = Eth;
 
-},{"../../utils/config":123,"../../utils/utils":125,"../contract":130,"../filter":134,"../formatters":135,"../iban":138,"../method":141,"../namereg":149,"../property":150,"../syncing":153,"../transfer":154,"./watches":148}],144:[function(require,module,exports){
+},{"../../utils/config":114,"../../utils/utils":116,"../contract":121,"../filter":125,"../formatters":126,"../iban":129,"../method":132,"../namereg":140,"../property":141,"../syncing":144,"../transfer":145,"./watches":139}],135:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -59539,7 +56804,7 @@ var properties = function () {
 
 module.exports = Net;
 
-},{"../../utils/utils":125,"../property":150}],145:[function(require,module,exports){
+},{"../../utils/utils":116,"../property":141}],136:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -59656,7 +56921,7 @@ var properties = function () {
 
 module.exports = Personal;
 
-},{"../formatters":135,"../method":141,"../property":150}],146:[function(require,module,exports){
+},{"../formatters":126,"../method":132,"../property":141}],137:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -59744,7 +57009,7 @@ var methods = function () {
 module.exports = Shh;
 
 
-},{"../filter":134,"../formatters":135,"../method":141,"./watches":148}],147:[function(require,module,exports){
+},{"../filter":125,"../formatters":126,"../method":132,"./watches":139}],138:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -59891,7 +57156,7 @@ var properties = function () {
 
 module.exports = Swarm;
 
-},{"../method":141,"../property":150}],148:[function(require,module,exports){
+},{"../method":132,"../property":141}],139:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60007,7 +57272,7 @@ module.exports = {
 };
 
 
-},{"../method":141}],149:[function(require,module,exports){
+},{"../method":132}],140:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60048,7 +57313,7 @@ module.exports = {
 };
 
 
-},{"../contracts/GlobalRegistrar.json":106,"../contracts/ICAPRegistrar.json":107}],150:[function(require,module,exports){
+},{"../contracts/GlobalRegistrar.json":97,"../contracts/ICAPRegistrar.json":98}],141:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60194,7 +57459,7 @@ Property.prototype.request = function () {
 module.exports = Property;
 
 
-},{"../utils/utils":125}],151:[function(require,module,exports){
+},{"../utils/utils":116}],142:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60461,7 +57726,7 @@ RequestManager.prototype.poll = function () {
 module.exports = RequestManager;
 
 
-},{"../utils/config":123,"../utils/utils":125,"./errors":131,"./jsonrpc":140}],152:[function(require,module,exports){
+},{"../utils/config":114,"../utils/utils":116,"./errors":122,"./jsonrpc":131}],143:[function(require,module,exports){
 
 
 var Settings = function () {
@@ -60472,7 +57737,7 @@ var Settings = function () {
 module.exports = Settings;
 
 
-},{}],153:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60567,7 +57832,7 @@ IsSyncing.prototype.stopWatching = function () {
 module.exports = IsSyncing;
 
 
-},{"../utils/utils":125,"./formatters":135}],154:[function(require,module,exports){
+},{"../utils/utils":116,"./formatters":126}],145:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60661,10 +57926,10 @@ var deposit = function (eth, from, to, value, client, callback) {
 module.exports = transfer;
 
 
-},{"../contracts/SmartExchange.json":108,"./iban":138}],155:[function(require,module,exports){
+},{"../contracts/SmartExchange.json":99,"./iban":129}],146:[function(require,module,exports){
 module.exports = XMLHttpRequest;
 
-},{}],156:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -60817,7 +58082,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],157:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -62555,7 +59820,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":156,"ieee754":158}],158:[function(require,module,exports){
+},{"base64-js":147,"ieee754":149}],149:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -62641,7 +59906,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],159:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -62827,7 +60092,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],160:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -63364,7 +60629,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],161:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -63443,193 +60708,4 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":159,"timers":161}]},{},[11]);
-</script>
-<script src="js/youtube-load.js"></script>
-<script>
-        // Global variables for GoogleAuth object, auth status.
-    var GoogleAuth;
-
-    /**
-     * Load the API's client and auth2 modules.
-     * Call the initClient function after the modules load.
-     */
-    function handleClientLoad() {
-        gapi.load('client:auth2', initClient);
-    }
-
-    function initClient() {
-        // Initialize the gapi.client object, which app uses to make API requests.
-        // Get API key and client ID from API Console.
-        // 'scope' field specifies space-delimited list of access scopes
-
-        gapi.client.init({
-            'clientId': '840608930739-12c2gdat8sefu73ddbos0ci7i3dk0qa4.apps.googleusercontent.com',
-            'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
-            'scope': 'https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner'
-        }).then(function () {
-            GoogleAuth = gapi.auth2.getAuthInstance();
-
-            // Listen for sign-in state changes.
-            GoogleAuth.isSignedIn.listen(updateSigninStatus);
-
-            // Handle initial sign-in state. (Determine if user is already signed in.)
-            setSigninStatus();
-
-            // Call handleAuthClick function when user clicks on "Authorize" button.
-            $('#execute-request-button').click(function () {
-                $('#youtubeImportContent').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-                handleAuthClick(event);
-            });
-        });
-    }
-
-    function handleAuthClick(event) {
-        // Sign user in after click on auth button.
-        if (isAuthorized) {
-            defineRequest();
-        } else {
-            GoogleAuth.signIn();
-        }
-    }
-
-    function setSigninStatus() {
-        var user = GoogleAuth.currentUser.get();
-        isAuthorized = user.hasGrantedScopes('https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner');
-        // Toggle button text and displayed statement based on current auth status.
-        if (isAuthorized) {
-            //defineRequest();
-        }
-    }
-
-    function updateSigninStatus(isSignedIn) {
-        setSigninStatus();
-    }
-
-    function createResource(properties) {
-        var resource = {};
-        var normalizedProps = properties;
-        for (var p in properties) {
-            var value = properties[p];
-            if (p && p.substr(-2, 2) == '[]') {
-                var adjustedName = p.replace('[]', '');
-                if (value) {
-                    normalizedProps[adjustedName] = value.split(',');
-                }
-                delete normalizedProps[p];
-            }
-        }
-        for (var p in normalizedProps) {
-            // Leave properties that don't have values out of inserted resource.
-            if (normalizedProps.hasOwnProperty(p) && normalizedProps[p]) {
-                var propArray = p.split('.');
-                var ref = resource;
-                for (var pa = 0; pa < propArray.length; pa++) {
-                    var key = propArray[pa];
-                    if (pa == propArray.length - 1) {
-                        ref[key] = normalizedProps[p];
-                    } else {
-                        ref = ref[key] = ref[key] || {};
-                    }
-                }
-            }
-            ;
-        }
-        return resource;
-    }
-
-    function removeEmptyParams(params) {
-        for (var p in params) {
-            if (!params[p] || params[p] == 'undefined') {
-                delete params[p];
-            }
-        }
-        return params;
-    }
-
-    function executeRequest(request, onSuccess) {
-        request.execute(function (response) {
-            console.log(response);
-            if (onSuccess) {
-                onSuccess(response);
-            }
-        });
-    }
-
-    function buildApiRequest(requestMethod, path, params, properties, onSuccess) {
-        params = removeEmptyParams(params);
-        var request;
-        if (properties) {
-            var resource = createResource(properties);
-            request = gapi.client.request({
-                'body': resource,
-                'method': requestMethod,
-                'path': path,
-                'params': params
-            });
-        } else {
-            request = gapi.client.request({
-                'method': requestMethod,
-                'path': path,
-                'params': params
-            });
-        }
-        executeRequest(request, onSuccess);
-    }
-
-    /***** END BOILERPLATE CODE *****/
-
-
-    function defineRequest() {
-        buildApiRequest('GET',
-            '/youtube/v3/playlists',
-            {
-                'mine': 'true',
-                'maxResults': '25',
-                'part': 'snippet,contentDetails',
-                'onBehalfOfContentOwner': '',
-                'onBehalfOfContentOwnerChannel': ''
-            }, null, function (response) {
-                let youtubeImportContent = $('#youtubeImportContent');
-                youtubeImportContent.html('<ul id="preview-youtube-playlists" class="list-inline">');
-                response.items.forEach(function (v) {
-                    youtubeImportContent.append('<li class="list-inline-item"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
-                        '<p><button type="button" class="btn btn-primary receive-youtube-playlist-videos" data-id="' + v.id + '">Receive videos</button></p>' +
-                        '</li>');
-
-                });
-                youtubeImportContent.append('</ul>');
-            });
-    }
-
-    $('#youtubeImportModal').on('click', '.receive-youtube-playlist-videos', function () {
-        let id = $(this).attr('data-id');
-        if (!id) {
-            alert('Incorrect playlist id');
-
-            return;
-        }
-
-        $('#youtubePlaylistVideos').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-        buildApiRequest('GET',
-            '/youtube/v3/playlistItems',
-            {
-                'maxResults': '25',
-                'part': 'snippet,contentDetails',
-                'playlistId': id
-            }, null, function (response) {
-                let videos = $('#youtubePlaylistVideos');
-                videos.html('<p><button type="button" class="btn btn-success btn-import-all-videos">Import all videos</button></p>' +
-                    '<ul id="preview-youtube-videos" class="list-inline">');
-                response.items.forEach(function (v) {
-                    videos.append('<li class="list-inline-item youtube-video-import" data-id="' + v.contentDetails.videoId + '" data-cover-file="' + v.snippet.thumbnails.medium.url + '"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
-                        '</li>');
-
-                });
-                videos.append('</ul>');
-            });
-    });
-</script>
-
-</body>
-</html>
+},{"process/browser.js":150,"timers":152}]},{},[2]);

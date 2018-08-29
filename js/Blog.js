@@ -385,3 +385,5 @@ class Blog {
         return this.swarm.post(null, data, null, null, 'bzz-resource:');
     }
 }
+
+module.exports = Blog;

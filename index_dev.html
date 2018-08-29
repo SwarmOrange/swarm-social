@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Ihar Shaduryn">
+    <link rel="icon" href="img/logo.jpeg">
+
+    <title>Bee Free</title>
+
+    <link href="css/uglify.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <script src="https://vk.com/js/api/openapi.js?159" type="text/javascript"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+    VK.init({
+        apiId: 6670736
+    });
+</script>
+
+<div id="fb-root"></div>
+<script>(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = 'https://connect.facebook.net/ru_RU/sdk.js#xfbml=1&version=v3.1&appId=1804254456326979&autoLogAppEvents=1';
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<header>
+    <!--<div class="collapse bg-dark" id="navbarHeader">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-8 col-md-7 py-4">
+                    <h4 class="text-white">Navigate to user page</h4>
+                    <form>
+                        <div class="form-group">
+                            <label for="navigateUserHash" class="text-muted">Paste here SWARM user hash. If user
+                                registered you can see his page</label>
+                            <input type="text" class="form-control" id="navigateUserHash" placeholder="User hash">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary go-user-hash">Go</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>-->
+    <div class="navbar navbar-dark bg-dark box-shadow">
+        <div class="container d-flex justify-content-between">
+            <a href="./" class="navbar-brand d-flex align-items-center">
+                <img src="img/logo.jpeg" alt="" style="width: 60px; margin-right: 12px">
+                <!--<strong>Bee Free</strong>-->
+            </a>
+            <!--<button id="mainMenu" class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarHeader"
+                    aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>-->
+            <ul class="nav nav-pills nav-fill fake-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">My Page</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Public Page</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">View Page</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<div id="userRegistration" class="masthead" style="display: none">
+    <div class="container h-100">
+        <div class="row h-100">
+            <div class="col-lg-7 my-auto">
+                <div class="header-content mx-auto">
+                    <h1 class="mb-5">Decentralized social network where only you own your data!</h1>
+                    <a href="#" class="btn btn-outline btn-lg js-scroll-trigger btn-start-now">Start Now for Free!</a>
+                </div>
+            </div>
+            <div class="col-lg-5 my-auto">
+                <!--<div class="device-container">
+                    <div class="device-mockup iphone6_plus portrait white">
+                        <div class="device">
+                            <div class="screen">
+                               <img src="img/demo-screen-1.jpg" class="img-fluid" alt="">
+                            </div>
+                            <div class="button">
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="device-wrapper">
+                    <div class="device" data-device="iPhone6" data-orientation="portrait" data-color="white">
+                        <div class="screen">
+                            <!-- PUT CONTENTS HERE -->
+                            <img src="img/swarm.png" class="img-fluid" alt="">
+
+                        </div>
+                        <div class="button">
+                            <!-- You can hook the "home button" to some JavaScript events or just remove it -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="importData" class="container" style="margin-top: 30px; text-align: center; display: none">
+    <h1>Import your data...</h1>
+    <button class="btn btn-primary mb-2 btn-import-instagram"><img src="img/instagram.png" alt="" style="width: 30px">
+        Import from Instagram
+    </button>
+    <h1>...or create empty page</h1>
+    <button class="btn btn-success mb-2 btn-create-empty"><img src="img/empty.png" alt="" style="width: 30px"> Create
+        empty page
+    </button>
+
+</div>
+
+<div id="userInfo" class="container" style="margin-top: 30px; display: none">
+    <div class="row">
+        <div class="col-sm-4">
+            <ul class="main-blocks">
+                <!--<li>
+                    <p>
+                        <img id="bigAvatar" src="img/no-photo.png" alt="">
+                    </p>
+                    <p>
+                        <button id="uploadAvatarButton" type="button" class="btn btn-success" data-toggle="modal"
+                                data-target="#uploadAvatarModal" style="width: 100%">Upload avatar
+                        </button>
+                    </p>
+
+                </li>-->
+                <li>
+                    <p>My wallet - Estimated earnings</p>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">ETH</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Value" aria-label="Username"
+                               aria-describedby="basic-addon1" value="25.04444" disabled>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">BTC</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Value" aria-label="Username"
+                               aria-describedby="basic-addon1" value="0.300080" disabled>
+                    </div>
+
+                    <p>
+                        <button type="button" class="btn btn-light btn-send-crypto"
+                                style="width: 130px; margin-right: 13px">
+                            Send Crypto
+                        </button>
+                        <button type="button" class="btn btn-light btn-receive-crypto float-right"
+                                style="width: 130px;">
+                            Receive Crypto
+                        </button>
+                    </p>
+                </li>
+                <li>
+                    <p>My data</p>
+
+                    <p>Import from </p>
+                    <p>
+                        <button type="button" class="btn btn-primary btn-profile-import-instagram col-sm-5"
+                                style="">
+                            <img src="img/instagram.png" alt="" style="width: 30px; margin-right: 8px">
+                            Instagram
+                        </button>
+
+                        <button type="button" class="btn btn-primary btn-profile-import-youtube float-right col-sm-5"
+                                style="">
+                            <img src="img/youtube-white.png" alt="" style="width: 30px; margin-right: 8px">
+                            Youtube
+                        </button>
+                    </p>
+                    <p>
+
+                        <button type="button" class="btn btn-primary btn-profile-import-vk col-sm-5"
+                                style="">
+                            <img src="img/vk.png" alt="" style="width: 30px; margin-right: 8px">
+                            VK
+                        </button>
+                        <button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
+                                style="">
+                            <img src="img/facebook.png" alt="" style="width: 30px; margin-right: 8px">
+                            Facebook
+                        </button>
+                        <!--<button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
+                                style="">
+                            <img src="img/google-plus.png" alt="" style="width: 30px; margin-right: 8px">
+                            Google+
+                        </button>-->
+                    </p>
+                </li>
+
+
+            </ul>
+        </div>
+        <div class="col-sm-8">
+            <ul class="main-blocks">
+                <!-- <li>
+                     <!--<div class="dropdown float-right">
+                         <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                             Import data
+                         </button>
+                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                             <a class="dropdown-item btn-profile-import-instagram" href="#">Instagram</a>
+                             <a class="dropdown-item btn-profile-import-facebook" href="#">Facebook</a>
+                         </div>
+                     </div>-->
+
+                <!--   <h1><span id="firstName">...</span> <span id="lastName">...</span> <a href="#"
+                                                                                         class="edit-page-info"
+                                                                                         data-toggle="modal"
+                                                                                         data-target="#editInfoModal"><img
+                           class="project-icon" src="img/edit.png" alt=""></a></h1>
+                   <h3>Birth: <span id="birthDate">...</span></h3>
+                   <h3>Location: <span id="locationName"></span></h3>
+                   <h3>About: <span id="about"></span></h3>
+                   <p>
+                       <button type="submit" class="btn btn-primary mb-2 save-mru">Save MRU</button>
+                       <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
+                   </p>
+               </li>-->
+
+                <li>
+                    <div class="row">
+                        <div class="col-sm-3" style="border-right: 1px solid #e0e0e0">
+                            <p>Contacts</p>
+                            <!--<p class="float-left">Contacts</p>-->
+                            <!--<p class="float-right">
+                                <a href="#" data-toggle="modal" data-target="#addFollowerModal">
+                                    <img src="img/add.png" alt="" style="width: 20px">
+                                </a>
+                            </p>
+                            <div class="clear-both"></div>
+
+                            <ul id="iFollowUsers" class="list-inline">
+
+                            </ul>-->
+                            <p>
+                                <img src="img/avatars/1.png" alt="" style="max-width: 40px"> <span>Nikitus Barmal</span>
+                            </p>
+                            <p>
+                                <img src="img/avatars/2.png" alt="" style="max-width: 40px"> <span>Anton Zelten</span>
+
+                            </p>
+                            <p>
+                                <img src="img/avatars/3.png" alt="" style="max-width: 40px"> <span>Iren Nagorny</span>
+
+                            </p>
+                            <p>
+                                <img src="img/avatars/4.png" alt="" style="max-width: 40px"> <span>Ann Holod</span>
+
+                            </p>
+                            <p>
+                                <img src="img/avatars/4.png" alt="" style="max-width: 40px"> <span>Ann Holod</span>
+
+                            </p>
+
+                        </div>
+                        <div class="col-sm-4" style="border-right: 1px solid #e0e0e0">
+                            <p><strong>Ann Holod</strong></p>
+                            <!--<div class="form-group">
+                                <textarea class="form-control" id="" rows="6"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary mb-2" onclick="alert('Not implemented')">Send
+                            </button>-->
+                            <img src="img/avatars/video.png" style="width: 100%">
+
+                        </div>
+                        <div class="col-sm-5">
+                            <p>Inbox</p>
+                            <div class="pre-scrollable">
+                                <table class="table table-striped">
+                                    <!--<thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">First</th>
+                                    </tr>
+                                    </thead>-->
+                                    <tbody>
+                                    <tr>
+                                        <th scope="row">Bill G.</th>
+                                        <td>What's up</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Warren B.</th>
+                                        <td>RE: Money? No problem</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Larry P.</th>
+                                        <td>RE: SWARM + Goo...</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Larry P.</th>
+                                        <td>RE: SWARM + Goo...</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Mark Z.</th>
+                                        <td>New social network!</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Johny B.</th>
+                                        <td>SWARM</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <!--<p class="float-left">Photo albums / <a class="show-all-photoalbums" href="#">All</a></p>-->
+                    <p class="float-left">Photo albums</p>
+                    <p class="float-right">
+                        <a href="#" class="create-album">
+                            <img src="img/add.png" alt="" style="width: 20px">
+                        </a>
+                    </p>
+                    <div class="clear-both"></div>
+
+                    <ul id="photoAlbums" class="list-inline">
+
+                    </ul>
+                </li>
+                <li>
+                    <!--<p class="float-left">Video playlists / <a class="show-all-videoalbums" href="#">All</a></p>-->
+                    <p class="float-left">Video playlists</p>
+                    <!--<p class="float-right">
+                        <a href="#" class="create-video-playlist">
+                            <img src="img/add.png" alt="" style="width: 20px">
+                        </a>
+                    </p>-->
+                    <div class="clear-both"></div>
+
+                    <ul id="videoPlaylists" class="list-inline">
+
+                    </ul>
+                </li>
+
+                <li id="postBlock">
+                    <div class="row">
+                        <div class="col-sm-2">Create post</div>
+                        <div class="col-sm-3">
+                            <button type="button" class="btn btn-primary create-album">
+                                <img src="img/photo-white.png" alt="" style="width: 20px; margin-right: 8px;">
+                                Upload photos
+                            </button>
+                        </div>
+                        <div class="col-sm-7">
+                            <button type="button" class="btn btn-primary upload-videos-preview">
+                                <img src="img/video-white.png" alt="" style="width: 20px; margin-right: 8px">
+                                Upload videos
+                            </button>
+                        </div>
+                    </div>
+                    <p></p>
+                    <form>
+                        <div class="form-group">
+                            <textarea class="form-control" id="postContent" rows="3"></textarea>
+                        </div>
+
+                        <div id="attached-content">
+
+                        </div>
+
+                        <div id="postOrAttach" style="height: 30px">
+                            <p class="float-left">
+                                <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
+                                <input type="checkbox" aria-label="Checkbox for following text input"
+                                       style="margin-left: 8px"> Share anonymously
+                            </p>
+
+                            <p class="float-right">
+                                <input id="input-attach-file" type="file" style="display: none;" data-type="other"
+                                       accept="">
+                                <a href="#" class="attach-button attach-photo"><img src="img/photo.png"
+                                                                                    alt=""></a>
+                                <a href="#" class="attach-button attach-video"><img src="img/video.png"
+                                                                                    alt=""></a>
+                                <a href="#" class="attach-button attach-youtube" data-toggle="modal"
+                                   data-target="#attachYoutubeModal"><img src="img/youtube.png"
+                                                                          alt=""></a>
+                            </p>
+
+                        </div>
+                        <div id="progressPanel" style="display:none;">
+                            <div class="clear-both"></div>
+                            <div class="progress" style="height: 20px;">
+                                <div id="postProgress" class="progress-bar progress-bar-striped" role="progressbar"
+                                     style="width: 0%"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </form>
+                </li>
+
+
+                <li style="border: 0; padding: 0">
+                    <div id="userPosts" class="posts">
+
+                    </div>
+                    <p id="loadMore" class="text-center" style="display: none"><a class="btn btn-primary load-more"
+                                                                                  href="#">Load
+                        more..</a></p>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+</div>
+
+<div class="templates" style="display: none">
+    <div id="userPost" class="wall-post col-sm-12" style="display: none">
+        <a href="#" class="delete-post float-right">
+            <img src="img/delete.png" alt="">
+        </a>
+        <a href="#" class="edit-post float-right">
+            <img src="img/empty-black.png" alt="">
+        </a>
+        <div class="description"></div>
+        <div class="edit-post-block" style="display: none">
+            <div class="form-group">
+                <textarea class="form-control" rows="3"></textarea>
+            </div>
+            <p>
+                <button type="button" class="btn btn-primary save-post">Save</button>
+            </p>
+        </div>
+    </div>
+    <div id="postAttachment" class="post-attachment" style="display: none">
+
+    </div>
+    <div id="wallYoutubeAttachment" class="wall-attachment" style="display: none">
+
+    </div>
+    <div id="photoAttachment" class="wall-attachment" style="display: none">
+
+    </div>
+    <div id="videoAttachment" class="wall-attachment" style="display: none">
+
+    </div>
+    <div id="photoalbumAttachment" class="wall-attachment photoalbum-attachment" style="display: none">
+
+    </div>
+    <div id="videoalbumAttachment" class="wall-attachment videoalbum-attachment" style="display: none">
+
+    </div>
+</div>
+
+<!-- Edit Info Modal -->
+<div class="modal fade" id="editInfoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit info</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
+                    <input type="text" class="form-control" id="firstNameEdit" placeholder="First name">
+                </div>
+
+                <div class="form-group">
+                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
+                    <input type="text" class="form-control" id="lastNameEdit" placeholder="Last name">
+                </div>
+
+                <div class="form-group">
+                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
+                    <input type="text" class="form-control" id="birthDateEdit" placeholder="Birth date">
+                </div>
+
+                <div class="form-group">
+                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
+                    <input type="text" class="form-control" id="locationEdit" placeholder="Location">
+                </div>
+
+                <div class="form-group">
+                    <!--<label for="firstNameEdit" class="text-muted">First name</label>-->
+                    <textarea class="form-control" id="aboutEdit" rows="3" placeholder="About"></textarea>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary save-info-changes">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Avatar Modal -->
+<div class="modal fade" id="uploadAvatarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload avatar</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <img id="avatarUpload">
+                </p>
+                <p>
+                    <input id="file-input" type="file">
+                </p>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary save-avatar">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attach Youtube Modal -->
+<div class="modal fade" id="attachYoutubeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Attach Youtube Video</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="youtubeUrl" placeholder="Youtube Video URL">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+                <button type="button" class="btn btn-primary add-youtube-video">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Follower Modal -->
+<div class="modal fade" id="addFollowerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add follower</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="followerHash" placeholder="Follower SWARM hash">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+                <button type="button" class="btn btn-primary add-follower">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update ENS Modal -->
+<div class="modal fade" id="updateEnsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update ENS domain with current hash</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="ensDomain" placeholder="Your ENS domain">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="currentHash" placeholder="Current page hash" disabled>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+                <button type="button" class="btn btn-primary send-ens-transaction">Send transaction</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="messageBody" class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                <div class="additional-buttons">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Modal -->
+<div class="modal fade" id="loadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Transfer SWARM data</h5>
+            </div>
+            <div id="loadContent" class="modal-body">
+                <div class="col-sm-4 offset-sm-4">
+                    <div class="loader-animation"></div>
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!-- View Album Modal -->
+<div class="modal fade bd-example-modal-lg" id="viewAlbumModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">View Photo Album</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button type="button" class="btn btn-sm btn-danger float-right btn-delete-album" data-album-id="0">
+                    Delete
+                </button>
+
+                <div class="clear-both"></div>
+                <div id="viewAlbumContent">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!-- View Video Modal -->
+<div class="modal fade bd-example-modal-lg" id="viewVideoAlbumModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">View Video Playlist</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!--<button type="button" class="btn btn-sm btn-danger float-right btn-delete-album" data-album-id="0">
+                    Delete
+                </button>-->
+
+                <div class="clear-both"></div>
+                <div id="viewVideoAlbumContent">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Album Modal -->
+<div class="modal fade bd-example-modal-lg" id="newAlbumModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create/Edit Album</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="newAlbumContent" class="modal-body">
+                <!--<p class="float-left">Hello </p><button type="button" class="btn btn-sm btn-primary add-photo-album float-right">Add photos</button>-->
+                <p>
+                    <input id="input-upload-photo-album" type="file" style="display: none;" accept="image/*" multiple>
+                    <button type="button" class="btn btn-primary upload-photos">Upload photos</button>
+                    <button type="button" class="btn btn-primary show-insta-panel">Import photos from Instagram</button>
+                    <button type="button" class="btn btn-success upload-all-insta">Upload all from Instagram</button>
+                </p>
+                <p>
+                <div id="progressPanelAlbum" style="display:none;">
+                    <div class="clear-both"></div>
+                    <div class="progress" style="height: 20px;">
+                        <div id="postProgressAlbum" class="progress-bar progress-bar-striped" role="progressbar"
+                             style="width: 0%"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <div class="import-insta-panel" style="display: none">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="instaNick" placeholder="Instagram nickname">
+                    </div>
+                    <button type="button" class="btn btn-primary import-instagram">Import</button>
+                    <button type="button" class="btn btn-secondary import-instagram-cancel">Cancel</button>
+                </div>
+                <div class="clear-both"></div>
+                <hr>
+                <div id="uploaded-photos">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary send-ens-transaction">Save</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Video Album Modal -->
+<div class="modal fade bd-example-modal-lg" id="newVideoModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create/Edit Album</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <input id="input-upload-video-album" type="file" style="display: none;" accept="video/*" multiple>
+                    <button type="button" class="btn btn-primary upload-videos">Upload videos</button>
+                </p>
+                <p>
+                <div id="progressPanelVideoAlbum" style="display:none;">
+                    <div class="clear-both"></div>
+                    <div class="progress" style="height: 20px;">
+                        <div id="postProgressVideoAlbum" class="progress-bar progress-bar-striped" role="progressbar"
+                             style="width: 0%"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+                <div class="clear-both"></div>
+                <hr>
+                <div id="uploaded-videos">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary send-ens-transaction">Save</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!--Youtube Import Modal -->
+<div class="modal fade bd-example-modal-lg" id="youtubeImportModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import YouTube Videos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="d-flex justify-content-center">
+                    <button id="execute-request-button" type="button" class="btn btn-primary">Authorize with YouTube
+                    </button>
+                </div>
+
+                <div id="youtubeImportContent" style="margin-top: 8px">
+
+                </div>
+                <hr>
+                <div id="youtubePlaylistVideos" style="margin-top: 8px">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!--Show all photoalbums Modal -->
+<div class="modal fade bd-example-modal-lg" id="allPhotoalbumsModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import YouTube Videos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="allPhotoAlbums">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!-- Import from Facebook Modal -->
+<div class="modal fade bd-example-modal-lg" id="importFromFacebookModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import from Facebook</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="continue_with"
+                     data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="true"
+                     data-onlogin="fbCheckLoginState" data-scope="user_videos,user_posts,user_photos"></div>
+
+                <div id="importFacebookContent">
+
+                </div>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<!-- Import from VK Modal -->
+<div class="modal fade bd-example-modal-lg" id="importFromVKModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import from VK</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-center">
+
+                    <button type="button" class="btn btn-primary" onclick="VK.Auth.login(vkImport.vkAuthInfo, 20);">
+                        Authorize and receive albums
+                    </button>
+
+                </div>
+
+                <div id="importVKContent">
+                    <span id="receiveVkPhotos"></span>
+                    <ul class="list-inline vk-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/scripts.js"></script>
+<script src="js/youtube-load.js"></script>
+<script>
+        // Global variables for GoogleAuth object, auth status.
+    var GoogleAuth;
+
+    /**
+     * Load the API's client and auth2 modules.
+     * Call the initClient function after the modules load.
+     */
+    function handleClientLoad() {
+        gapi.load('client:auth2', initClient);
+    }
+
+    function initClient() {
+        // Initialize the gapi.client object, which app uses to make API requests.
+        // Get API key and client ID from API Console.
+        // 'scope' field specifies space-delimited list of access scopes
+
+        gapi.client.init({
+            'clientId': '840608930739-12c2gdat8sefu73ddbos0ci7i3dk0qa4.apps.googleusercontent.com',
+            'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
+            'scope': 'https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner'
+        }).then(function () {
+            GoogleAuth = gapi.auth2.getAuthInstance();
+
+            // Listen for sign-in state changes.
+            GoogleAuth.isSignedIn.listen(updateSigninStatus);
+
+            // Handle initial sign-in state. (Determine if user is already signed in.)
+            setSigninStatus();
+
+            // Call handleAuthClick function when user clicks on "Authorize" button.
+            $('#execute-request-button').click(function () {
+                $('#youtubeImportContent').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+                handleAuthClick(event);
+            });
+        });
+    }
+
+    function handleAuthClick(event) {
+        // Sign user in after click on auth button.
+        if (isAuthorized) {
+            defineRequest();
+        } else {
+            GoogleAuth.signIn();
+        }
+    }
+
+    function setSigninStatus() {
+        var user = GoogleAuth.currentUser.get();
+        isAuthorized = user.hasGrantedScopes('https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner');
+        // Toggle button text and displayed statement based on current auth status.
+        if (isAuthorized) {
+            //defineRequest();
+        }
+    }
+
+    function updateSigninStatus(isSignedIn) {
+        setSigninStatus();
+    }
+
+    function createResource(properties) {
+        var resource = {};
+        var normalizedProps = properties;
+        for (var p in properties) {
+            var value = properties[p];
+            if (p && p.substr(-2, 2) == '[]') {
+                var adjustedName = p.replace('[]', '');
+                if (value) {
+                    normalizedProps[adjustedName] = value.split(',');
+                }
+                delete normalizedProps[p];
+            }
+        }
+        for (var p in normalizedProps) {
+            // Leave properties that don't have values out of inserted resource.
+            if (normalizedProps.hasOwnProperty(p) && normalizedProps[p]) {
+                var propArray = p.split('.');
+                var ref = resource;
+                for (var pa = 0; pa < propArray.length; pa++) {
+                    var key = propArray[pa];
+                    if (pa == propArray.length - 1) {
+                        ref[key] = normalizedProps[p];
+                    } else {
+                        ref = ref[key] = ref[key] || {};
+                    }
+                }
+            }
+        }
+
+        return resource;
+    }
+
+    function removeEmptyParams(params) {
+        for (var p in params) {
+            if (!params[p] || params[p] == 'undefined') {
+                delete params[p];
+            }
+        }
+        return params;
+    }
+
+    function executeRequest(request, onSuccess) {
+        request.execute(function (response) {
+            console.log(response);
+            if (onSuccess) {
+                onSuccess(response);
+            }
+        });
+    }
+
+    function buildApiRequest(requestMethod, path, params, properties, onSuccess) {
+        params = removeEmptyParams(params);
+        var request;
+        if (properties) {
+            var resource = createResource(properties);
+            request = gapi.client.request({
+                'body': resource,
+                'method': requestMethod,
+                'path': path,
+                'params': params
+            });
+        } else {
+            request = gapi.client.request({
+                'method': requestMethod,
+                'path': path,
+                'params': params
+            });
+        }
+        executeRequest(request, onSuccess);
+    }
+
+    /***** END BOILERPLATE CODE *****/
+
+
+    function defineRequest() {
+        buildApiRequest('GET',
+            '/youtube/v3/playlists',
+            {
+                'mine': 'true',
+                'maxResults': '25',
+                'part': 'snippet,contentDetails',
+                'onBehalfOfContentOwner': '',
+                'onBehalfOfContentOwnerChannel': ''
+            }, null, function (response) {
+                let youtubeImportContent = $('#youtubeImportContent');
+                youtubeImportContent.html('<ul id="preview-youtube-playlists" class="list-inline">');
+                response.items.forEach(function (v) {
+                    youtubeImportContent.append('<li class="list-inline-item"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
+                        '<p><button type="button" class="btn btn-primary receive-youtube-playlist-videos" data-id="' + v.id + '">Receive videos</button></p>' +
+                        '</li>');
+
+                });
+                youtubeImportContent.append('</ul>');
+            });
+    }
+
+    $('#youtubeImportModal').on('click', '.receive-youtube-playlist-videos', function () {
+        let id = $(this).attr('data-id');
+        if (!id) {
+            alert('Incorrect playlist id');
+
+            return;
+        }
+
+        $('#youtubePlaylistVideos').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+        buildApiRequest('GET',
+            '/youtube/v3/playlistItems',
+            {
+                'maxResults': '25',
+                'part': 'snippet,contentDetails',
+                'playlistId': id
+            }, null, function (response) {
+                let videos = $('#youtubePlaylistVideos');
+                videos.html('<p><button type="button" class="btn btn-success btn-import-all-videos">Import all videos</button></p>' +
+                    '<ul id="preview-youtube-videos" class="list-inline">');
+                response.items.forEach(function (v) {
+                    videos.append('<li class="list-inline-item youtube-video-import" data-id="' + v.contentDetails.videoId + '" data-cover-file="' + v.snippet.thumbnails.medium.url + '"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
+                        '</li>');
+
+                });
+                videos.append('</ul>');
+            });
+    });
+</script>
+
+</body>
+</html>
