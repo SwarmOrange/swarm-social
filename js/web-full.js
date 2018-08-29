@@ -21,7 +21,7 @@ let ImportButtons = require('./ImportButtons.js');
 /* todo use one init section for dev and production */
 //window.youtubeImport = new YoutubeImport();
 let myMain = new Main();
-new Photoalbum();
+new Photoalbum(myMain);
 window.vkImport = new VKImport(myMain);
 new Videoplaylist(myMain);
 new EnsUtility(myMain);

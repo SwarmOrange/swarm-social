@@ -1,6 +1,6 @@
 window.myMain = new Main();
 new Blog();
-new Photoalbum();
+new Photoalbum(myMain);
 window.vkImport = new VKImport(myMain);
 new Videoplaylist(myMain);
 new EnsUtility(myMain);

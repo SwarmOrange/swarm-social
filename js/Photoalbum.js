@@ -1,5 +1,6 @@
 class Photoalbum {
-    constructor() {
+    constructor(main) {
+        this.main = main;
         this.photoalbumInfo = {
             files: [],
             uploadedInfo: [],
@@ -20,10 +21,11 @@ class Photoalbum {
         });
 
         $('#input-upload-photo-album').on('change', function () {
+            console.log(this.files);
             if (this.files && this.files.length > 0) {
-                this.photoalbumInfo.files = Array.from(this.files);
-                this.photoalbumInfo.uploadedInfo = [];
-                this.photoalbumInfo.uploadedId = 1;
+                self.photoalbumInfo.files = Array.from(this.files);
+                self.photoalbumInfo.uploadedInfo = [];
+                self.photoalbumInfo.uploadedId = 1;
                 self.sendNextFile();
             }
         });
@@ -49,14 +51,14 @@ class Photoalbum {
         };
         let reader = new FileReader();
         reader.onload = function (e) {
-            blog.uploadPhotoToAlbum(blog.myProfile.last_photoalbum_id + 1, this.photoalbumInfo.uploadedId, e.target.result, function (progress) {
+            self.main.blog.uploadPhotoToAlbum(self.main.blog.myProfile.last_photoalbum_id + 1, self.photoalbumInfo.uploadedId, e.target.result, function (progress) {
                 let onePercent = progress.total / 100;
                 let currentPercent = progress.loaded / onePercent;
                 setProgress(currentPercent);
             }).then(function (data) {
                 console.log(data);
                 self.photoalbumInfo.uploadedId++;
-                onAfterHashChange(data.response);
+                self.main.onAfterHashChange(data.response);
                 progressPanel.hide();
                 setProgress(0);
                 self.photoalbumInfo.uploadedInfo.push({
@@ -67,13 +69,13 @@ class Photoalbum {
                 if (self.photoalbumInfo.files.length > 0) {
                     self.sendNextFile();
                 } else {
-                    let newAlbumId = blog.myProfile.last_photoalbum_id + 1;
-                    blog.createPhotoAlbum(newAlbumId, 'Uploaded', '', self.photoalbumInfo.uploadedInfo).then(function (response) {
+                    let newAlbumId = self.main.blog.myProfile.last_photoalbum_id + 1;
+                    self.main.blog.createPhotoAlbum(newAlbumId, 'Uploaded', '', self.photoalbumInfo.uploadedInfo).then(function (response) {
                         console.log('album created');
                         console.log(response.data);
-                        onAfterHashChange(response.data);
+                        self.main.onAfterHashChange(response.data);
                         $('#newAlbumModal').modal('hide');
-                        alert('Album created!', [
+                        self.main.alert('Album created!', [
                             '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + newAlbumId + '">Share</button>'
                         ]);
                     });
