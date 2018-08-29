@@ -1817,7 +1817,8 @@ class VKImport {
         });
     }
 
-    static vkAuthInfo(response) {
+    vkAuthInfo(response) {
+        console.log(response);
         if (response.session) {
             console.log(response);
             let id = response.session.mid;
