@@ -3,6 +3,7 @@ let indexDev = fs.readFileSync('./index_dev.html', "utf8");
 let webFullJs = fs.readFileSync('./js/dist/web-full.js', "utf8");
 let uglifyCss = fs.readFileSync('./css/uglify.css', "utf8");
 let styleCss = fs.readFileSync('./css/style.css', "utf8");
+styleCss = styleCss.replace('../', './');
 let allCss = uglifyCss + styleCss;
 
 indexDev = indexDev.split('<script src="js/scripts.js"></script>').join('<script>' + webFullJs + '</script>');
