@@ -13,7 +13,7 @@ if (host === 'localhost') {
         '<script src="js/Main.js"></script>' +
         '<script src="js/EnsUtility.js"></script>' +
         //'<script src="js/mru.js"></script>' +
-        '<script src="js/YoutubeImport.js"></script>' +
+        //'<script src="js/YoutubeImport.js"></script>' +
         '<script src="js/FacebookImport.js"></script>' +
         '<script src="js/VKImport.js"></script>' +
         '<script src="js/anal.js"></script>' +

@@ -80,3 +80,8 @@ browserify js/web-modules.js > js/dist/web-modules.js && browserify js/web-full.
 ```
 node css/uglify.js > css/uglify.css
 ```
+
+Compile all files to HTML
+```
+node ./build.js 
+```
