@@ -57,18 +57,10 @@ Install dependencies
 
 ```
 npm install
-```
-
-```
 npm install uglifycss -g
-```
-
-```
 npm install -g uglify-js
-```
-
-```
 npm install -g browserify
+npm install uglify-es -g
 ```
 
 After changing or adding JS libraries, run
@@ -84,4 +76,9 @@ node css/uglify.js > css/uglify.css
 Compile all files to HTML
 ```
 node ./build.js 
+```
+
+Or
+```
+browserify js/web-full.js > js/dist/web-full.js && uglifyjs --compress -- ./js/dist/web-full.js > ./js/dist/web-full.min.js && node ./build.js 
 ```
