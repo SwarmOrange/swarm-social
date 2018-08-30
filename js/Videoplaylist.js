@@ -63,7 +63,7 @@ class Videoplaylist {
                 setProgress(currentPercent);
             }).then(function (data) {
                 console.log(data);
-                self.main.onAfterHashChange(data.response);
+                self.main.onAfterHashChange(data.response, true);
                 progressPanel.hide();
                 setProgress(0);
                 self.videoInfo.uploadedInfo.push({

@@ -58,7 +58,7 @@ class Photoalbum {
             }).then(function (data) {
                 console.log(data);
                 self.photoalbumInfo.uploadedId++;
-                self.main.onAfterHashChange(data.response);
+                self.main.onAfterHashChange(data.response, true);
                 progressPanel.hide();
                 setProgress(0);
                 self.photoalbumInfo.uploadedInfo.push({
