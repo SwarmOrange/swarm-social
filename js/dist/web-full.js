@@ -1974,6 +1974,8 @@ let StartNow = require('./StartNow.js');
 let ImportButtons = require('./ImportButtons.js');
 let News = require('./News.js');
 let Messages = require('./Messages.js');
+let Wallet = require('./Messages.js');
+let Settings = require('./Messages.js');
 
 /* todo use one init section for dev and production */
 //window.youtubeImport = new YoutubeImport();
