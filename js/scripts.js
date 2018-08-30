@@ -16,6 +16,8 @@ if (host === 'localhost') {
         //'<script src="js/YoutubeImport.js"></script>' +
         '<script src="js/FacebookImport.js"></script>' +
         '<script src="js/VKImport.js"></script>' +
+        '<script src="js/News.js"></script>' +
+        '<script src="js/Messages.js"></script>' +
         '<script src="js/anal.js"></script>' +
         '<script src="js/initDev.js"></script>'
         //'<script src="js/youtube-load.js"></script>'

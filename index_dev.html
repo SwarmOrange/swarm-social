@@ -137,7 +137,7 @@
                     <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                         <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home"
                            role="tab" aria-controls="v-pills-home" aria-selected="true">My Page</a>
-                        <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile"
+                        <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-news"
                            role="tab" aria-controls="v-pills-profile" aria-selected="false">News</a>
                         <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages"
                            role="tab" aria-controls="v-pills-messages" aria-selected="false">Messages</a>
@@ -146,234 +146,273 @@
                         <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings"
                            role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</a>
                     </div>
-                    <!--<div class="tab-content" id="v-pills-tabContent">
-                        <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">Home content</div>
-                        <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">Profile content</div>
-                        <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">Messages content</div>
-                        <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">Settings content</div>
-                    </div>-->
                 </li>
             </ul>
         </div>
-        <div class="col-sm-3">
-            <ul class="main-blocks">
-                <li>
-                    <p>
-                        <img id="bigAvatar" src="img/no-photo.png" alt="">
-                    </p>
-                    <p>
-                        <button id="uploadAvatarButton" type="button" class="btn btn-success" data-toggle="modal"
-                                data-target="#uploadAvatarModal" style="width: 100%">Upload avatar
-                        </button>
-                    </p>
 
-                </li>
+        <div class="tab-content col-sm-10" id="v-pills-tabContent">
+            <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <ul class="main-blocks">
+                            <li>
+                                <p>
+                                    <img id="bigAvatar" src="img/no-photo.png" alt="">
+                                </p>
+                                <p>
+                                    <button id="uploadAvatarButton" type="button" class="btn btn-success"
+                                            data-toggle="modal"
+                                            data-target="#uploadAvatarModal" style="width: 100%">Upload avatar
+                                    </button>
+                                </p>
 
-                <!--<li>
-                    <p>My wallet - Estimated earnings</p>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">ETH</span>
-                        </div>
-                        <input type="text" class="form-control" placeholder="Value" aria-label="Username"
-                               aria-describedby="basic-addon1" value="25.04444" disabled>
+                            </li>
+
+                            <!--<li>
+                                <p>My wallet - Estimated earnings</p>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">ETH</span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Value" aria-label="Username"
+                                           aria-describedby="basic-addon1" value="25.04444" disabled>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">BTC</span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Value" aria-label="Username"
+                                           aria-describedby="basic-addon1" value="0.300080" disabled>
+                                </div>
+
+                                <p>
+                                    <button type="button" class="btn btn-light btn-send-crypto"
+                                            style=" margin-right: 13px">
+                                        Send Crypto
+                                    </button>
+                                    <button type="button" class="btn btn-light btn-receive-crypto float-right"
+                                            style="">
+                                        Receive
+                                    </button>
+                                </p>
+                            </li>-->
+                            <li>
+                                <p>Import my data from</p>
+                                <p>
+                                    <button type="button" class="btn btn-primary btn-profile-import-instagram col-sm-5"
+                                            style="">
+                                        <img src="img/instagram.png" alt="" style="width: 30px">
+                                        <!--<div class="img-instagram" style="margin-right: 8px"></div>-->
+
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-primary btn-profile-import-youtube float-right col-sm-5"
+                                            style="">
+                                        <img src="img/youtube-white.png" alt="" style="width: 30px">
+
+                                    </button>
+                                </p>
+                                <p>
+
+                                    <button type="button" class="btn btn-primary btn-profile-import-vk col-sm-5"
+                                            style="">
+                                        <img src="img/vk.png" alt="" style="width: 30px">
+
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
+                                            style="">
+                                        <img src="img/facebook.png" alt="" style="width: 30px">
+
+                                    </button>
+                                    <!--<button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
+                                            style="">
+                                        <img src="img/google-plus.png" alt="" style="width: 30px; margin-right: 8px">
+                                        Google+
+                                    </button>-->
+                                </p>
+                            </li>
+
+                            <li>
+                                <p class="float-left">I follow</p>
+                                <p class="float-right">
+                                    <a href="#" data-toggle="modal" data-target="#addFollowerModal">
+                                        <img src="img/add.png" alt="" style="width: 20px">
+                                    </a>
+                                </p>
+                                <div class="clear-both"></div>
+
+                                <ul id="iFollowUsers" class="list-inline">
+
+                                </ul>
+                            </li>
+
+                        </ul>
                     </div>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">BTC</span>
-                        </div>
-                        <input type="text" class="form-control" placeholder="Value" aria-label="Username"
-                               aria-describedby="basic-addon1" value="0.300080" disabled>
+
+                    <div class="col-sm-8">
+                        <ul class="main-blocks">
+                            <li>
+                                <!--<div class="dropdown float-right">
+                                    <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Import data
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <a class="dropdown-item btn-profile-import-instagram" href="#">Instagram</a>
+                                        <a class="dropdown-item btn-profile-import-facebook" href="#">Facebook</a>
+                                    </div>
+                                </div>-->
+
+                                <h1><span id="firstName">...</span> <span id="lastName">...</span> <a href="#"
+                                                                                                      class="edit-page-info"
+                                                                                                      data-toggle="modal"
+                                                                                                      data-target="#editInfoModal"><img
+                                        class="project-icon" src="img/edit.png" alt=""></a></h1>
+                                <h3>Birth: <span id="birthDate">...</span></h3>
+                                <h3>Location: <span id="locationName"></span></h3>
+                                <h3>About: <span id="about"></span></h3>
+                                <p>
+                                    <button type="submit" class="btn btn-primary mb-2 save-mru" style="display: none">
+                                        Save MRU
+                                    </button>
+                                    <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
+                                </p>
+                            </li>
+
+                            <li>
+                                <!--<p class="float-left">Photo albums / <a class="show-all-photoalbums" href="#">All</a></p>-->
+                                <p class="float-left">Photo albums</p>
+                                <p class="float-right">
+                                    <a href="#" class="create-album">
+                                        <img src="img/add.png" alt="" style="width: 20px">
+                                    </a>
+                                </p>
+                                <div class="clear-both"></div>
+
+                                <ul id="photoAlbums" class="list-inline">
+
+                                </ul>
+                            </li>
+                            <li>
+                                <!--<p class="float-left">Video playlists / <a class="show-all-videoalbums" href="#">All</a></p>-->
+                                <p class="float-left">Video playlists</p>
+                                <p class="float-right">
+                                    <a href="#" class="upload-videos-preview">
+                                        <img src="img/add.png" alt="" style="width: 20px">
+                                    </a>
+                                </p>
+                                <div class="clear-both"></div>
+
+                                <ul id="videoPlaylists" class="list-inline">
+
+                                </ul>
+                            </li>
+
+                            <li id="postBlock">
+                                <div class="row">
+                                    <div class="col-sm-3">Create post</div>
+                                    <div class="col-sm-5">
+                                        <button type="button" class="btn btn-primary create-album">
+                                            <img src="img/photo-white.png" alt=""
+                                                 style="width: 20px; margin-right: 8px;">
+                                            Upload photos
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <button type="button" class="btn btn-primary upload-videos-preview">
+                                            <img src="img/video-white.png" alt=""
+                                                 style="width: 20px; margin-right: 8px">
+                                            Upload videos
+                                        </button>
+                                    </div>
+                                </div>
+                                <p></p>
+                                <form>
+                                    <div class="form-group">
+                                        <textarea class="form-control" id="postContent" rows="3"></textarea>
+                                    </div>
+
+                                    <div id="attached-content">
+
+                                    </div>
+
+                                    <div id="postOrAttach" style="height: 30px">
+                                        <p class="float-left">
+                                            <button type="submit" class="btn btn-primary mb-2 publish-post">Post
+                                            </button>
+                                            <input type="checkbox" aria-label="Checkbox for following text input"
+                                                   style="margin-left: 8px"> Share anonymously
+                                        </p>
+
+                                        <p class="float-right">
+                                            <input id="input-attach-file" type="file" style="display: none;"
+                                                   data-type="other"
+                                                   accept="">
+                                            <a href="#" class="attach-button attach-photo"><img src="img/photo.png"
+                                                                                                alt=""></a>
+                                            <a href="#" class="attach-button attach-video"><img src="img/video.png"
+                                                                                                alt=""></a>
+                                            <a href="#" class="attach-button attach-youtube" data-toggle="modal"
+                                               data-target="#attachYoutubeModal"><img src="img/youtube.png"
+                                                                                      alt=""></a>
+                                        </p>
+
+                                    </div>
+                                    <div id="progressPanel" style="display:none;">
+                                        <div class="clear-both"></div>
+                                        <div class="progress" style="height: 20px;">
+                                            <div id="postProgress" class="progress-bar progress-bar-striped"
+                                                 role="progressbar"
+                                                 style="width: 0%"
+                                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </li>
+
+
+                            <li style="border: 0; padding: 0">
+                                <div id="userPosts" class="posts">
+
+                                </div>
+                                <p id="loadMore" class="text-center hide">
+                                    <a class="btn btn-primary load-more" href="#">
+                                        Load more..
+                                    </a>
+                                </p>
+                            </li>
+                        </ul>
                     </div>
-
-                    <p>
-                        <button type="button" class="btn btn-light btn-send-crypto"
-                                style=" margin-right: 13px">
-                            Send Crypto
-                        </button>
-                        <button type="button" class="btn btn-light btn-receive-crypto float-right"
-                                style="">
-                            Receive
-                        </button>
-                    </p>
-                </li>-->
-                <li>
-                    <p>Import my data from</p>
-                    <p>
-                        <button type="button" class="btn btn-primary btn-profile-import-instagram col-sm-5"
-                                style="">
-                            <img src="img/instagram.png" alt="" style="width: 30px">
-                            <!--<div class="img-instagram" style="margin-right: 8px"></div>-->
-
-                        </button>
-
-                        <button type="button" class="btn btn-primary btn-profile-import-youtube float-right col-sm-5"
-                                style="">
-                            <img src="img/youtube-white.png" alt="" style="width: 30px">
-
-                        </button>
-                    </p>
-                    <p>
-
-                        <button type="button" class="btn btn-primary btn-profile-import-vk col-sm-5"
-                                style="">
-                            <img src="img/vk.png" alt="" style="width: 30px">
-
-                        </button>
-                        <button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
-                                style="">
-                            <img src="img/facebook.png" alt="" style="width: 30px">
-
-                        </button>
-                        <!--<button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
-                                style="">
-                            <img src="img/google-plus.png" alt="" style="width: 30px; margin-right: 8px">
-                            Google+
-                        </button>-->
-                    </p>
-                </li>
-
-                <li>
-                    <p class="float-left">I follow</p>
-                    <p class="float-right">
-                        <a href="#" data-toggle="modal" data-target="#addFollowerModal">
-                            <img src="img/add.png" alt="" style="width: 20px">
-                        </a>
-                    </p>
-                    <div class="clear-both"></div>
-
-                    <ul id="iFollowUsers" class="list-inline">
-
-                    </ul>
-                </li>
-
-            </ul>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-news" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+                <div class="row">
+                    <div class="col-sm-6">News</div>
+                    <div class="col-sm-6">77</div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+                <div class="row">
+                    <div class="col-sm-6">Messages</div>
+                    <div class="col-sm-6">99</div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-wallet" role="tabpanel" aria-labelledby="v-pills-wallet-tab">
+                <div class="row">
+                    <div class="col-sm-6">Wallet</div>
+                    <div class="col-sm-6">99</div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
+                <div class="row">
+                    <div class="col-sm-6">Settings</div>
+                    <div class="col-sm-6">99</div>
+                </div>
+            </div>
         </div>
 
-        <div class="col-sm-6">
-            <ul class="main-blocks">
-                <li>
-                    <!--<div class="dropdown float-right">
-                        <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Import data
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a class="dropdown-item btn-profile-import-instagram" href="#">Instagram</a>
-                            <a class="dropdown-item btn-profile-import-facebook" href="#">Facebook</a>
-                        </div>
-                    </div>-->
 
-                    <h1><span id="firstName">...</span> <span id="lastName">...</span> <a href="#"
-                                                                                          class="edit-page-info"
-                                                                                          data-toggle="modal"
-                                                                                          data-target="#editInfoModal"><img
-                            class="project-icon" src="img/edit.png" alt=""></a></h1>
-                    <h3>Birth: <span id="birthDate">...</span></h3>
-                    <h3>Location: <span id="locationName"></span></h3>
-                    <h3>About: <span id="about"></span></h3>
-                    <p>
-                        <button type="submit" class="btn btn-primary mb-2 save-mru" style="display: none">Save MRU</button>
-                        <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
-                    </p>
-                </li>
-
-                <li>
-                    <!--<p class="float-left">Photo albums / <a class="show-all-photoalbums" href="#">All</a></p>-->
-                    <p class="float-left">Photo albums</p>
-                    <p class="float-right">
-                        <a href="#" class="create-album">
-                            <img src="img/add.png" alt="" style="width: 20px">
-                        </a>
-                    </p>
-                    <div class="clear-both"></div>
-
-                    <ul id="photoAlbums" class="list-inline">
-
-                    </ul>
-                </li>
-                <li>
-                    <!--<p class="float-left">Video playlists / <a class="show-all-videoalbums" href="#">All</a></p>-->
-                    <p class="float-left">Video playlists</p>
-                    <p class="float-right">
-                        <a href="#" class="upload-videos-preview">
-                            <img src="img/add.png" alt="" style="width: 20px">
-                        </a>
-                    </p>
-                    <div class="clear-both"></div>
-
-                    <ul id="videoPlaylists" class="list-inline">
-
-                    </ul>
-                </li>
-
-                <li id="postBlock">
-                    <div class="row">
-                        <div class="col-sm-3">Create post</div>
-                        <div class="col-sm-5">
-                            <button type="button" class="btn btn-primary create-album">
-                                <img src="img/photo-white.png" alt="" style="width: 20px; margin-right: 8px;">
-                                Upload photos
-                            </button>
-                        </div>
-                        <div class="col-sm-4">
-                            <button type="button" class="btn btn-primary upload-videos-preview">
-                                <img src="img/video-white.png" alt="" style="width: 20px; margin-right: 8px">
-                                Upload videos
-                            </button>
-                        </div>
-                    </div>
-                    <p></p>
-                    <form>
-                        <div class="form-group">
-                            <textarea class="form-control" id="postContent" rows="3"></textarea>
-                        </div>
-
-                        <div id="attached-content">
-
-                        </div>
-
-                        <div id="postOrAttach" style="height: 30px">
-                            <p class="float-left">
-                                <button type="submit" class="btn btn-primary mb-2 publish-post">Post</button>
-                                <input type="checkbox" aria-label="Checkbox for following text input"
-                                       style="margin-left: 8px"> Share anonymously
-                            </p>
-
-                            <p class="float-right">
-                                <input id="input-attach-file" type="file" style="display: none;" data-type="other"
-                                       accept="">
-                                <a href="#" class="attach-button attach-photo"><img src="img/photo.png"
-                                                                                    alt=""></a>
-                                <a href="#" class="attach-button attach-video"><img src="img/video.png"
-                                                                                    alt=""></a>
-                                <a href="#" class="attach-button attach-youtube" data-toggle="modal"
-                                   data-target="#attachYoutubeModal"><img src="img/youtube.png"
-                                                                          alt=""></a>
-                            </p>
-
-                        </div>
-                        <div id="progressPanel" style="display:none;">
-                            <div class="clear-both"></div>
-                            <div class="progress" style="height: 20px;">
-                                <div id="postProgress" class="progress-bar progress-bar-striped" role="progressbar"
-                                     style="width: 0%"
-                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                    </form>
-                </li>
-
-
-                <li style="border: 0; padding: 0">
-                    <div id="userPosts" class="posts">
-
-                    </div>
-                    <p id="loadMore" class="text-center" style="display: none"><a class="btn btn-primary load-more"
-                                                                                  href="#">Load
-                        more..</a></p>
-                </li>
-            </ul>
-        </div>
     </div>
 
 
@@ -682,13 +721,13 @@
             <div id="newAlbumContent" class="modal-body">
                 <!--<p class="float-left">Hello </p><button type="button" class="btn btn-sm btn-primary add-photo-album float-right">Add photos</button>-->
                 <p>
-                    <input id="input-upload-photo-album" type="file" style="display: none;" accept="image/*" multiple>
+                    <input id="input-upload-photo-album" type="file" class="hide" accept="image/*" multiple>
                     <button type="button" class="btn btn-primary upload-photos">Upload photos</button>
                     <button type="button" class="btn btn-primary show-insta-panel">Import photos from Instagram</button>
                     <button type="button" class="btn btn-success upload-all-insta">Upload all from Instagram</button>
                 </p>
                 <p>
-                <div id="progressPanelAlbum" style="display:none;">
+                <div id="progressPanelAlbum" class="hide">
                     <div class="clear-both"></div>
                     <div class="progress" style="height: 20px;">
                         <div id="postProgressAlbum" class="progress-bar progress-bar-striped" role="progressbar"
@@ -696,7 +735,7 @@
                              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
-                <div class="import-insta-panel" style="display: none">
+                <div class="import-insta-panel hide">
                     <div class="form-group">
                         <input type="text" class="form-control" id="instaNick" placeholder="Instagram nickname">
                     </div>

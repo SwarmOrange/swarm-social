@@ -1,3 +1,7 @@
+.hide {
+    display: none;
+}
+
 .posts {
     margin-top: 8px;
 }
@@ -212,10 +216,16 @@ img {
     height: 168px;
 }
 
-#photoAlbums > li img, .preview-album-photo, .post-photoalbum-item img {
+#photoAlbums > li img, .post-photoalbum-item img {
     object-fit: cover;
-    width: 158px;
-    height: 158px;
+    width: 200px;
+    height: 200px;
+}
+
+.preview-album-photo {
+    object-fit: cover;
+    width: 250px;
+    height: 250px;
 }
 
 .wall-attachment .post-photoalbum-item {
