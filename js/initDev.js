@@ -6,6 +6,6 @@ new Videoplaylist(myMain);
 new EnsUtility(myMain);
 new FacebookImport();
 new StartNow();
-new ImportButtons();
+new ImportButtons(myMain);
 //window.youtubeImport = new YoutubeImport();
 new ImportButtons(myMain);

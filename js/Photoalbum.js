@@ -7,7 +7,6 @@ class Photoalbum {
             uploadedId: 0
         };
 
-        // todo what the correct form for init?
         this.init();
     }
 
@@ -21,7 +20,6 @@ class Photoalbum {
         });
 
         $('#input-upload-photo-album').on('change', function () {
-            console.log(this.files);
             if (this.files && this.files.length > 0) {
                 self.photoalbumInfo.files = Array.from(this.files);
                 self.photoalbumInfo.uploadedInfo = [];
