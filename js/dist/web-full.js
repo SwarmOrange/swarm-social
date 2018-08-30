@@ -1410,13 +1410,34 @@ class Main {
 module.exports = Main;
 },{}],6:[function(require,module,exports){
 class Messages {
+    constructor(main) {
+        this.main = main;
+        this.init();
+    }
 
+    init() {
+        let self = this;
+        $('#v-pills-messages-tab').click(function (e) {
+            e.preventDefault();
+            self.main.alert('Not implemented');
+        });
+    }
 }
 
 module.exports = Messages;
 },{}],7:[function(require,module,exports){
 class News {
+    constructor(main) {
+        this.main = main;
+        this.init();
+    }
 
+    init() {
+        let self = this;
+        $('#v-pills-news-tab').click(function (e) {
+            e.preventDefault();
+        });
+    }
 }
 
 module.exports = News;
@@ -1966,6 +1987,8 @@ new StartNow();
 new ImportButtons(myMain);
 new News(myMain);
 new Messages(myMain);
+new Wallet(myMain);
+new Settings(myMain);
 
 },{"./Blog.js":1,"./EnsUtility.js":2,"./FacebookImport.js":3,"./ImportButtons.js":4,"./Main":5,"./Messages.js":6,"./News.js":7,"./Photoalbum.js":8,"./StartNow.js":9,"./SwarmApi":10,"./VKImport.js":11,"./Videoplaylist.js":12,"bootstrap":41,"cropperjs":42,"ekko-lightbox":77,"ethereum-ens":79,"jquery":83}],14:[function(require,module,exports){
 module.exports = require('./lib/axios');
