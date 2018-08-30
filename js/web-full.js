@@ -32,3 +32,5 @@ new StartNow();
 new ImportButtons(myMain);
 new News(myMain);
 new Messages(myMain);
+new Wallet(myMain);
+new Settings(myMain);

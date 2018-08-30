@@ -1,4 +1,4 @@
-class News {
+class Wallet {
     constructor(main) {
         this.main = main;
         this.init();
@@ -6,10 +6,11 @@ class News {
 
     init() {
         let self = this;
-        $('#v-pills-news-tab').click(function (e) {
+        $('#v-pills-wallet-tab').click(function (e) {
             e.preventDefault();
+            self.main.alert('Not implemented');
         });
     }
 }
 
-module.exports = News;
+module.exports = Wallet;
