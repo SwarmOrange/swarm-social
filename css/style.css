@@ -243,3 +243,7 @@ img {
 .vertical-pills li {
     border: 0;
 }
+
+li > p:last-child {
+    margin-bottom: 0;
+}
