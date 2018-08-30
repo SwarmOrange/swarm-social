@@ -233,3 +233,17 @@ img {
     width: 250px;
     height: 250px;
 }
+
+.img {
+    display: inline-block;
+    background: url('png.png') no-repeat;
+    overflow: hidden;
+    text-indent: -9999px;
+    text-align: left;
+}
+
+.img-instagram {
+    width: 30px;
+    height: 30px;
+    background: url("../img/instagram.png?__spriter") 0 0;
+}
