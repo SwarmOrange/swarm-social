@@ -141,6 +141,8 @@
                            role="tab" aria-controls="v-pills-profile" aria-selected="false">News</a>
                         <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages"
                            role="tab" aria-controls="v-pills-messages" aria-selected="false">Messages</a>
+                        <a class="nav-link" id="v-pills-wallet-tab" data-toggle="pill" href="#v-pills-wallet"
+                           role="tab" aria-controls="v-pills-wallet" aria-selected="false">Wallet</a>
                         <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings"
                            role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</a>
                     </div>
@@ -167,7 +169,7 @@
 
                 </li>
 
-                <li>
+                <!--<li>
                     <p>My wallet - Estimated earnings</p>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -194,36 +196,34 @@
                             Receive
                         </button>
                     </p>
-                </li>
+                </li>-->
                 <li>
-                    <p>My data</p>
-
-                    <p>Import from </p>
+                    <p>Import my data from</p>
                     <p>
                         <button type="button" class="btn btn-primary btn-profile-import-instagram col-sm-5"
                                 style="">
-                            <img src="img/instagram.png" alt="" style="width: 30px; margin-right: 8px">
+                            <img src="img/instagram.png" alt="" style="width: 30px">
                             <!--<div class="img-instagram" style="margin-right: 8px"></div>-->
-                            Instagram
+
                         </button>
 
                         <button type="button" class="btn btn-primary btn-profile-import-youtube float-right col-sm-5"
                                 style="">
-                            <img src="img/youtube-white.png" alt="" style="width: 30px; margin-right: 8px">
-                            Youtube
+                            <img src="img/youtube-white.png" alt="" style="width: 30px">
+
                         </button>
                     </p>
                     <p>
 
                         <button type="button" class="btn btn-primary btn-profile-import-vk col-sm-5"
                                 style="">
-                            <img src="img/vk.png" alt="" style="width: 30px; margin-right: 8px">
-                            VK
+                            <img src="img/vk.png" alt="" style="width: 30px">
+
                         </button>
                         <button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
                                 style="">
-                            <img src="img/facebook.png" alt="" style="width: 30px; margin-right: 8px">
-                            Facebook
+                            <img src="img/facebook.png" alt="" style="width: 30px">
+
                         </button>
                         <!--<button type="button" class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
                                 style="">
@@ -233,6 +233,19 @@
                     </p>
                 </li>
 
+                <li>
+                    <p class="float-left">I follow</p>
+                    <p class="float-right">
+                        <a href="#" data-toggle="modal" data-target="#addFollowerModal">
+                            <img src="img/add.png" alt="" style="width: 20px">
+                        </a>
+                    </p>
+                    <div class="clear-both"></div>
+
+                    <ul id="iFollowUsers" class="list-inline">
+
+                    </ul>
+                </li>
 
             </ul>
         </div>
@@ -259,7 +272,7 @@
                     <h3>Location: <span id="locationName"></span></h3>
                     <h3>About: <span id="about"></span></h3>
                     <p>
-                        <button type="submit" class="btn btn-primary mb-2 save-mru">Save MRU</button>
+                        <button type="submit" class="btn btn-primary mb-2 save-mru" style="display: none">Save MRU</button>
                         <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
                     </p>
                 </li>
@@ -295,14 +308,14 @@
 
                 <li id="postBlock">
                     <div class="row">
-                        <div class="col-sm-2">Create post</div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-3">Create post</div>
+                        <div class="col-sm-5">
                             <button type="button" class="btn btn-primary create-album">
                                 <img src="img/photo-white.png" alt="" style="width: 20px; margin-right: 8px;">
                                 Upload photos
                             </button>
                         </div>
-                        <div class="col-sm-7">
+                        <div class="col-sm-4">
                             <button type="button" class="btn btn-primary upload-videos-preview">
                                 <img src="img/video-white.png" alt="" style="width: 20px; margin-right: 8px">
                                 Upload videos

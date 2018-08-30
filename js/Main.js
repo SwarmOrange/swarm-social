@@ -175,11 +175,6 @@ class Main {
             let self = this;
 
             let userHash = $('#navigateUserHash').val();
-            /*goToHash(userHash).then(function (response) {
-                $('#userInfo').show();
-                $('#mainMenu').click();
-                //reload();
-            })*/
             self.onAfterHashChange(userHash).then(function () {
                 $('#userInfo').show();
                 $('#mainMenu').click();
@@ -208,7 +203,6 @@ class Main {
             info.about = $('#aboutEdit').val();
 
             $('#editInfoModal').modal('hide');
-            //self.showUploadModal();
             self.blog.saveProfile(info).then(function (response) {
                 console.log(response.data);
                 self.onAfterHashChange(response.data);
@@ -392,7 +386,7 @@ class Main {
                 e.preventDefault();
                 let swarmProfileHash = $(this).attr('data-profile-id');
                 // todo go to profile
-                self.goToHash(swarmProfileHash).then(function (response) {
+                self.onAfterHashChange(swarmProfileHash).then(function (response) {
                     //reload();
                 });
             })
@@ -573,31 +567,6 @@ class Main {
         }
     }
 
-    goToHash(userHash) {
-        let self = this;
-        //swarm.applicationHash = userHash;
-        //localStorage.setItem('applicationHash', userHash);
-        self.onAfterHashChange(userHash);
-        /*showUploadModal();
-        // todo check it before load
-        console.log(userHash);
-        return blog.getProfile(userHash)
-            .then(function (response) {
-                console.log('ok, hide');
-                setTimeout(function () {
-                    $('#loadModal').modal('hide');
-                }, 1000);
-
-                console.log(response.data);
-                updateInfo(response.data);
-            })
-            .catch(function (error) {
-                // handle error
-                console.log(error);
-                console.log('Some error happen');
-            })*/
-    }
-
     youtube_parser(url) {
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
         var match = url.match(regExp);
@@ -712,10 +681,9 @@ class Main {
         let iFollowBlock = $('#iFollowUsers');
         if ('i_follow' in data && data.i_follow.length) {
             data.i_follow.forEach(function (v) {
-                //iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
-                iFollowBlock.append('<li class="i-follow-li">' +
-                    //'<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
-                    '<a onclick="return false;" href="' + self.swarm.getFullUrl('', v) + '" class="load-profile--" data-profile-id="' + v + '"><img src="' + self.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 30px"></a> <a href="#" onclick="return false;"><span style="margin-left: 8px">iii aaa</span></a></li>');
+                iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
+                    '<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
+                    '<a onclick="return false;" href="' + self.swarm.getFullUrl('', v) + '" class="load-profile" data-profile-id="' + v + '"><img src="' + self.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 30px"></a></li>');
             });
         }
     }

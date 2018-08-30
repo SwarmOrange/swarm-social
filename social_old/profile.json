@@ -10,12 +10,7 @@
     "original": "social/file/avatar/original.jpg"
   },
   "about": "My SWARM page. You can edit this information",
-  "i_follow": [
-    "9949b5ea3a8ea3327362495eb93c2307b51a8a99717aed7287302fa5cc4a1365",
-    "b74bf6a578eaa59379c7b54c223e79e86493f5aa6a816923decb283ee0e247cf",
-    "9708f86b2167e57db146908819eb2cc40984030431868874d0fa37956d895de1",
-    "159d0a277189c5564c3d23eabe952f237f04c126079cca23f6c8508c4d4e5ffe"
-  ],
+  "i_follow": [],
   "last_post_id": 0,
   "last_photoalbum_id": 2,
   "last_videoalbum_id": 1
