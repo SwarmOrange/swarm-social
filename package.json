@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify ./js/web-full.js > ./js/dist/web-full.js && uglifyjs --compress -- ./js/dist/web-full.js > ./js/dist/web-full.min.js && node ./build.js"
   },
   "repository": {
     "type": "git",

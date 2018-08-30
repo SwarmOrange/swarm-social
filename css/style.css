@@ -182,11 +182,11 @@ img {
     background-color: #0092e7 !important;
 }
 
-.nav-link {
+.fake-nav .nav-link {
     color: white;
 }
 
-.nav-link:hover {
+.fake-nav .nav-link:hover {
     color: #dbedff;
 }
 
@@ -212,26 +212,18 @@ img {
     height: 168px;
 }
 
-#photoAlbums > li img {
+#photoAlbums > li img, .preview-album-photo, .post-photoalbum-item img {
     object-fit: cover;
-    width: 230px;
-    height: 230px;
+    width: 158px;
+    height: 158px;
 }
 
-.preview-album-photo {
-    object-fit: cover;
-    width: 250px;
-    height: 250px;
+.wall-attachment .post-photoalbum-item {
+    border: 0;
 }
 
 .post-photoalbum-item, .post-videoalbum-item {
     padding: 0 !important;
-}
-
-.post-photoalbum-item img {
-    object-fit: cover;
-    width: 250px;
-    height: 250px;
 }
 
 .img {
@@ -246,4 +238,8 @@ img {
     width: 30px;
     height: 30px;
     background: url("../img/instagram.png?__spriter") 0 0;
+}
+
+.vertical-pills li {
+    border: 0;
 }

@@ -63,7 +63,7 @@
                     aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>-->
-            <ul class="nav nav-pills nav-fill fake-nav">
+            <!--<ul class="nav nav-pills nav-fill fake-nav">
                 <li class="nav-item">
                     <a class="nav-link active" href="#">My Page</a>
                 </li>
@@ -73,7 +73,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">View Page</a>
                 </li>
-            </ul>
+            </ul>-->
         </div>
     </div>
 </header>
@@ -131,9 +131,31 @@
 
 <div id="userInfo" class="container" style="margin-top: 30px; display: none">
     <div class="row">
-        <div class="col-sm-4">
+        <div class="col-sm-2">
+            <ul class="main-blocks vertical-pills">
+                <li>
+                    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                        <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home"
+                           role="tab" aria-controls="v-pills-home" aria-selected="true">My Page</a>
+                        <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile"
+                           role="tab" aria-controls="v-pills-profile" aria-selected="false">News</a>
+                        <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages"
+                           role="tab" aria-controls="v-pills-messages" aria-selected="false">Messages</a>
+                        <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings"
+                           role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</a>
+                    </div>
+                    <!--<div class="tab-content" id="v-pills-tabContent">
+                        <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">Home content</div>
+                        <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">Profile content</div>
+                        <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">Messages content</div>
+                        <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">Settings content</div>
+                    </div>-->
+                </li>
+            </ul>
+        </div>
+        <div class="col-sm-3">
             <ul class="main-blocks">
-                <!--<li>
+                <li>
                     <p>
                         <img id="bigAvatar" src="img/no-photo.png" alt="">
                     </p>
@@ -143,7 +165,8 @@
                         </button>
                     </p>
 
-                </li>-->
+                </li>
+
                 <li>
                     <p>My wallet - Estimated earnings</p>
                     <div class="input-group mb-3">
@@ -163,12 +186,12 @@
 
                     <p>
                         <button type="button" class="btn btn-light btn-send-crypto"
-                                style="width: 130px; margin-right: 13px">
+                                style=" margin-right: 13px">
                             Send Crypto
                         </button>
                         <button type="button" class="btn btn-light btn-receive-crypto float-right"
-                                style="width: 130px;">
-                            Receive Crypto
+                                style="">
+                            Receive
                         </button>
                     </p>
                 </li>
@@ -213,120 +236,32 @@
 
             </ul>
         </div>
-        <div class="col-sm-8">
+
+        <div class="col-sm-6">
             <ul class="main-blocks">
-                <!-- <li>
-                     <!--<div class="dropdown float-right">
-                         <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                             Import data
-                         </button>
-                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                             <a class="dropdown-item btn-profile-import-instagram" href="#">Instagram</a>
-                             <a class="dropdown-item btn-profile-import-facebook" href="#">Facebook</a>
-                         </div>
-                     </div>-->
-
-                <!--   <h1><span id="firstName">...</span> <span id="lastName">...</span> <a href="#"
-                                                                                         class="edit-page-info"
-                                                                                         data-toggle="modal"
-                                                                                         data-target="#editInfoModal"><img
-                           class="project-icon" src="img/edit.png" alt=""></a></h1>
-                   <h3>Birth: <span id="birthDate">...</span></h3>
-                   <h3>Location: <span id="locationName"></span></h3>
-                   <h3>About: <span id="about"></span></h3>
-                   <p>
-                       <button type="submit" class="btn btn-primary mb-2 save-mru">Save MRU</button>
-                       <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
-                   </p>
-               </li>-->
-
                 <li>
-                    <div class="row">
-                        <div class="col-sm-3" style="border-right: 1px solid #e0e0e0">
-                            <p>Contacts</p>
-                            <!--<p class="float-left">Contacts</p>-->
-                            <!--<p class="float-right">
-                                <a href="#" data-toggle="modal" data-target="#addFollowerModal">
-                                    <img src="img/add.png" alt="" style="width: 20px">
-                                </a>
-                            </p>
-                            <div class="clear-both"></div>
-
-                            <ul id="iFollowUsers" class="list-inline">
-
-                            </ul>-->
-                            <p>
-                                <img src="img/avatars/1.png" alt="" style="max-width: 40px"> <span>Nikitus Barmal</span>
-                            </p>
-                            <p>
-                                <img src="img/avatars/2.png" alt="" style="max-width: 40px"> <span>Anton Zelten</span>
-
-                            </p>
-                            <p>
-                                <img src="img/avatars/3.png" alt="" style="max-width: 40px"> <span>Iren Nagorny</span>
-
-                            </p>
-                            <p>
-                                <img src="img/avatars/4.png" alt="" style="max-width: 40px"> <span>Ann Holod</span>
-
-                            </p>
-                            <p>
-                                <img src="img/avatars/4.png" alt="" style="max-width: 40px"> <span>Ann Holod</span>
-
-                            </p>
-
+                    <!--<div class="dropdown float-right">
+                        <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Import data
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item btn-profile-import-instagram" href="#">Instagram</a>
+                            <a class="dropdown-item btn-profile-import-facebook" href="#">Facebook</a>
                         </div>
-                        <div class="col-sm-4" style="border-right: 1px solid #e0e0e0">
-                            <p><strong>Ann Holod</strong></p>
-                            <!--<div class="form-group">
-                                <textarea class="form-control" id="" rows="6"></textarea>
-                            </div>
+                    </div>-->
 
-                            <button type="submit" class="btn btn-primary mb-2" onclick="alert('Not implemented')">Send
-                            </button>-->
-                            <img src="img/avatars/video.png" style="width: 100%">
-
-                        </div>
-                        <div class="col-sm-5">
-                            <p>Inbox</p>
-                            <div class="pre-scrollable">
-                                <table class="table table-striped">
-                                    <!--<thead>
-                                    <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">First</th>
-                                    </tr>
-                                    </thead>-->
-                                    <tbody>
-                                    <tr>
-                                        <th scope="row">Bill G.</th>
-                                        <td>What's up</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Warren B.</th>
-                                        <td>RE: Money? No problem</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Larry P.</th>
-                                        <td>RE: SWARM + Goo...</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Larry P.</th>
-                                        <td>RE: SWARM + Goo...</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Mark Z.</th>
-                                        <td>New social network!</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Johny B.</th>
-                                        <td>SWARM</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                    <h1><span id="firstName">...</span> <span id="lastName">...</span> <a href="#"
+                                                                                          class="edit-page-info"
+                                                                                          data-toggle="modal"
+                                                                                          data-target="#editInfoModal"><img
+                            class="project-icon" src="img/edit.png" alt=""></a></h1>
+                    <h3>Birth: <span id="birthDate">...</span></h3>
+                    <h3>Location: <span id="locationName"></span></h3>
+                    <h3>About: <span id="about"></span></h3>
+                    <p>
+                        <button type="submit" class="btn btn-primary mb-2 save-mru">Save MRU</button>
+                        <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
+                    </p>
                 </li>
 
                 <li>
@@ -926,7 +861,7 @@
 
 <script src="js/scripts.js"></script>
 <script src="js/youtube-load.js"></script>
-<script>
+<script type="text/javascript">
     // Global variables for GoogleAuth object, auth status.
     var GoogleAuth;
 

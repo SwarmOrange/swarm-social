@@ -221,7 +221,7 @@ class Main {
                 reader.onload = function (e) {
                     const image = document.getElementById('avatarUpload');
                     image.src = e.target.result;
-                    cropper = new Cropper(image, {
+                    self.cropper = new Cropper(image, {
                         aspectRatio: 1,
                         crop(event) {
                             /*console.log(event.detail.x);
@@ -274,8 +274,8 @@ class Main {
         });
 
         $('.save-avatar').click(function () {
-            if (cropper) {
-                let canvas = cropper.getCroppedCanvas();
+            if (self.cropper) {
+                let canvas = self.cropper.getCroppedCanvas();
                 const mimeType = 'image/jpg';
                 canvas.toBlob((blob) => {
                     const reader = new FileReader();

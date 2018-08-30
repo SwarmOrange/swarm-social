@@ -415,6 +415,8 @@ class EnsUtility {
 
         console.log(web3);
         this.ens = new EthereumENS(window.web3.currentProvider);
+        console.log('ens');
+        console.log(this.ens);
         web3.version.getNetwork(function (error, result) {
             if (error) {
                 console.error(error);
@@ -444,18 +446,18 @@ class EnsUtility {
 
         $('.save-ens').click(function (e) {
             e.preventDefault();
-            $('#currentHash').val(swarm.applicationHash);
+            $('#currentHash').val(self.main.swarm.applicationHash);
             $('#updateEnsModal').modal('show');
         });
 
         $('.send-ens-transaction').click(function (e) {
             e.preventDefault();
             if (!web3.eth.defaultAccount) {
-                alert('Please, select main Ethereum account and unlock MetaMask.');
+                self.main.alert('Please, select main Ethereum account and unlock MetaMask.');
 
                 return;
             }
-            saveDomainHash();
+            self.saveDomainHash();
         });
     }
 
@@ -471,14 +473,14 @@ class EnsUtility {
         let swarmHash = $('#currentHash').val();
         console.log([ensDomain, swarmHash]);
 
-        if (!isCorrectDomain(ensDomain) || !Blog.isCorrectSwarmHash(swarmHash)) {
-            alert('Incorrect domain or hash');
+        if (!self.isCorrectDomain(ensDomain) || !Blog.isCorrectSwarmHash(swarmHash)) {
+            self.main.alert('Incorrect domain or hash');
 
             return;
         }
 
         var resultSwarmHash = '0x' + swarmHash;
-        var resolver = ens.resolver(ensDomain);
+        var resolver = this.ens.resolver(ensDomain);
         resolver.instancePromise.then(function () {
             return resolver.setContent(resultSwarmHash, {from: web3.eth.defaultAccount}).then(function (result) {
                 $('#updateEnsModal').modal('hide');
@@ -828,7 +830,7 @@ class Main {
                 reader.onload = function (e) {
                     const image = document.getElementById('avatarUpload');
                     image.src = e.target.result;
-                    cropper = new Cropper(image, {
+                    self.cropper = new Cropper(image, {
                         aspectRatio: 1,
                         crop(event) {
                             /*console.log(event.detail.x);
@@ -881,8 +883,8 @@ class Main {
         });
 
         $('.save-avatar').click(function () {
-            if (cropper) {
-                let canvas = cropper.getCroppedCanvas();
+            if (self.cropper) {
+                let canvas = self.cropper.getCroppedCanvas();
                 const mimeType = 'image/jpg';
                 canvas.toBlob((blob) => {
                     const reader = new FileReader();
