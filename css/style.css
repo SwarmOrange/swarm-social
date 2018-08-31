@@ -257,3 +257,7 @@ img {
 li > p:last-child {
     margin-bottom: 0;
 }
+
+.i-follow-news-li {
+    margin-bottom: 8px;
+}
