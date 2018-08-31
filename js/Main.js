@@ -1,8 +1,9 @@
 class Main {
 
-    constructor() {
+    constructor(blogClass, blog) {
+        this.blogClass = blogClass;
         this.swarm = null;
-        this.blog = null;
+        this.blog = blog;
         this.cropper = null;
         this.lastLoadedPost = 0;
         this.currentPhotoAlbum = 0;
@@ -24,7 +25,7 @@ class Main {
             //console.log('hash from local storage: ' + localStorage.getItem('applicationHash'));
             let hash = window.location.hash.substring(1);
             if (hash) {
-                if (Blog.isCorrectSwarmHash(hash)) {
+                if (self.blogClass.isCorrectSwarmHash(hash)) {
 
                 } else {
                     self.alert('Incorrect hash after # in url. Fix it and reload page.');
@@ -48,7 +49,8 @@ class Main {
             //swarmHost = window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500";
             self.swarm = new SwarmApi(swarmHost, "");
             //swarm = new SwarmApi("https://swarm-gateways.net", initHash);
-            self.blog = new Blog(self.swarm);
+            //self.blog = new Blog(self.swarm);
+            self.blog.swarm = self.swarm;
             let isValid = (hash || self.blog.uploadedSwarmHash).length > 0;
             if (isValid) {
                 $('#userRegistration').hide();
