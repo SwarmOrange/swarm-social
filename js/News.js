@@ -57,14 +57,17 @@ class News {
 
             let userId = 'userNews' + currentUser;
             let getUserPost = function (userId, postId) {
-                let userSection = $('#userNews' + userId);
+                let userHolderName = '#userNews' + userId;
+                let userSection = $(userHolderName);
                 return self.main.blog.getPost(postId, userId).then(function (response) {
                     let post = response.data;
-                    userSection.append('<p>' + post.id + ': ' + post.description + '</p>');
+                    //userSection.append('<p>' + post.id + ': ' + post.description + '</p>');
+                    userSection.append('<div id="newsPost' + post.id + '"></div>');
+                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName);
                     console.log('Received post: ' + userId + ', ' + postId);
 
-                    postId--;
-                    if (postId >= minPostId) {
+                    postId++;
+                    if (postId <= lastPostId) {
                         return getUserPost(userId, postId);
                     } else {
                         return self.compileNews(users);
@@ -74,7 +77,8 @@ class News {
 
             if (lastPostId > 0) {
                 newsContent.append('<div id="' + userId + '"></div>');
-                return getUserPost(currentUser, lastPostId)
+
+                return getUserPost(currentUser, minPostId)
             } else {
                 return self.compileNews(users);
             }

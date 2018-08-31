@@ -1321,10 +1321,12 @@ class Main {
         }
     }
 
-    addPostTemplate(id, addToTop) {
+    addPostTemplate(id, addToTop, containerName, postNamePrefix) {
+        postNamePrefix = postNamePrefix || 'userPost';
         let userPostTemplate = $('#userPost');
-        let userPosts = $('#userPosts');
-        let newPost = userPostTemplate.clone().attr('id', 'userPost' + id).attr('style', '').attr('data-id', id);
+        containerName = containerName || '#userPosts';
+        let userPosts = $(containerName);
+        let newPost = userPostTemplate.clone().attr('id', postNamePrefix + id).attr('style', '').attr('data-id', id);
         newPost.find('.description').text('Loading');
         if (addToTop) {
             userPosts.prepend(newPost);
@@ -1335,11 +1337,12 @@ class Main {
         return newPost;
     }
 
-    addPostByData(data) {
+    addPostByData(data, prefix, containerName) {
         let self = this;
-        let userPost = $('#userPost' + data.id);
+        prefix = prefix || '#userPost';
+        let userPost = $(prefix + data.id);
         if (userPost.length <= 0) {
-            userPost = self.addPostTemplate(data.id, true);
+            userPost = self.addPostTemplate(data.id, true, containerName, prefix.substring(1));
         }
 
         if (data.is_deleted) {
@@ -1438,7 +1441,7 @@ class News {
         let self = this;
         $('#v-pills-news-tab').click(function (e) {
             //e.preventDefault();
-            $('.news-update, .news-update > .loader-animation').show();
+            self.showLoadingBar(true);
             let newsUsers = $('.news-users');
             let newsContent = $('.news-content');
             newsUsers.html('');
@@ -1453,15 +1456,26 @@ class News {
                 });
                 self.compileNews(users);
             } else {
+                self.showLoadingBar(false);
                 newsContent.html('You are not subscribed to anyone');
             }
         });
     }
 
+    showLoadingBar(isShow) {
+        let selector = $('.news-update, .news-update > .loader-animation');
+        if (isShow) {
+            selector.show();
+        } else {
+            selector.hide('slow');
+        }
+    }
+
     compileNews(users) {
         if (users.length <= 0) {
             console.log('compileNews complete!');
-            $('.news-update, .news-update > .loader-animation').hide('slow');
+            this.showLoadingBar(false);
+
             return;
         }
 
@@ -1476,14 +1490,17 @@ class News {
 
             let userId = 'userNews' + currentUser;
             let getUserPost = function (userId, postId) {
-                let userSection = $('#userNews' + userId);
+                let userHolderName = '#userNews' + userId;
+                let userSection = $(userHolderName);
                 return self.main.blog.getPost(postId, userId).then(function (response) {
                     let post = response.data;
-                    userSection.append('<p>' + post.id + ': ' + post.description + '</p>');
+                    //userSection.append('<p>' + post.id + ': ' + post.description + '</p>');
+                    userSection.append('<div id="newsPost' + post.id + '"></div>');
+                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName);
                     console.log('Received post: ' + userId + ', ' + postId);
 
-                    postId--;
-                    if (postId >= minPostId) {
+                    postId++;
+                    if (postId <= lastPostId) {
                         return getUserPost(userId, postId);
                     } else {
                         return self.compileNews(users);
@@ -1493,7 +1510,8 @@ class News {
 
             if (lastPostId > 0) {
                 newsContent.append('<div id="' + userId + '"></div>');
-                return getUserPost(currentUser, lastPostId)
+
+                return getUserPost(currentUser, minPostId)
             } else {
                 return self.compileNews(users);
             }

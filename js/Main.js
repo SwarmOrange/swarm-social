@@ -712,10 +712,12 @@ class Main {
         }
     }
 
-    addPostTemplate(id, addToTop) {
+    addPostTemplate(id, addToTop, containerName, postNamePrefix) {
+        postNamePrefix = postNamePrefix || 'userPost';
         let userPostTemplate = $('#userPost');
-        let userPosts = $('#userPosts');
-        let newPost = userPostTemplate.clone().attr('id', 'userPost' + id).attr('style', '').attr('data-id', id);
+        containerName = containerName || '#userPosts';
+        let userPosts = $(containerName);
+        let newPost = userPostTemplate.clone().attr('id', postNamePrefix + id).attr('style', '').attr('data-id', id);
         newPost.find('.description').text('Loading');
         if (addToTop) {
             userPosts.prepend(newPost);
@@ -726,11 +728,12 @@ class Main {
         return newPost;
     }
 
-    addPostByData(data) {
+    addPostByData(data, prefix, containerName) {
         let self = this;
-        let userPost = $('#userPost' + data.id);
+        prefix = prefix || '#userPost';
+        let userPost = $(prefix + data.id);
         if (userPost.length <= 0) {
-            userPost = self.addPostTemplate(data.id, true);
+            userPost = self.addPostTemplate(data.id, true, containerName, prefix.substring(1));
         }
 
         if (data.is_deleted) {
