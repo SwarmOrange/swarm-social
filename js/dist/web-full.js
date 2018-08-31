@@ -977,7 +977,7 @@ class Main {
             let followerHash = $('#followerHash');
             let swarmHash = followerHash.val();
             console.log(swarmHash);
-            if (Blog.isCorrectSwarmHash(swarmHash)) {
+            if (self.blogClass.isCorrectSwarmHash(swarmHash)) {
                 $('#addFollowerModal').modal('hide');
                 followerHash.val('');
                 try {
