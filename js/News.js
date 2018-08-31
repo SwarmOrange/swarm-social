@@ -8,7 +8,7 @@ class News {
         let self = this;
         $('#v-pills-news-tab').click(function (e) {
             //e.preventDefault();
-            $('.news-update, .news-update > .loader-animation').show();
+            self.showLoadingBar(true);
             let newsUsers = $('.news-users');
             let newsContent = $('.news-content');
             newsUsers.html('');
@@ -23,15 +23,26 @@ class News {
                 });
                 self.compileNews(users);
             } else {
+                self.showLoadingBar(false);
                 newsContent.html('You are not subscribed to anyone');
             }
         });
     }
 
+    showLoadingBar(isShow) {
+        let selector = $('.news-update, .news-update > .loader-animation');
+        if (isShow) {
+            selector.show();
+        } else {
+            selector.hide('slow');
+        }
+    }
+
     compileNews(users) {
         if (users.length <= 0) {
             console.log('compileNews complete!');
-            $('.news-update, .news-update > .loader-animation').hide('slow');
+            this.showLoadingBar(false);
+
             return;
         }
 
