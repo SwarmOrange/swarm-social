@@ -250,6 +250,13 @@ img {
     background: url("../img/instagram.png?__spriter") 0 0;
 }
 
+.img-home {
+    width: 20px;
+    height: 20px;
+    background: url("../img/home.png?__spriter") no-repeat;
+    background-size: 20px;
+}
+
 .vertical-pills li {
     border: 0;
 }
