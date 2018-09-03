@@ -11,7 +11,7 @@ class News {
             let newsContent = $('.news-content');
             newsUsers.html('');
             newsContent.html('');
-            let users = self.main.blog.myProfile.i_follow ? self.main.blog.myProfile.i_follow.slice(0) : [];
+            let users = self.main.blog.getIFollow();
             if (users.length) {
                 self.showLoadingBar(true);
                 users.forEach(function (v) {

@@ -403,8 +403,39 @@
             </div>
             <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
                 <div class="row">
-                    <div class="col-sm-6">Messages</div>
-                    <div class="col-sm-6">99</div>
+                    <div class="col-sm-12">
+                        <div class="btn-group dropright">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">
+                                Write message to ..
+                            </button>
+                            <div class="dropdown-menu messages-users-list">
+                                <button class="dropdown-item" type="button">Action</button>
+                            </div>
+                        </div>
+
+                        <form id="send-message-to" style="display: none">
+                            <hr>
+                            <div class="form-group">
+                                <label for="messageUserHash">User hash</label>
+                                <div class="row">
+                                    <div class="col-sm-1">
+                                        <img id="message-to-avatar" src="img/swarm-avatar.jpg" alt="" class="size-36">
+                                    </div>
+                                    <div class="col-sm-11">
+                                        <input type="text" class="form-control" id="messageUserHash" placeholder="...">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="messageUserMessage">Message for user</label>
+                                <textarea class="form-control" id="messageUserMessage" rows="3"></textarea>
+                            </div>
+                            <p style="color: red">Currently all messages are public and not encrypted</p>
+                            <button type="button" class="btn btn-primary messages-send-message">Send</button>
+                        </form>
+                    </div>
                 </div>
             </div>
             <div class="tab-pane fade" id="v-pills-wallet" role="tabpanel" aria-labelledby="v-pills-wallet-tab">

@@ -268,3 +268,18 @@ li > p:last-child {
 .i-follow-news-li {
     margin-bottom: 8px;
 }
+
+.size-50 {
+    max-width: 50px;
+    max-height: 50px;
+}
+
+.size-30 {
+    max-width: 30px;
+    max-height: 30px;
+}
+
+.size-36 {
+    max-width: 36px;
+    max-height: 36px;
+}

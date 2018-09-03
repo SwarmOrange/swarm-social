@@ -6,6 +6,7 @@ class Blog {
         this.mruName = "SWARM Social";
         this.swarm = swarm;
         this.version = 1;
+        this.myProfile = {};
         let elements = window.location.href.split('/').filter(word => word.length === 64 || word.length === 128 || (word.length >= 11 && word.endsWith('.eth')));
         this.uploadedToSwarm = elements.length > 0;
         if (this.uploadedToSwarm) {
@@ -42,6 +43,10 @@ class Blog {
         return hash && (hash.length === hashLength || hash.length === hashLengthEncrypted);
     }
 
+    getMyProfile() {
+        return this.getProfile(this.swarm.applicationHash);
+    }
+
     setMyProfile(data) {
         this.myProfile = data;
     }
@@ -55,8 +60,8 @@ class Blog {
         return this.swarm.get(this.prefix + 'profile.json', userHash);
     }
 
-    getMyProfile() {
-        return this.getProfile(this.swarm.applicationHash);
+    getIFollow() {
+        return this.myProfile.i_follow ? this.myProfile.i_follow.slice(0) : [];
     }
 
     addIFollow(swarmProfileHash) {
@@ -383,6 +388,63 @@ class Blog {
         };
 
         return this.swarm.post(null, data, null, null, 'bzz-resource:');
+    }
+
+    saveMessage(receiverHash, message, isPrivate) {
+        let self = this;
+        if (isPrivate) {
+            throw('Private messages not supported');
+        }
+
+        if (!Blog.isCorrectSwarmHash(receiverHash)) {
+            throw('Incorrect receiver hash');
+        }
+
+        if (!message) {
+            throw('Empty message');
+        }
+
+
+        let sendMessage = function (messageInfo) {
+            let messageId = 1;
+            if (receiverHash in messageInfo && 'last_message_id' in messageInfo[receiverHash]) {
+                messageInfo[receiverHash].last_message_id++;
+                messageId = messageInfo[receiverHash].last_message_id;
+            } else {
+                messageInfo = messageInfo || {};
+                messageInfo[receiverHash] = {last_message_id: messageId};
+            }
+
+            let data = {
+                id: messageId,
+                receiverHash: receiverHash,
+                message: message
+            };
+
+            return self.swarm.post(self.prefix + "message/public/" + receiverHash + "/" + messageId + ".json", JSON.stringify(data), 'application/json').then(function (response) {
+                self.swarm.applicationHash = response.data;
+                return self.saveMessageInfo(messageInfo);
+            });
+        };
+
+        return self.getMessageInfo().then(function (response) {
+            return sendMessage(response.data);
+        }).catch(function () {
+            return sendMessage({});
+        });
+    }
+
+    getMessage(id, receiverHash) {
+        return this.swarm.get(this.prefix + 'message/public/' + receiverHash + '/' + id + '.json');
+    }
+
+    getMessageInfo() {
+        return this.swarm.get(this.prefix + 'message/public/info.json');
+    }
+
+    saveMessageInfo(data) {
+        // {"*user hash*":{last_message_id:1}}
+        return this.swarm.post(this.prefix + 'message/public/info.json', JSON.stringify(data));
     }
 }
 

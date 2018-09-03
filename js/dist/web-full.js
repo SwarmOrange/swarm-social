@@ -7,6 +7,7 @@ class Blog {
         this.mruName = "SWARM Social";
         this.swarm = swarm;
         this.version = 1;
+        this.myProfile = {};
         let elements = window.location.href.split('/').filter(word => word.length === 64 || word.length === 128 || (word.length >= 11 && word.endsWith('.eth')));
         this.uploadedToSwarm = elements.length > 0;
         if (this.uploadedToSwarm) {
@@ -43,6 +44,10 @@ class Blog {
         return hash && (hash.length === hashLength || hash.length === hashLengthEncrypted);
     }
 
+    getMyProfile() {
+        return this.getProfile(this.swarm.applicationHash);
+    }
+
     setMyProfile(data) {
         this.myProfile = data;
     }
@@ -56,8 +61,8 @@ class Blog {
         return this.swarm.get(this.prefix + 'profile.json', userHash);
     }
 
-    getMyProfile() {
-        return this.getProfile(this.swarm.applicationHash);
+    getIFollow() {
+        return this.myProfile.i_follow ? this.myProfile.i_follow.slice(0) : [];
     }
 
     addIFollow(swarmProfileHash) {
@@ -384,6 +389,63 @@ class Blog {
         };
 
         return this.swarm.post(null, data, null, null, 'bzz-resource:');
+    }
+
+    saveMessage(receiverHash, message, isPrivate) {
+        let self = this;
+        if (isPrivate) {
+            throw('Private messages not supported');
+        }
+
+        if (!Blog.isCorrectSwarmHash(receiverHash)) {
+            throw('Incorrect receiver hash');
+        }
+
+        if (!message) {
+            throw('Empty message');
+        }
+
+
+        let sendMessage = function (messageInfo) {
+            let messageId = 1;
+            if (receiverHash in messageInfo && 'last_message_id' in messageInfo[receiverHash]) {
+                messageInfo[receiverHash].last_message_id++;
+                messageId = messageInfo[receiverHash].last_message_id;
+            } else {
+                messageInfo = messageInfo || {};
+                messageInfo[receiverHash] = {last_message_id: messageId};
+            }
+
+            let data = {
+                id: messageId,
+                receiverHash: receiverHash,
+                message: message
+            };
+
+            return self.swarm.post(self.prefix + "message/public/" + receiverHash + "/" + messageId + ".json", JSON.stringify(data), 'application/json').then(function (response) {
+                self.swarm.applicationHash = response.data;
+                return self.saveMessageInfo(messageInfo);
+            });
+        };
+
+        return self.getMessageInfo().then(function (response) {
+            return sendMessage(response.data);
+        }).catch(function () {
+            return sendMessage({});
+        });
+    }
+
+    getMessage(id, receiverHash) {
+        return this.swarm.get(this.prefix + 'message/public/' + receiverHash + '/' + id + '.json');
+    }
+
+    getMessageInfo() {
+        return this.swarm.get(this.prefix + 'message/public/info.json');
+    }
+
+    saveMessageInfo(data) {
+        // {"*user hash*":{last_message_id:1}}
+        return this.swarm.post(this.prefix + 'message/public/info.json', JSON.stringify(data));
     }
 }
 
@@ -1422,10 +1484,57 @@ class Messages {
 
     init() {
         let self = this;
+        $('#v-pills-messages')
+            .on('change', '#messageUserHash', function (e) {
+                let currentHash = $(this).val();
+                if (self.main.blogClass.isCorrectSwarmHash(currentHash)) {
+                    let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', currentHash);
+                    $('#message-to-avatar').attr('src', avatar);
+                } else {
+                    $('#message-to-avatar').attr('src', 'img/swarm-avatar.jpg');
+                }
+            })
+            .on('click', '.messages-enter-user-hash', function (e) {
+                $('#message-to-avatar').attr('src', 'img/swarm-avatar.jpg');
+                self.showMessageInput(true);
+            })
+            .on('click', '.messages-write-message', function (e) {
+                let userId = $(this).attr('data-user-id');
+                let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', userId);
+                self.showMessageInput(true);
+                $('#messageUserHash').val(userId);
+                $('#message-to-avatar').attr('src', avatar);
+            })
+            .on('click', '.messages-send-message', function (e) {
+                e.preventDefault();
+                let userHash = $('#messageUserHash').val();
+                let userMessage = $('#messageUserMessage').val();
+                $('#send-message-to').addClass("disabled-content");
+
+                self.main.blog.saveMessage(userHash, userMessage, false).then(function (response) {
+                    let data = response.data;
+                    $('#send-message-to').removeClass("disabled-content");
+                    $('#messageUserMessage').val('');
+                    self.main.onAfterHashChange(data, true);
+                });
+            });
+
         $('#v-pills-messages-tab').click(function (e) {
-            e.preventDefault();
-            self.main.alert('Not implemented');
+            let usersList = $('.messages-users-list');
+            usersList.html('<button class="dropdown-item messages-enter-user-hash" type="button">Enter user hash</button>');
+            let users = self.main.blog.getIFollow();
+            users.forEach(function (v) {
+                usersList.append('<button class="dropdown-item text-center messages-write-message" type="button" data-user-id="' + v + '"><img src="' + self.main.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" alt="" class="size-36"></button>');
+            })
         });
+    }
+
+    showMessageInput(isShow) {
+        if (isShow) {
+            $('#send-message-to').show();
+        } else {
+            $('#send-message-to').hide();
+        }
     }
 }
 
@@ -1440,21 +1549,20 @@ class News {
     init() {
         let self = this;
         $('#v-pills-news-tab').click(function (e) {
-            //e.preventDefault();
-            self.showLoadingBar(true);
             let newsUsers = $('.news-users');
             let newsContent = $('.news-content');
             newsUsers.html('');
             newsContent.html('');
-            let users = self.main.blog.myProfile.i_follow ? self.main.blog.myProfile.i_follow.slice(0) : [];
+            let users = self.main.blog.getIFollow();
             if (users.length) {
+                self.showLoadingBar(true);
                 users.forEach(function (v) {
                     newsUsers.append('<li class="list-group i-follow-news-li">' +
                         //'<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
                         '<a onclick="return false;" href="' + self.main.swarm.getFullUrl('', v) + '" class="load-profile-------" data-profile-id="' + v + '"><img src="' + self.main.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 80px"></a>' +
                         '</li>');
                 });
-                self.compileNews(users);
+                self.compileNews(users, 5);
             } else {
                 self.showLoadingBar(false);
                 newsContent.html('You are not subscribed to anyone');
@@ -1471,7 +1579,8 @@ class News {
         }
     }
 
-    compileNews(users) {
+    compileNews(users, maxPostsFromUser) {
+        maxPostsFromUser = maxPostsFromUser || 10;
         if (users.length <= 0) {
             console.log('compileNews complete!');
             this.showLoadingBar(false);
@@ -1484,10 +1593,8 @@ class News {
         let currentUser = users.shift();
         return this.main.blog.getProfile(currentUser).then(function (response) {
             let lastPostId = response.data.last_post_id;
-            let minPostId = Math.max(1, lastPostId - 10);
-
+            let minPostId = Math.max(1, lastPostId - maxPostsFromUser);
             console.log('Received profile: ' + currentUser + ', ' + lastPostId + ', ' + minPostId);
-
             let userId = 'userNews' + currentUser;
             let getUserPost = function (userId, postId) {
                 let userHolderName = '#userNews' + userId;
@@ -1503,7 +1610,7 @@ class News {
                     if (postId <= lastPostId) {
                         return getUserPost(userId, postId);
                     } else {
-                        return self.compileNews(users);
+                        return self.compileNews(users, maxPostsFromUser);
                     }
                 });
             };
@@ -1513,7 +1620,7 @@ class News {
 
                 return getUserPost(currentUser, minPostId)
             } else {
-                return self.compileNews(users);
+                return self.compileNews(users, maxPostsFromUser);
             }
         });
     }
