@@ -283,3 +283,11 @@ li > p:last-child {
     max-width: 36px;
     max-height: 36px;
 }
+
+.message-dialogs-info {
+    margin-top: 18px;
+}
+
+.message-dialogs {
+    margin-top: 8px;
+}
