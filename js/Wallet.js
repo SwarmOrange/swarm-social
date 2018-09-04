@@ -7,8 +7,8 @@ class Wallet {
     init() {
         let self = this;
         $('#v-pills-wallet-tab').click(function (e) {
-            if ('ethereumWallet' in self.main.blog.myProfile) {
-                $('#myEthereumWallet').val(self.main.blog.myProfile.ethereumWallet);
+            if ('ethereum_wallet' in self.main.blog.myProfile) {
+                $('#myEthereumWallet').val(self.main.blog.myProfile.ethereum_wallet);
             }
         });
 
@@ -21,7 +21,7 @@ class Wallet {
                 return;
             }
 
-            self.main.blog.myProfile.ethereumWallet = wallet;
+            self.main.blog.myProfile.ethereum_wallet = wallet;
             self.main.blog.saveProfile(self.main.blog.myProfile).then(function (response) {
                 $('#wallet-form').removeClass("disabled-content");
                 self.main.onAfterHashChange(response.data, true);
