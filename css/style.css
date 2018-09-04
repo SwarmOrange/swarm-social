@@ -218,8 +218,8 @@ img {
 
 #photoAlbums > li img, .post-photoalbum-item img {
     object-fit: cover;
-    width: 200px;
-    height: 200px;
+    width: 179px;
+    height: 179px;
 }
 
 .preview-album-photo {
