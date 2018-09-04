@@ -6,3 +6,5 @@ window.EthereumENS = require('ethereum-ens');
 window.Cropper = require('cropperjs');
 require('bootstrap');
 require('ekko-lightbox');
+window.JSZip = require('jszip');
+window.saveAs = require('file-saver');
