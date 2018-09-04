@@ -755,7 +755,7 @@ class Main {
             let videoalbumAttachment = $('#videoalbumAttachment');
             data.attachments.forEach(function (v) {
                 if (v.type === "youtube") {
-                    let videoId = youtube_parser(v.url);
+                    let videoId = self.youtube_parser(v.url);
                     userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
                         '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
                         '</div>'));
