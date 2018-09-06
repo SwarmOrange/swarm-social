@@ -949,15 +949,43 @@
                 <div class="modal-body">
                     <div class="d-flex justify-content-center">
 
-                        <button type="button" class="btn btn-primary" onclick="VK.Auth.login(vkImport.vkAuthInfo, 20);">
-                            Authorize and receive albums
+                        <button type="button" class="btn btn-primary btn-vk-authorize"
+                                onclick="VK.Auth.login(vkImport.vkAuthInfo, 20);">
+                            Authorize
                         </button>
+
+                        <div class="vk-authorized hide">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="vkTransferPhoto" value="option1"
+                                       checked>
+                                <label class="form-check-label" for="vkTransferPhoto">Transfer photo albums <br>
+                                    <a href="#" class="vk-select-photos">Select albums</a></label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="vkTransferVideo" value="option2"
+                                       checked>
+                                <label class="form-check-label" for="vkTransferVideo">Transfer video <br>
+                                    <a href="#" class="vk-select-videos">Select videos</a></label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="vkTransferUserInfo" value="option2"
+                                       checked>
+                                <label class="form-check-label" for="vkTransferUserInfo">Transfer user info</label>
+                            </div>
+
+                            <p class="text-center" style="margin-top: 16px">
+                                <button type="button" class="btn btn-primary" onclick="vkImport.transferAll();">
+                                    Transfer
+                                </button>
+                            </p>
+                        </div>
 
                     </div>
 
-                    <div id="importVKContent">
+                    <div class="import-vk-content">
                         <span id="receiveVkPhotos"></span>
-                        <ul class="list-inline vk-list"></ul>
+                        <ul class="list-inline vk-list-photos hide"></ul>
+                        <ul class="list-inline vk-list-videos hide"></ul>
                     </div>
                 </div>
             </div>

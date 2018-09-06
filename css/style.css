@@ -83,7 +83,7 @@ img {
     padding: 0;
 }
 
-#photoAlbums li, #videoPlaylists li, .vk-list li {
+#photoAlbums li, #videoPlaylists li, .vk-list-photos li, .vk-list-videos li {
     margin-right: 0 !important;
     padding-right: 8px;
 }
@@ -206,11 +206,11 @@ img {
     width: 100%;
 }
 
-.vk-list {
+.vk-list-photos, .vk-list-videos {
     margin-top: 8px;
 }
 
-.vk-list img {
+.vk-list-photos img, .vk-list-videos img {
     object-fit: cover;
     width: 168px;
     height: 168px;
