@@ -302,8 +302,6 @@ class Blog {
     }
 
     uploadPhotoToAlbum(photoAlbumId, photoId, fileContent, onProgress) {
-        //let timestamp = +new Date();
-        //let fileName = this.prefix + "photoalbum/" + photoAlbumId + "/" + timestamp + ".jpg";
         let fileName = this.prefix + "photoalbum/" + photoAlbumId + "/" + photoId + ".jpg";
         return this.sendRawFile(fileName, fileContent, 'image/jpeg', null, null, onProgress).then(function (response) {
             return {fileName: fileName, response: response.data};
