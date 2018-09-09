@@ -247,7 +247,9 @@
                                     <button type="submit" class="btn btn-primary mb-2 save-mru" style="display: none">
                                         Save MRU
                                     </button>
-                                    <button type="submit" class="btn btn-primary mb-2 save-ens">Save ENS</button>
+                                    <button type="submit" class="btn btn-primary mb-2 save-ens" style="display: none">
+                                        Save ENS
+                                    </button>
                                 </p>
                             </li>
 
@@ -312,8 +314,8 @@
                                         <p class="float-left">
                                             <button type="submit" class="btn btn-primary mb-2 publish-post">Post
                                             </button>
-                                            <input type="checkbox" aria-label="Checkbox for following text input"
-                                                   style="margin-left: 8px"> Share anonymously
+                                            <!--<input type="checkbox" aria-label="Checkbox for following text input"
+                                                   style="margin-left: 8px"> Share anonymously-->
                                         </p>
 
                                         <p class="float-right">
@@ -950,7 +952,7 @@
                     <div class="d-flex justify-content-center">
 
                         <button type="button" class="btn btn-primary btn-vk-authorize"
-                                onclick="VK.Auth.login(vkImport.vkAuthInfo, 20);">
+                                onclick="startVkAuth()">
                             Authorize
                         </button>
 
@@ -974,7 +976,7 @@
                             </div>
 
                             <p class="text-center" style="margin-top: 16px">
-                                <button type="button" class="btn btn-primary" onclick="vkImport.transferAll();">
+                                <button type="button" class="btn btn-primary" onclick="startVkImport()">
                                     Transfer
                                 </button>
                             </p>
@@ -994,6 +996,17 @@
 
     <script src="js/scripts.js"></script>
     <script src="js/youtube-load.js"></script>
+    <script type="text/javascript">
+        function startVkImport() {
+            vkImport.transferAll();
+        }
+
+        function startVkAuth() {
+            VK.Auth.login(function (response) {
+                vkImport.vkAuthInfo(response);
+            }, 20);
+        }
+    </script>
     <script type="text/javascript">
         // Global variables for GoogleAuth object, auth status.
         var GoogleAuth;

@@ -30,71 +30,6 @@ class VKImport {
             $('#receiveVkPhotos').text('');
             $('#importFromVKModal').modal('show');
         });
-
-        $('.vk-list').on('click', '.btn-import-vk-album', function (e) {
-            e.preventDefault();
-            $(this).attr('disabled', 'disabled');
-            let albumId = $(this).attr('data-album-id');
-            let ownerId = $(this).attr('data-owner-id');
-            VK.Api.call('photos.get', {owner_id: ownerId, album_id: albumId, v: '5.80'}, function (r) {
-                console.log(r);
-                if (r.response) {
-                    let items = r.response.items;
-                    self.vkSettings.vkPhotoUrls = [];
-                    self.vkSettings.photosForAlbum = [];
-                    self.vkSettings.uploadedPhotoId = 1;
-                    self.vkSettings.currentPhotoAlbum = self.main.blog.myProfile.last_photoalbum_id + 1;
-                    items.forEach(function (v) {
-                        let url = v.sizes[v.sizes.length - 1].url;
-                        self.vkSettings.vkPhotoUrls.push(url);
-                    });
-                    self.importNextVkPhoto();
-                }
-            });
-        });
-    }
-
-    importNextVkPhoto() {
-        let self = this;
-        let textHolder = $('#receiveVkPhotos');
-        if (self.vkSettings.uploadedPhotoId >= self.vkSettings.vkPhotoUrls.length) {
-            textHolder.text('All photos imported!');
-
-            self.main.blog.createPhotoAlbum(self.vkSettings.currentPhotoAlbum, 'VK', '', self.vkSettings.photosForAlbum).then(function (response) {
-                console.log('album created');
-                console.log(response.data);
-                self.main.onAfterHashChange(response.data);
-                $('#importFromVKModal').modal('hide');
-                self.main.alert('Album created!', [
-                    '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum from Instagram!" data-id="' + self.vkSettings.currentPhotoAlbum + '">Share</button>'
-                ]);
-            });
-
-            return;
-        }
-
-        textHolder.text('Receiving ' + self.vkSettings.uploadedPhotoId + '/' + self.vkSettings.vkPhotoUrls.length + ' photo..');
-        let url = self.vkSettings.vkPhotoUrls[self.vkSettings.uploadedPhotoId - 1];
-        console.log(url);
-        self.main.swarm.axios.request({
-            url: url,
-            method: 'GET',
-            responseType: 'blob',
-        }).then(function (response) {
-            console.log('VK photo downloaded ');
-            //console.log(response);
-            self.main.blog.uploadPhotoToAlbum(self.vkSettings.currentPhotoAlbum, self.vkSettings.uploadedPhotoId, response.data).then(function (data) {
-                console.log('Photo uploaded');
-                console.log(data);
-                self.vkSettings.photosForAlbum.push({
-                    file: data.fileName,
-                    description: ""
-                });
-                self.vkSettings.uploadedPhotoId++;
-                self.main.onAfterHashChange(data.response, true);
-                self.importNextVkPhoto();
-            });
-        });
     }
 
     vkAuthInfo(response) {
@@ -158,37 +93,306 @@ class VKImport {
         let isTransferUserInfo = $('#vkTransferUserInfo').prop('checked');
         let isTransferPhoto = $('#vkTransferPhoto').prop('checked');
         let isTransferVideo = $('#vkTransferVideo').prop('checked');
-
-        $('#importFromVKModal').modal('hide');
-        self.main.alert('Development in progress');
-        return;
-
-        if (isTransferUserInfo) {
-            self.main.blog.myProfile.first_name = self.userInfo.first_name;
-            self.main.blog.myProfile.last_name = self.userInfo.last_name;
-            self.main.blog.myProfile.birth_date = self.userInfo.bdate;
-            self.main.blog.myProfile.about = self.userInfo.about;
-            let locationName = self.userInfo.country.title + ', ' + self.userInfo.city.title;
-            self.main.blog.myProfile.location = {name: locationName};
-            // todo download it
-            //self.main.blog.myProfile.photo = self.userInfo.photo_max_orig;
-            self.main.blog.saveProfile(self.main.blog.myProfile).then(function (response) {
-                let data = response.data;
-                self.main.onAfterHashChange(response.data, true);
-                // todo next steps
+        // todo block transfer button
+        self.transferUserInfo(isTransferUserInfo)
+            .then(function () {
+                return self.transferPhotos(isTransferPhoto);
+            })
+            .then(function () {
+                return self.transferVideos(isTransferVideo);
+            })
+            .then(function () {
+                //todo log complete
+                console.log('Promises complete');
+                $('#importFromVKModal').modal('hide');
+                /*self.main.alert('Added', [
+                   '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbums" data-message="Just created new photoalbum from VK!" data-id="' + currentPhotoAlbum + '">Share</button>'
+               ]);*/
             });
-        }
-
-        if (isTransferPhoto) {
-            let photosChecked = $('.vk-checkbox-photo:checked');
-        }
-
-        if (isTransferVideo) {
-            let videosChecked = $('.vk-checkbox-video:checked');
-        }
-
-
     }
+
+    transferPhotos(isTransfer) {
+        let self = this;
+        let albumsList = [];
+
+        let photosChecked = $('.vk-checkbox-photo:checked');
+        photosChecked.each(function (k, v) {
+            let albumId = $(v).attr('data-album-id');
+            let ownerId = $(v).attr('data-owner-id');
+            albumsList.push({
+                albumId: albumId,
+                ownerId: ownerId
+            });
+        });
+
+        if (isTransfer) {
+            return self
+                .vkReceiveAlbumsPhotos(albumsList)
+                .then(function (vkAlbumsWithPhotos) {
+                    console.log('vkAlbumsWithPhotos');
+                    console.log(vkAlbumsWithPhotos);
+                    return self
+                        .createPhotoAlbums(vkAlbumsWithPhotos)
+                        .then(function (createdAlbums) {
+                            console.log('All created albums');
+                            console.log(createdAlbums);
+                        });
+                });
+        } else {
+            return self.consistently([]);
+        }
+    }
+
+    vkReceiveAlbumsPhotos(albumsList) {
+        let self = this;
+        return self.consistently(albumsList, function (album, onComplete) {
+            let result = [];
+            VK.Api.call('photos.get', {
+                owner_id: album.ownerId,
+                album_id: album.albumId,
+                v: '5.80'
+            }, function (r) {
+                console.log(r);
+                if (r.response) {
+                    let items = r.response.items;
+                    if (items.length) {
+                        result.push({
+                            owner_id: album.ownerId,
+                            album_id: album.albumId,
+                            items: items
+                        });
+                    }
+                }
+
+                // timeout between requests
+                setTimeout(function () {
+                    onComplete(result);
+                }, 1000);
+            });
+        })
+    }
+
+    createPhotoAlbums(vkAlbumsWithPhotos) {
+        let self = this;
+        let currentPhotoAlbum = self.main.blog.myProfile.last_photoalbum_id;
+
+        return self
+            .consistently(vkAlbumsWithPhotos, function (album, onComplete) {
+                let result = [];
+                console.log(album);
+                currentPhotoAlbum++;
+                self
+                    .uploadPhotos(album.items, currentPhotoAlbum)
+                    .then(function (photosForAlbum) {
+                        return self.main.blog
+                            .createPhotoAlbum(currentPhotoAlbum, 'VK', '', photosForAlbum)
+                            .then(function (response) {
+                                console.log('album created');
+                                console.log(response.data);
+                                self.main.onAfterHashChange(response.data);
+                                result.push({createdAlbum: currentPhotoAlbum});
+                                onComplete(result);
+                            });
+                    });
+            });
+    }
+
+    uploadPhotos(photos, currentPhotoAlbum) {
+        let self = this;
+        let uploadedPhotoId = 1;
+
+        return self
+            .consistently(photos, function (photo, onComplete) {
+                let result = [];
+                let url = photo.sizes[photo.sizes.length - 1].url;
+
+                self.main.swarm.axios
+                    .request({
+                        url: url,
+                        method: 'GET',
+                        responseType: 'blob',
+                    })
+                    .then(function (response) {
+                        console.log('VK photo downloaded ');
+                        //console.log(response);
+                        self.main.blog
+                            .uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId, response.data)
+                            .then(function (data) {
+                                console.log('Photo uploaded');
+                                console.log(data);
+                                result.push({
+                                    file: data.fileName,
+                                    description: ""
+                                });
+                                uploadedPhotoId++;
+                                self.main.onAfterHashChange(data.response, true);
+                                onComplete(result);
+                            });
+                    });
+            });
+    }
+
+    transferVideos(isTransfer) {
+        let self = this;
+        if (isTransfer) {
+            let albumsList = [];
+            let videosChecked = $('.vk-checkbox-video:checked');
+            videosChecked.each(function (k, v) {
+                let albumId = $(v).attr('data-video-album-id');
+                let ownerId = $(v).attr('data-owner-id');
+                albumsList.push({
+                    albumId: albumId,
+                    ownerId: ownerId
+                });
+            });
+
+            return self
+                .vkReceiveVideosAlbums(albumsList)
+                .then(function (result) {
+                    console.log('vkReceiveVideosAlbums');
+                    console.log(result);
+                    return self
+                        .createVideoAlbums(result)
+                        .then(function (result) {
+                            console.log('createVideoAlbums');
+                            console.log(result);
+                        });
+                });
+        } else {
+            return self.consistently([]);
+        }
+    }
+
+    vkReceiveVideosAlbums(albumsList) {
+        let self = this;
+        return self.consistently(albumsList, function (album, onComplete) {
+            let result = [];
+            VK.Api.call('video.get', {
+                owner_id: album.ownerId,
+                album_id: album.albumId,
+                v: '5.80'
+            }, function (r) {
+                console.log(r);
+                if (r.response) {
+                    let items = r.response.items;
+                    if (items.length) {
+                        result.push({
+                            owner_id: album.ownerId,
+                            album_id: album.albumId,
+                            items: items
+                        });
+                    }
+                }
+
+                // timeout between requests
+                setTimeout(function () {
+                    onComplete(result);
+                }, 1000);
+            });
+        })
+    }
+
+    createVideoAlbums(vkVideoAlbums) {
+        let self = this;
+        let currentVideoAlbum = self.main.blog.myProfile.last_videoalbum_id;
+
+        return self
+            .consistently(vkVideoAlbums, function (album, onComplete) {
+                console.log(album);
+                let result = [];
+                currentVideoAlbum++;
+                let videosForAlbum = [];
+                let currentVideoId = 1;
+                album.items.forEach(function (v) {
+                    let platform = v.platform ? v.platform.toLowerCase() : 'vk';
+                    let coverKey = null;
+                    Object.keys(v).reverse().forEach(function (v) {
+                        console.log(v);
+                        if (coverKey) {
+                            return;
+                        }
+
+                        if (v.search('photo_') >= 0) {
+                            coverKey = v;
+                        }
+                    });
+                    videosForAlbum.push({
+                        "id": currentVideoId,
+                        "name": "",
+                        "description": "",
+                        "cover_file": v[coverKey],
+                        "file": v.player,
+                        "type": platform
+                    });
+                    currentVideoId++;
+                });
+                console.log(videosForAlbum);
+                console.log(currentVideoAlbum);
+                self.main.blog
+                    .createVideoAlbum(currentVideoAlbum, 'VK', '', videosForAlbum)
+                    .then(function (preResponse) {
+                        console.log('video album created');
+                        preResponse.response.then(function (response) {
+                            self.main.onAfterHashChange(response.data);
+                            result.push({createdAlbum: currentVideoAlbum});
+                            onComplete(result);
+                        });
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            });
+    }
+
+    transferUserInfo(isTransfer) {
+        let self = this;
+        return new Promise((resolve, reject) => {
+            console.log('transferUserInfo');
+            if (isTransfer) {
+                self.main.blog.myProfile.first_name = self.userInfo.first_name;
+                self.main.blog.myProfile.last_name = self.userInfo.last_name;
+                self.main.blog.myProfile.birth_date = self.userInfo.bdate;
+                self.main.blog.myProfile.about = self.userInfo.about;
+                let locationName = self.userInfo.country.title + ', ' + self.userInfo.city.title;
+                self.main.blog.myProfile.location = {name: locationName};
+                return self.main.swarm.axios.request({
+                    url: self.userInfo.photo_max_orig,
+                    method: 'GET',
+                    responseType: 'blob',
+                }).then(function (response) {
+                    let data = response.data;
+                    return self.main.blog.uploadAvatar(data).then(function (response) {
+                        self.main.onAfterHashChange(response.data);
+                        resolve();
+                    });
+                });
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    consistently(items, eachItem) {
+        let storedItems = items.slice(0);
+        return new Promise((resolve, reject) => {
+            let result = [];
+            let handler = function () {
+                let item = storedItems.shift();
+                if (item) {
+                    eachItem(item, function (eachResult) {
+                        result = result.concat(eachResult);
+                        handler();
+                    }, storedItems);
+                } else {
+                    resolve(result);
+                }
+            };
+
+            handler();
+        });
+    }
+
 }
 
 module.exports = VKImport;
