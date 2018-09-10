@@ -500,7 +500,7 @@ class Main {
 
                 uploaderPhotos.html('<ul id="preview-insta-album" class="list-inline">');
                 data.forEach(function (v) {
-                    uploaderPhotos.append('<li class="list-inline-item"><img data-type="insta-photo" style="max-width: 100px; max-height: 100px;" src="' + v.fullsize + '"></li>');
+                    uploaderPhotos.append('<li class="list-inline-item"><img class="preview-album-photo" data-type="insta-photo" src="' + v.fullsize + '"></li>');
                 });
                 uploaderPhotos.append('</ul>');
             }).catch(function (error) {
