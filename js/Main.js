@@ -183,17 +183,6 @@ class Main {
             });
         });
 
-        $('.edit-page-info').click(function (e) {
-            let info = self.blog.myProfile;
-            if (info) {
-                $('#firstNameEdit').val(info.first_name);
-                $('#lastNameEdit').val(info.last_name);
-                $('#birthDateEdit').val(info.birth_date);
-                $('#locationEdit').val(info.location.name);
-                $('#aboutEdit').val(info.about);
-            }
-        });
-
         $('.save-info-changes').click(function () {
             let info = self.blog.myProfile || {
                 location: {}
@@ -204,11 +193,35 @@ class Main {
             info.location.name = $('#locationEdit').val();
             info.about = $('#aboutEdit').val();
 
-            $('#editInfoModal').modal('hide');
+            self.updateInfo(info, true);
+            $('.user-info-filled').show();
+            $('.user-info-edit').hide();
             self.blog.saveProfile(info).then(function (response) {
                 console.log(response.data);
-                self.onAfterHashChange(response.data);
+                self.onAfterHashChange(response.data, true);
             });
+        });
+
+        $('.user-info-filled')
+            .hover(function (e) {
+                $('.edit-field-icon').removeClass('hide');
+            }, function (e) {
+                $('.edit-field-icon').addClass('hide');
+            });
+
+        $('.edit-field-icon').click(function (e) {
+            e.preventDefault();
+            let info = self.blog.myProfile;
+            if (info) {
+                $('#firstNameEdit').val(info.first_name);
+                $('#lastNameEdit').val(info.last_name);
+                $('#birthDateEdit').val(info.birth_date);
+                $('#locationEdit').val(info.location.name);
+                $('#aboutEdit').val(info.about);
+            }
+
+            $('.user-info-filled').hide();
+            $('.user-info-edit').show();
         });
 
         $('#file-input').on('change', function () {
@@ -575,7 +588,7 @@ class Main {
         return (match && match[7].length == 11) ? match[7] : false;
     }
 
-    updateInfo(data) {
+    updateInfo(data, isLoadOnlyProfile) {
         let self = this;
         self.blog.myProfile = data;
         $('#firstName').text(data.first_name);
@@ -585,24 +598,27 @@ class Main {
             $('#locationName').text(data.location.name);
         }
 
-        if (data.photo && data.photo.original) {
-            let url = self.swarm.getFullUrl(data.photo.original);
-            $('#bigAvatar').attr('src', url);
-        }
-
         $('#about').text(data.about);
-        self.lastLoadedPost = 0;
-        $('#userPosts').html('');
-        $('#iFollowUsers').html('');
-        if (data.last_post_id > 0) {
-            self.loadPosts();
-        } else {
-            $('#loadMore').hide();
-        }
 
-        self.loadIFollow();
-        self.loadPhotoAlbums(3, 'desc');
-        self.loadVideoPlaylists(3, 'desc');
+        if (!isLoadOnlyProfile) {
+            if (data.photo && data.photo.original) {
+                let url = self.swarm.getFullUrl(data.photo.original);
+                $('#bigAvatar').attr('src', url);
+            }
+
+            self.lastLoadedPost = 0;
+            $('#userPosts').html('');
+            $('#iFollowUsers').html('');
+            if (data.last_post_id > 0) {
+                self.loadPosts();
+            } else {
+                $('#loadMore').hide();
+            }
+
+            self.loadIFollow();
+            self.loadPhotoAlbums(3, 'desc');
+            self.loadVideoPlaylists(3, 'desc');
+        }
     }
 
     loadPhotoAlbums(limit, sorting) {
