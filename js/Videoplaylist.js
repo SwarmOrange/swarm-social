@@ -7,10 +7,10 @@ class Videoplaylist {
             uploadedId: 0
         };
 
-        this.initVideoPlaylist();
+        this.init();
     }
 
-    initVideoPlaylist() {
+    init() {
         let self = this;
         $('.upload-videos-preview').click(function (e) {
             e.preventDefault();
@@ -25,6 +25,37 @@ class Videoplaylist {
             input.click();
         });
 
+        $('html').on('click', '.load-videoalbum', function (e) {
+            e.preventDefault();
+            let albumId = $(this).attr('data-album-id');
+            let viewAlbumContent = $('#viewVideoAlbumContent');
+            $('.btn-delete-album').attr('data-album-id', albumId);
+            let shownModals = $('.modal.show');
+            if (shownModals.length) {
+                shownModals.one('hidden.bs.modal', function (e) {
+                    $('#viewVideoAlbumModal').modal('show');
+                });
+                shownModals.modal('hide');
+            } else {
+                $('#viewVideoAlbumModal').modal('show');
+            }
+
+            viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
+            self.main.blog.getVideoAlbumInfo(albumId).then(function (response) {
+                let data = response.data;
+                console.log(data);
+                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
+                data.videos.forEach(function (v) {
+                    if (v.type === "youtube") {
+                        viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                    } else {
+                        viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
+                    }
+                });
+                viewAlbumContent.append('</ul>');
+            });
+        });
+
         $('#input-upload-video-album').on('change', function () {
             if (this.files && this.files.length > 0) {
                 self.videoInfo.files = Array.from(this.files);
@@ -36,7 +67,25 @@ class Videoplaylist {
 
         $('.show-all-videoalbums').click(function (e) {
             e.preventDefault();
-            //$('#showAllPhotoalbumsModal').modal('show');
+            let albumsModal = $('#showAllVideoalbumsModal');
+            let content = albumsModal.find('.modal-body');
+            albumsModal.modal('show');
+            content.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
+            self.main.blog.getVideoAlbumsInfo().then(function (response) {
+                let data = response.data;
+                data = data || [];
+                if (data.length) {
+                    let html = '<ul class="list-inline preview-images">';
+                    data.forEach(function (v) {
+                        let imgUrl = v.type === "video" ? self.main.swarm.getFullUrl(v.cover_file) : v.cover_file;
+                        html += '<li class="list-inline-item"><a href="#" class="load-videoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
+                    });
+                    html += '</ul>';
+                    content.html(html);
+                } else {
+                    content.html('<p>Albums not found</p>');
+                }
+            });
         });
     }
 

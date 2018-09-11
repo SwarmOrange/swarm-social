@@ -285,7 +285,7 @@ class Blog {
                     cover_file: coverFile
                 };
 
-                return self.getAlbumsInfo().then(function (response) {
+                return self.getPhotoAlbumsInfo().then(function (response) {
                     let data = response.data;
                     data = Array.isArray(data) ? data : [];
                     data.push(newAlbumInfo);
@@ -313,7 +313,7 @@ class Blog {
         return this.swarm.get(this.prefix + 'photoalbum/' + id + '/info.json');
     }
 
-    getAlbumsInfo() {
+    getPhotoAlbumsInfo() {
         return this.swarm.get(this.prefix + 'photoalbum/info.json');
     }
 
@@ -327,7 +327,7 @@ class Blog {
         // todo delete from photoalbum/info.json
         return this.swarm.delete(this.prefix + 'photoalbum/' + id + '/1.jpg').then(function (response) {
             self.swarm.applicationHash = response.data;
-            return self.getAlbumsInfo().then(function (response) {
+            return self.getPhotoAlbumsInfo().then(function (response) {
                 let data = response.data;
                 let newAlbums = [];
                 if (data && Array.isArray(data) && data.length) {
@@ -1096,30 +1096,6 @@ class Main {
             }
         });
 
-
-
-        $('html').on('click', '.load-videoalbum', function (e) {
-            e.preventDefault();
-            let albumId = $(this).attr('data-album-id');
-            let viewAlbumContent = $('#viewVideoAlbumContent');
-            $('.btn-delete-album').attr('data-album-id', albumId);
-            $('#viewVideoAlbumModal').modal('show');
-            viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-            self.blog.getVideoAlbumInfo(albumId).then(function (response) {
-                let data = response.data;
-                console.log(data);
-                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
-                data.videos.forEach(function (v) {
-                    if (v.type === "youtube") {
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
-                    } else {
-                        viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + self.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + self.swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
-                    }
-                });
-                viewAlbumContent.append('</ul>');
-            });
-        });
-
         $('.show-insta-panel').click(function (e) {
             e.preventDefault();
             $('.import-insta-panel').show('fast');
@@ -1283,7 +1259,7 @@ class Main {
         if (data.last_photoalbum_id && data.last_photoalbum_id > 0) {
             let photoAlbums = $('#photoAlbums');
             photoAlbums.html('');
-            self.blog.getAlbumsInfo().then(function (response) {
+            self.blog.getPhotoAlbumsInfo().then(function (response) {
                 let data = response.data;
                 if (sorting === 'desc') {
                     data.reverse();
@@ -1331,12 +1307,11 @@ class Main {
                     let id = v.id;
                     if (v.type === "youtube") {
                         videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                            '<a href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
+                            '<a href="#" class="load-videoalbum post-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
                     } else {
                         videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                            '<a data-type="video" href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
+                            '<a data-type="video" href="#" class="load-videoalbum post-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
                     }
-
 
                     i++;
                 });
@@ -1707,10 +1682,9 @@ class Photoalbum {
                 $('#viewAlbumModal').modal('show');
             }
 
-            viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+            viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
             self.main.blog.getAlbumInfo(albumId).then(function (response) {
                 let data = response.data;
-                console.log(data);
                 viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
                 data.photos.forEach(function (v) {
                     viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
@@ -1734,7 +1708,7 @@ class Photoalbum {
             let content = albumsModal.find('.modal-body');
             albumsModal.modal('show');
             content.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
-            self.main.blog.getAlbumsInfo().then(function (response) {
+            self.main.blog.getPhotoAlbumsInfo().then(function (response) {
                 let data = response.data;
                 data = data || [];
                 if (data.length) {
@@ -2416,10 +2390,10 @@ class Videoplaylist {
             uploadedId: 0
         };
 
-        this.initVideoPlaylist();
+        this.init();
     }
 
-    initVideoPlaylist() {
+    init() {
         let self = this;
         $('.upload-videos-preview').click(function (e) {
             e.preventDefault();
@@ -2434,6 +2408,37 @@ class Videoplaylist {
             input.click();
         });
 
+        $('html').on('click', '.load-videoalbum', function (e) {
+            e.preventDefault();
+            let albumId = $(this).attr('data-album-id');
+            let viewAlbumContent = $('#viewVideoAlbumContent');
+            $('.btn-delete-album').attr('data-album-id', albumId);
+            let shownModals = $('.modal.show');
+            if (shownModals.length) {
+                shownModals.one('hidden.bs.modal', function (e) {
+                    $('#viewVideoAlbumModal').modal('show');
+                });
+                shownModals.modal('hide');
+            } else {
+                $('#viewVideoAlbumModal').modal('show');
+            }
+
+            viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
+            self.main.blog.getVideoAlbumInfo(albumId).then(function (response) {
+                let data = response.data;
+                console.log(data);
+                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
+                data.videos.forEach(function (v) {
+                    if (v.type === "youtube") {
+                        viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                    } else {
+                        viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
+                    }
+                });
+                viewAlbumContent.append('</ul>');
+            });
+        });
+
         $('#input-upload-video-album').on('change', function () {
             if (this.files && this.files.length > 0) {
                 self.videoInfo.files = Array.from(this.files);
@@ -2445,7 +2450,25 @@ class Videoplaylist {
 
         $('.show-all-videoalbums').click(function (e) {
             e.preventDefault();
-            //$('#showAllPhotoalbumsModal').modal('show');
+            let albumsModal = $('#showAllVideoalbumsModal');
+            let content = albumsModal.find('.modal-body');
+            albumsModal.modal('show');
+            content.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
+            self.main.blog.getVideoAlbumsInfo().then(function (response) {
+                let data = response.data;
+                data = data || [];
+                if (data.length) {
+                    let html = '<ul class="list-inline preview-images">';
+                    data.forEach(function (v) {
+                        let imgUrl = v.type === "video" ? self.main.swarm.getFullUrl(v.cover_file) : v.cover_file;
+                        html += '<li class="list-inline-item"><a href="#" class="load-videoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
+                    });
+                    html += '</ul>';
+                    content.html(html);
+                } else {
+                    content.html('<p>Albums not found</p>');
+                }
+            });
         });
     }
 

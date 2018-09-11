@@ -427,30 +427,6 @@ class Main {
             }
         });
 
-
-
-        $('html').on('click', '.load-videoalbum', function (e) {
-            e.preventDefault();
-            let albumId = $(this).attr('data-album-id');
-            let viewAlbumContent = $('#viewVideoAlbumContent');
-            $('.btn-delete-album').attr('data-album-id', albumId);
-            $('#viewVideoAlbumModal').modal('show');
-            viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-            self.blog.getVideoAlbumInfo(albumId).then(function (response) {
-                let data = response.data;
-                console.log(data);
-                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
-                data.videos.forEach(function (v) {
-                    if (v.type === "youtube") {
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
-                    } else {
-                        viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + self.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + self.swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
-                    }
-                });
-                viewAlbumContent.append('</ul>');
-            });
-        });
-
         $('.show-insta-panel').click(function (e) {
             e.preventDefault();
             $('.import-insta-panel').show('fast');
@@ -614,7 +590,7 @@ class Main {
         if (data.last_photoalbum_id && data.last_photoalbum_id > 0) {
             let photoAlbums = $('#photoAlbums');
             photoAlbums.html('');
-            self.blog.getAlbumsInfo().then(function (response) {
+            self.blog.getPhotoAlbumsInfo().then(function (response) {
                 let data = response.data;
                 if (sorting === 'desc') {
                     data.reverse();
@@ -662,12 +638,11 @@ class Main {
                     let id = v.id;
                     if (v.type === "youtube") {
                         videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                            '<a href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
+                            '<a href="#" class="load-videoalbum post-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
                     } else {
                         videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                            '<a data-type="video" href="#" class="load-videoalbum" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
+                            '<a data-type="video" href="#" class="load-videoalbum post-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
                     }
-
 
                     i++;
                 });

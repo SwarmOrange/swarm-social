@@ -34,7 +34,7 @@ class Photoalbum {
                 $('#viewAlbumModal').modal('show');
             }
 
-            viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+            viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
             self.main.blog.getAlbumInfo(albumId).then(function (response) {
                 let data = response.data;
                 viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
@@ -60,7 +60,7 @@ class Photoalbum {
             let content = albumsModal.find('.modal-body');
             albumsModal.modal('show');
             content.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
-            self.main.blog.getAlbumsInfo().then(function (response) {
+            self.main.blog.getPhotoAlbumsInfo().then(function (response) {
                 let data = response.data;
                 data = data || [];
                 if (data.length) {

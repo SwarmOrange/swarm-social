@@ -284,7 +284,7 @@ class Blog {
                     cover_file: coverFile
                 };
 
-                return self.getAlbumsInfo().then(function (response) {
+                return self.getPhotoAlbumsInfo().then(function (response) {
                     let data = response.data;
                     data = Array.isArray(data) ? data : [];
                     data.push(newAlbumInfo);
@@ -312,7 +312,7 @@ class Blog {
         return this.swarm.get(this.prefix + 'photoalbum/' + id + '/info.json');
     }
 
-    getAlbumsInfo() {
+    getPhotoAlbumsInfo() {
         return this.swarm.get(this.prefix + 'photoalbum/info.json');
     }
 
@@ -326,7 +326,7 @@ class Blog {
         // todo delete from photoalbum/info.json
         return this.swarm.delete(this.prefix + 'photoalbum/' + id + '/1.jpg').then(function (response) {
             self.swarm.applicationHash = response.data;
-            return self.getAlbumsInfo().then(function (response) {
+            return self.getPhotoAlbumsInfo().then(function (response) {
                 let data = response.data;
                 let newAlbums = [];
                 if (data && Array.isArray(data) && data.length) {

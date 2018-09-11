@@ -289,14 +289,13 @@
                                 </p>
                                 <div class="clear-both"></div>
 
-                                <ul id="photoAlbums" class="list-inline">
+                                <ul id="photoAlbums" class="list-inline preview-wall-image">
 
                                 </ul>
                             </li>
 
                             <li>
-                                <!--<p class="float-left">Video playlists / <a class="show-all-videoalbums" href="#">All</a></p>-->
-                                <p class="float-left">Video playlists</p>
+                                <p class="float-left"><a class="show-all-videoalbums" href="#">Video playlists</a></p>
                                 <p class="float-right">
                                     <a href="#" class="upload-videos-preview">
                                         <img src="img/add.png" alt="" style="width: 20px">
@@ -680,12 +679,30 @@
         </div>
     </div>
 
-    <div class="modal fade bd-example-modal-lg" id="showAllPhotoalbumsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    <div class="modal fade bd-example-modal-lg" id="showAllPhotoalbumsModal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">All photoalbums</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-center">
+                        <div class="loader-animation"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade bd-example-modal-lg" id="showAllVideoalbumsModal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">All videoalbums</h5>
                 </div>
                 <div class="modal-body">
                     <div class="d-flex justify-content-center">
