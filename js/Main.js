@@ -582,7 +582,7 @@ class Main {
 
             self.loadIFollow();
             self.loadPhotoAlbums(3, 'desc');
-            self.loadVideoPlaylists(3, 'desc');
+            self.loadVideoPlaylists(2, 'desc');
         }
     }
 
@@ -642,11 +642,11 @@ class Main {
 
                     let id = v.id;
                     if (v.type === "youtube") {
-                        videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                            '<a href="#" class="load-videoalbum post-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
+                        videoPlaylists.append('<li class="list-unstyled">' +
+                            '<a href="#" class="load-videoalbum page-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
                     } else {
-                        videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                            '<a data-type="video" href="#" class="load-videoalbum post-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
+                        videoPlaylists.append('<li class="list-unstyled">' +
+                            '<a data-type="video" href="#" class="load-videoalbum page-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
                     }
 
                     i++;

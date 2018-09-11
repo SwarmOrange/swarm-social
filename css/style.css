@@ -228,6 +228,12 @@ img {
     height: 179px;
 }
 
+.page-videoalbum-item img {
+    object-fit: cover;
+    width: 237px;
+    height: 237px;
+}
+
 .preview-album-photo {
     object-fit: cover;
     width: 250px;
