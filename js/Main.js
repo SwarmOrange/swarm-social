@@ -131,18 +131,19 @@ class Main {
             let postContentElement = $('#postContent');
             let description = postContentElement.val();
             let attachments = [];
+            let id = 1;
             $('.post-attachment').each(function (k, v) {
                 let type = $(v).attr('data-type');
                 let url = $(v).attr('data-url');
                 if (type && url) {
                     attachments.push({
+                        id: id,
                         type: type,
                         url: url
                     });
+                    id++;
                 }
             });
-            console.log(description);
-            console.log(attachments);
             let isContentExists = description.length || attachments.length;
             if (!isContentExists) {
                 self.alert('Please, write text or add attachments');
@@ -740,7 +741,10 @@ class Main {
                         '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
                         '</div>'));
                 } else if (v.type === "photo") {
-                    userPost.append(photoAttachment.clone().attr('style', '').html('<img src="' + self.swarm.getFullUrl(v.url) + '">'));
+                    let content = photoAttachment.clone().attr('id', '').attr('style', '').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
+                    content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
+                    content.find('.content').html('<img src="' + self.swarm.getFullUrl(v.url) + '">');
+                    userPost.append(content);
                 } else if (v.type === "video") {
                     // todo move to html
                     userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));

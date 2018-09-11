@@ -304,3 +304,15 @@ li > p:last-child {
 .message-dialogs {
     margin-top: 8px;
 }
+
+.photo-attachment {
+    position: relative;
+}
+
+.delete-post-content {
+    position: absolute;
+    font-size: 35px;
+    color: white;
+    left: 10px;
+    cursor: pointer;
+}

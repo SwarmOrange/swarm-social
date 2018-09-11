@@ -19,31 +19,43 @@ class Photoalbum {
             input.click();
         });
 
-        $('body').on('click', '.load-photoalbum', function (e) {
-            e.preventDefault();
-            let albumId = $(this).attr('data-album-id');
-            let viewAlbumContent = $('#viewAlbumContent');
-            $('.btn-delete-album').attr('data-album-id', albumId);
-            let shownModals = $('.modal.show');
-            if (shownModals.length) {
-                shownModals.one('hidden.bs.modal', function (e) {
+        $('body')
+            .on('click', '.load-photoalbum', function (e) {
+                e.preventDefault();
+                let albumId = $(this).attr('data-album-id');
+                let viewAlbumContent = $('#viewAlbumContent');
+                $('.btn-delete-album').attr('data-album-id', albumId);
+                let shownModals = $('.modal.show');
+                if (shownModals.length) {
+                    shownModals.one('hidden.bs.modal', function (e) {
+                        $('#viewAlbumModal').modal('show');
+                    });
+                    shownModals.modal('hide');
+                } else {
                     $('#viewAlbumModal').modal('show');
-                });
-                shownModals.modal('hide');
-            } else {
-                $('#viewAlbumModal').modal('show');
-            }
+                }
 
-            viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
-            self.main.blog.getAlbumInfo(albumId).then(function (response) {
-                let data = response.data;
-                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
-                data.photos.forEach(function (v) {
-                    viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
+                viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
+                self.main.blog.getAlbumInfo(albumId).then(function (response) {
+                    let data = response.data;
+                    viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
+                    data.photos.forEach(function (v) {
+                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
+                    });
+                    viewAlbumContent.append('</ul>');
                 });
-                viewAlbumContent.append('</ul>');
+            })
+            .on('click', '.delete-post-content', function (e) {
+                let postId = $(this).attr('data-post-id');
+                let attachmentId = $(this).attr('data-attachment-id');
+                if (confirm('Really delete?')) {
+                    $('.photo-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
+
+                    self.main.blog.deletePostAttachment(postId, attachmentId).then(function (response) {
+                        self.main.onAfterHashChange(response.data, true);
+                    });
+                }
             });
-        });
 
         $('#input-upload-photo-album').on('change', function () {
             if (this.files && this.files.length > 0) {

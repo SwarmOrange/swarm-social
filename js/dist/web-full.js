@@ -140,6 +140,9 @@ class Blog {
         // structure
         // /post/ID/info.json - {"id":id, "description":"my super post", "attachments":[]}
         attachments = attachments || [];
+        attachments.forEach(function (v, i) {
+            v.id = i + 1;
+        });
         let info = {
             id: id,
             description: description,
@@ -162,17 +165,35 @@ class Blog {
     }
 
     deletePost(id) {
+        // todo delete all post content
         return this.swarm.post(this.prefix + "post/" + id + "/info.json", JSON.stringify({
             id: id,
             is_deleted: true
         }), 'application/json');
     }
 
-    editPost(id, description) {
+    deletePostAttachment(postId, attachmentId) {
         let self = this;
+        return self.getPost(postId).then(function (response) {
+            let data = response.data;
+            let newAttachments = [];
+            data.attachments.forEach(function (v) {
+                if (v.id != attachmentId) {
+                    newAttachments.push(v);
+                }
+            });
+
+            return self.editPost(postId, data.description, newAttachments);
+        });
+    }
+
+    editPost(id, description, attachments) {
+        let self = this;
+        attachments = attachments || [];
         return this.getPost(id).then(function (response) {
             let data = response.data;
             data.description = description;
+            data.attachments = attachments;
             return self.swarm.post(self.prefix + "post/" + id + "/info.json", JSON.stringify(data), 'application/json');
         });
     }
@@ -800,18 +821,19 @@ class Main {
             let postContentElement = $('#postContent');
             let description = postContentElement.val();
             let attachments = [];
+            let id = 1;
             $('.post-attachment').each(function (k, v) {
                 let type = $(v).attr('data-type');
                 let url = $(v).attr('data-url');
                 if (type && url) {
                     attachments.push({
+                        id: id,
                         type: type,
                         url: url
                     });
+                    id++;
                 }
             });
-            console.log(description);
-            console.log(attachments);
             let isContentExists = description.length || attachments.length;
             if (!isContentExists) {
                 self.alert('Please, write text or add attachments');
@@ -869,6 +891,11 @@ class Main {
                 console.log(response.data);
                 self.onAfterHashChange(response.data, true);
             });
+        });
+
+        $('.save-info-changes-cancel').click(function () {
+            $('.user-info-filled').show();
+            $('.user-info-edit').hide();
         });
 
         $('.user-info-filled')
@@ -1246,7 +1273,7 @@ class Main {
 
             self.loadIFollow();
             self.loadPhotoAlbums(3, 'desc');
-            self.loadVideoPlaylists(3, 'desc');
+            self.loadVideoPlaylists(2, 'desc');
         }
     }
 
@@ -1306,11 +1333,11 @@ class Main {
 
                     let id = v.id;
                     if (v.type === "youtube") {
-                        videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                            '<a href="#" class="load-videoalbum post-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
+                        videoPlaylists.append('<li class="list-unstyled">' +
+                            '<a href="#" class="load-videoalbum page-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
                     } else {
-                        videoPlaylists.append('<li class="list-inline-item col-sm-4">' +
-                            '<a data-type="video" href="#" class="load-videoalbum post-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
+                        videoPlaylists.append('<li class="list-unstyled">' +
+                            '<a data-type="video" href="#" class="load-videoalbum page-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
                     }
 
                     i++;
@@ -1404,7 +1431,10 @@ class Main {
                         '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
                         '</div>'));
                 } else if (v.type === "photo") {
-                    userPost.append(photoAttachment.clone().attr('style', '').html('<img src="' + self.swarm.getFullUrl(v.url) + '">'));
+                    let content = photoAttachment.clone().attr('id', '').attr('style', '').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
+                    content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
+                    content.find('.content').html('<img src="' + self.swarm.getFullUrl(v.url) + '">');
+                    userPost.append(content);
                 } else if (v.type === "video") {
                     // todo move to html
                     userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
@@ -1667,31 +1697,43 @@ class Photoalbum {
             input.click();
         });
 
-        $('body').on('click', '.load-photoalbum', function (e) {
-            e.preventDefault();
-            let albumId = $(this).attr('data-album-id');
-            let viewAlbumContent = $('#viewAlbumContent');
-            $('.btn-delete-album').attr('data-album-id', albumId);
-            let shownModals = $('.modal.show');
-            if (shownModals.length) {
-                shownModals.one('hidden.bs.modal', function (e) {
+        $('body')
+            .on('click', '.load-photoalbum', function (e) {
+                e.preventDefault();
+                let albumId = $(this).attr('data-album-id');
+                let viewAlbumContent = $('#viewAlbumContent');
+                $('.btn-delete-album').attr('data-album-id', albumId);
+                let shownModals = $('.modal.show');
+                if (shownModals.length) {
+                    shownModals.one('hidden.bs.modal', function (e) {
+                        $('#viewAlbumModal').modal('show');
+                    });
+                    shownModals.modal('hide');
+                } else {
                     $('#viewAlbumModal').modal('show');
-                });
-                shownModals.modal('hide');
-            } else {
-                $('#viewAlbumModal').modal('show');
-            }
+                }
 
-            viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
-            self.main.blog.getAlbumInfo(albumId).then(function (response) {
-                let data = response.data;
-                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
-                data.photos.forEach(function (v) {
-                    viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
+                viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
+                self.main.blog.getAlbumInfo(albumId).then(function (response) {
+                    let data = response.data;
+                    viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
+                    data.photos.forEach(function (v) {
+                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
+                    });
+                    viewAlbumContent.append('</ul>');
                 });
-                viewAlbumContent.append('</ul>');
+            })
+            .on('click', '.delete-post-content', function (e) {
+                let postId = $(this).attr('data-post-id');
+                let attachmentId = $(this).attr('data-attachment-id');
+                if (confirm('Really delete?')) {
+                    $('.photo-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
+
+                    self.main.blog.deletePostAttachment(postId, attachmentId).then(function (response) {
+                        self.main.onAfterHashChange(response.data, true);
+                    });
+                }
             });
-        });
 
         $('#input-upload-photo-album').on('change', function () {
             if (this.files && this.files.length > 0) {

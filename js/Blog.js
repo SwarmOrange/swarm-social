@@ -139,6 +139,9 @@ class Blog {
         // structure
         // /post/ID/info.json - {"id":id, "description":"my super post", "attachments":[]}
         attachments = attachments || [];
+        attachments.forEach(function (v, i) {
+            v.id = i + 1;
+        });
         let info = {
             id: id,
             description: description,
@@ -161,17 +164,35 @@ class Blog {
     }
 
     deletePost(id) {
+        // todo delete all post content
         return this.swarm.post(this.prefix + "post/" + id + "/info.json", JSON.stringify({
             id: id,
             is_deleted: true
         }), 'application/json');
     }
 
-    editPost(id, description) {
+    deletePostAttachment(postId, attachmentId) {
         let self = this;
+        return self.getPost(postId).then(function (response) {
+            let data = response.data;
+            let newAttachments = [];
+            data.attachments.forEach(function (v) {
+                if (v.id != attachmentId) {
+                    newAttachments.push(v);
+                }
+            });
+
+            return self.editPost(postId, data.description, newAttachments);
+        });
+    }
+
+    editPost(id, description, attachments) {
+        let self = this;
+        attachments = attachments || [];
         return this.getPost(id).then(function (response) {
             let data = response.data;
             data.description = description;
+            data.attachments = attachments;
             return self.swarm.post(self.prefix + "post/" + id + "/info.json", JSON.stringify(data), 'application/json');
         });
     }
