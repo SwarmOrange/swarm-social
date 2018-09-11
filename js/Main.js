@@ -202,6 +202,11 @@ class Main {
             });
         });
 
+        $('.save-info-changes-cancel').click(function () {
+            $('.user-info-filled').show();
+            $('.user-info-edit').hide();
+        });
+
         $('.user-info-filled')
             .hover(function (e) {
                 $('.edit-field-icon').removeClass('hide');
