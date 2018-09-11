@@ -278,8 +278,10 @@
                             </li>
 
                             <li>
-                                <!--<p class="float-left">Photo albums / <a class="show-all-photoalbums" href="#">All</a></p>-->
-                                <p class="float-left">Photo albums</p>
+                                <p class="float-left">
+                                    <a class="show-all-photoalbums" href="#">Photo albums</a>
+                                </p>
+
                                 <p class="float-right">
                                     <a href="#" class="create-album">
                                         <img src="img/add.png" alt="" style="width: 20px">
@@ -291,6 +293,7 @@
 
                                 </ul>
                             </li>
+
                             <li>
                                 <!--<p class="float-left">Video playlists / <a class="show-all-videoalbums" href="#">All</a></p>-->
                                 <p class="float-left">Video playlists</p>
@@ -530,47 +533,6 @@
         </div>
     </div>
 
-    <!-- Edit Info Modal -->
-    <!--<div class="modal fade" id="editInfoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Edit info</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="firstNameEdit" placeholder="First name">
-                    </div>
-
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="lastNameEdit" placeholder="Last name">
-                    </div>
-
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="birthDateEdit" placeholder="Birth date">
-                    </div>
-
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="locationEdit" placeholder="Location">
-                    </div>
-
-                    <div class="form-group">
-                        <textarea class="form-control" id="aboutEdit" rows="3" placeholder="About"></textarea>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary save-info-changes">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>-->
-
     <!-- Upload Avatar Modal -->
     <div class="modal fade" id="uploadAvatarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
          aria-hidden="true">
@@ -718,6 +680,22 @@
         </div>
     </div>
 
+    <div class="modal fade bd-example-modal-lg" id="showAllPhotoalbumsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">All photoalbums</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-center">
+                        <div class="loader-animation"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- View Album Modal -->
     <div class="modal fade bd-example-modal-lg" id="viewAlbumModal" tabindex="-1" role="dialog"
          aria-labelledby="exampleModalLabel"
@@ -736,7 +714,7 @@
                     </button>
 
                     <div class="clear-both"></div>
-                    <div id="viewAlbumContent">
+                    <div id="viewAlbumContent" class="preview-images">
 
                     </div>
                 </div>
@@ -816,7 +794,7 @@
                     </div>
                     <div class="clear-both"></div>
                     <hr>
-                    <div id="uploaded-photos">
+                    <div id="uploaded-photos" class="preview-images">
 
                     </div>
                 </div>

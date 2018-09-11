@@ -303,8 +303,6 @@ class Blog {
     }
 
     uploadPhotoToAlbum(photoAlbumId, photoId, fileContent, onProgress) {
-        //let timestamp = +new Date();
-        //let fileName = this.prefix + "photoalbum/" + photoAlbumId + "/" + timestamp + ".jpg";
         let fileName = this.prefix + "photoalbum/" + photoAlbumId + "/" + photoId + ".jpg";
         return this.sendRawFile(fileName, fileContent, 'image/jpeg', null, null, onProgress).then(function (response) {
             return {fileName: fileName, response: response.data};
@@ -756,9 +754,9 @@ class Main {
                 // todo autoset profile after update?
                 self.blog.setMyProfile(data);
                 self.updateInfo(data);
-                setTimeout(function () {
+                /*setTimeout(function () {
                     $('#loadModal').modal('hide');
-                }, 1000);
+                }, 1000);*/
             })
             .catch(function (error) {
                 console.log(error);
@@ -854,17 +852,6 @@ class Main {
             });
         });
 
-        $('.edit-page-info').click(function (e) {
-            let info = self.blog.myProfile;
-            if (info) {
-                $('#firstNameEdit').val(info.first_name);
-                $('#lastNameEdit').val(info.last_name);
-                $('#birthDateEdit').val(info.birth_date);
-                $('#locationEdit').val(info.location.name);
-                $('#aboutEdit').val(info.about);
-            }
-        });
-
         $('.save-info-changes').click(function () {
             let info = self.blog.myProfile || {
                 location: {}
@@ -875,11 +862,35 @@ class Main {
             info.location.name = $('#locationEdit').val();
             info.about = $('#aboutEdit').val();
 
-            $('#editInfoModal').modal('hide');
+            self.updateInfo(info, true);
+            $('.user-info-filled').show();
+            $('.user-info-edit').hide();
             self.blog.saveProfile(info).then(function (response) {
                 console.log(response.data);
-                self.onAfterHashChange(response.data);
+                self.onAfterHashChange(response.data, true);
             });
+        });
+
+        $('.user-info-filled')
+            .hover(function (e) {
+                $('.edit-field-icon').removeClass('hide');
+            }, function (e) {
+                $('.edit-field-icon').addClass('hide');
+            });
+
+        $('.edit-field-icon').click(function (e) {
+            e.preventDefault();
+            let info = self.blog.myProfile;
+            if (info) {
+                $('#firstNameEdit').val(info.first_name);
+                $('#lastNameEdit').val(info.last_name);
+                $('#birthDateEdit').val(info.birth_date);
+                $('#locationEdit').val(info.location.name);
+                $('#aboutEdit').val(info.about);
+            }
+
+            $('.user-info-filled').hide();
+            $('.user-info-edit').show();
         });
 
         $('#file-input').on('change', function () {
@@ -1085,23 +1096,7 @@ class Main {
             }
         });
 
-        $('body').on('click', '.load-photoalbum', function (e) {
-            e.preventDefault();
-            let albumId = $(this).attr('data-album-id');
-            let viewAlbumContent = $('#viewAlbumContent');
-            $('.btn-delete-album').attr('data-album-id', albumId);
-            $('#viewAlbumModal').modal('show');
-            viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-            self.blog.getAlbumInfo(albumId).then(function (response) {
-                let data = response.data;
-                console.log(data);
-                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
-                data.photos.forEach(function (v) {
-                    viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
-                });
-                viewAlbumContent.append('</ul>');
-            });
-        });
+
 
         $('html').on('click', '.load-videoalbum', function (e) {
             e.preventDefault();
@@ -1158,7 +1153,7 @@ class Main {
 
                 uploaderPhotos.html('<ul id="preview-insta-album" class="list-inline">');
                 data.forEach(function (v) {
-                    uploaderPhotos.append('<li class="list-inline-item"><img data-type="insta-photo" style="max-width: 100px; max-height: 100px;" src="' + v.fullsize + '"></li>');
+                    uploaderPhotos.append('<li class="list-inline-item"><img class="preview-album-photo" data-type="insta-photo" src="' + v.fullsize + '"></li>');
                 });
                 uploaderPhotos.append('</ul>');
             }).catch(function (error) {
@@ -1246,7 +1241,7 @@ class Main {
         return (match && match[7].length == 11) ? match[7] : false;
     }
 
-    updateInfo(data) {
+    updateInfo(data, isLoadOnlyProfile) {
         let self = this;
         self.blog.myProfile = data;
         $('#firstName').text(data.first_name);
@@ -1256,24 +1251,27 @@ class Main {
             $('#locationName').text(data.location.name);
         }
 
-        if (data.photo && data.photo.original) {
-            let url = self.swarm.getFullUrl(data.photo.original);
-            $('#bigAvatar').attr('src', url);
-        }
-
         $('#about').text(data.about);
-        self.lastLoadedPost = 0;
-        $('#userPosts').html('');
-        $('#iFollowUsers').html('');
-        if (data.last_post_id > 0) {
-            self.loadPosts();
-        } else {
-            $('#loadMore').hide();
-        }
 
-        self.loadIFollow();
-        self.loadPhotoAlbums(3, 'desc');
-        self.loadVideoPlaylists(3, 'desc');
+        if (!isLoadOnlyProfile) {
+            if (data.photo && data.photo.original) {
+                let url = self.swarm.getFullUrl(data.photo.original);
+                $('#bigAvatar').attr('src', url);
+            }
+
+            self.lastLoadedPost = 0;
+            $('#userPosts').html('');
+            $('#iFollowUsers').html('');
+            if (data.last_post_id > 0) {
+                self.loadPosts();
+            } else {
+                $('#loadMore').hide();
+            }
+
+            self.loadIFollow();
+            self.loadPhotoAlbums(3, 'desc');
+            self.loadVideoPlaylists(3, 'desc');
+        }
     }
 
     loadPhotoAlbums(limit, sorting) {
@@ -1694,6 +1692,33 @@ class Photoalbum {
             input.click();
         });
 
+        $('body').on('click', '.load-photoalbum', function (e) {
+            e.preventDefault();
+            let albumId = $(this).attr('data-album-id');
+            let viewAlbumContent = $('#viewAlbumContent');
+            $('.btn-delete-album').attr('data-album-id', albumId);
+            let shownModals = $('.modal.show');
+            if (shownModals.length) {
+                shownModals.one('hidden.bs.modal', function (e) {
+                    $('#viewAlbumModal').modal('show');
+                });
+                shownModals.modal('hide');
+            } else {
+                $('#viewAlbumModal').modal('show');
+            }
+
+            viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+            self.main.blog.getAlbumInfo(albumId).then(function (response) {
+                let data = response.data;
+                console.log(data);
+                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
+                data.photos.forEach(function (v) {
+                    viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
+                });
+                viewAlbumContent.append('</ul>');
+            });
+        });
+
         $('#input-upload-photo-album').on('change', function () {
             if (this.files && this.files.length > 0) {
                 self.photoalbumInfo.files = Array.from(this.files);
@@ -1705,7 +1730,25 @@ class Photoalbum {
 
         $('.show-all-photoalbums').click(function (e) {
             e.preventDefault();
-            $('#showAllPhotoalbumsModal').modal('show');
+            let albumsModal = $('#showAllPhotoalbumsModal');
+            let content = albumsModal.find('.modal-body');
+            albumsModal.modal('show');
+            content.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
+            self.main.blog.getAlbumsInfo().then(function (response) {
+                let data = response.data;
+                data = data || [];
+                if (data.length) {
+                    let html = '<ul class="list-inline preview-images">';
+                    data.forEach(function (v) {
+                        let imgUrl = self.main.swarm.getFullUrl(v.cover_file);
+                        html += '<li class="list-inline-item"><a href="#" class="load-photoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
+                    });
+                    html += '</ul>';
+                    content.html(html);
+                } else {
+                    content.html('<p>Albums not found</p>');
+                }
+            });
         });
     }
 

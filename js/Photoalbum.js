@@ -19,6 +19,32 @@ class Photoalbum {
             input.click();
         });
 
+        $('body').on('click', '.load-photoalbum', function (e) {
+            e.preventDefault();
+            let albumId = $(this).attr('data-album-id');
+            let viewAlbumContent = $('#viewAlbumContent');
+            $('.btn-delete-album').attr('data-album-id', albumId);
+            let shownModals = $('.modal.show');
+            if (shownModals.length) {
+                shownModals.one('hidden.bs.modal', function (e) {
+                    $('#viewAlbumModal').modal('show');
+                });
+                shownModals.modal('hide');
+            } else {
+                $('#viewAlbumModal').modal('show');
+            }
+
+            viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+            self.main.blog.getAlbumInfo(albumId).then(function (response) {
+                let data = response.data;
+                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
+                data.photos.forEach(function (v) {
+                    viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
+                });
+                viewAlbumContent.append('</ul>');
+            });
+        });
+
         $('#input-upload-photo-album').on('change', function () {
             if (this.files && this.files.length > 0) {
                 self.photoalbumInfo.files = Array.from(this.files);
@@ -30,7 +56,25 @@ class Photoalbum {
 
         $('.show-all-photoalbums').click(function (e) {
             e.preventDefault();
-            $('#showAllPhotoalbumsModal').modal('show');
+            let albumsModal = $('#showAllPhotoalbumsModal');
+            let content = albumsModal.find('.modal-body');
+            albumsModal.modal('show');
+            content.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
+            self.main.blog.getAlbumsInfo().then(function (response) {
+                let data = response.data;
+                data = data || [];
+                if (data.length) {
+                    let html = '<ul class="list-inline preview-images">';
+                    data.forEach(function (v) {
+                        let imgUrl = self.main.swarm.getFullUrl(v.cover_file);
+                        html += '<li class="list-inline-item"><a href="#" class="load-photoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
+                    });
+                    html += '</ul>';
+                    content.html(html);
+                } else {
+                    content.html('<p>Albums not found</p>');
+                }
+            });
         });
     }
 

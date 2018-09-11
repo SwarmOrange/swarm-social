@@ -107,7 +107,7 @@ img {
     opacity: 0.2;
 }
 
-#viewAlbumContent li, #uploaded-photos li {
+.preview-images li {
     margin-bottom: 8px;
 }
 

@@ -85,9 +85,9 @@ class Main {
                 // todo autoset profile after update?
                 self.blog.setMyProfile(data);
                 self.updateInfo(data);
-                setTimeout(function () {
+                /*setTimeout(function () {
                     $('#loadModal').modal('hide');
-                }, 1000);
+                }, 1000);*/
             })
             .catch(function (error) {
                 console.log(error);
@@ -427,23 +427,7 @@ class Main {
             }
         });
 
-        $('body').on('click', '.load-photoalbum', function (e) {
-            e.preventDefault();
-            let albumId = $(this).attr('data-album-id');
-            let viewAlbumContent = $('#viewAlbumContent');
-            $('.btn-delete-album').attr('data-album-id', albumId);
-            $('#viewAlbumModal').modal('show');
-            viewAlbumContent.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-            self.blog.getAlbumInfo(albumId).then(function (response) {
-                let data = response.data;
-                console.log(data);
-                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
-                data.photos.forEach(function (v) {
-                    viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
-                });
-                viewAlbumContent.append('</ul>');
-            });
-        });
+
 
         $('html').on('click', '.load-videoalbum', function (e) {
             e.preventDefault();
