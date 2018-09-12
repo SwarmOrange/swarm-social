@@ -101,9 +101,14 @@ class Blog {
         // structure
         // post/ID/file/[timestamp].[extension]
         let self = this;
-        let extension = fileName.split('.').pop();
-        let timestamp = +new Date();
-        let url = this.prefix + "post/" + id + "/file/" + timestamp + "." + extension;
+        let url = null;
+        if (fileName) {
+            let extension = fileName.split('.').pop();
+            let timestamp = +new Date();
+            url = this.prefix + "post/" + id + "/file/" + timestamp + "." + extension;
+        } else {
+            url = this.prefix + "post/" + id + "/file/";
+        }
 
         return this.sendRawFile(url, fileContent, contentType, null, null, onUploadProgress).then(function (response) {
                 return {

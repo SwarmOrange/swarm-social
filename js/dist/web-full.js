@@ -102,9 +102,14 @@ class Blog {
         // structure
         // post/ID/file/[timestamp].[extension]
         let self = this;
-        let extension = fileName.split('.').pop();
-        let timestamp = +new Date();
-        let url = this.prefix + "post/" + id + "/file/" + timestamp + "." + extension;
+        let url = null;
+        if (fileName) {
+            let extension = fileName.split('.').pop();
+            let timestamp = +new Date();
+            url = this.prefix + "post/" + id + "/file/" + timestamp + "." + extension;
+        } else {
+            url = this.prefix + "post/" + id + "/file/";
+        }
 
         return this.sendRawFile(url, fileContent, contentType, null, null, onUploadProgress).then(function (response) {
                 return {
@@ -943,6 +948,22 @@ class Main {
             }
         });
 
+        $('.attach-photo').click(function (e) {
+            e.preventDefault();
+            let input = $('#input-attach-file');
+            input.attr('data-type', 'photo');
+            input.attr('accept', 'image/*');
+            input.click();
+        });
+
+        $('.attach-video').click(function (e) {
+            e.preventDefault();
+            let input = $('#input-attach-file');
+            input.attr('data-type', 'video');
+            input.attr('accept', 'video/*');
+            input.click();
+        });
+
         $('#input-attach-file').on('change', function () {
             if (this.files && this.files[0]) {
                 $('#postOrAttach').addClass("disabled-content");
@@ -951,30 +972,39 @@ class Main {
                 let postProgress = $('#postProgress');
                 progressPanel.show();
                 let fileType = $(this).attr('data-type');
-                let contentType = this.files[0].type;
-                let fileName = this.files[0].name;
                 let setProgress = function (val) {
                     postProgress.css('width', val + '%').attr('aria-valuenow', val);
                 };
-                let reader = new FileReader();
-                reader.onload = function (e) {
-                    self.blog.uploadFileForPost(self.blog.myProfile.last_post_id + 1, e.target.result, contentType, fileName, function (progress) {
-                        let onePercent = progress.total / 100;
-                        let currentPercent = progress.loaded / onePercent;
-                        setProgress(currentPercent);
-                    }).then(function (data) {
-                        let url = data.url;
-                        let fullUrl = data.fullUrl;
-                        console.log(data);
-                        let postAttachmentTemplate = $('#postAttachment').clone();
-                        $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', fileType).attr('data-url', url).html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
-                        self.onAfterHashChange(data.response.data, true);
-                        progressPanel.hide();
-                        setProgress(0);
-                        $('#postOrAttach').removeClass("disabled-content");
-                    });
-                };
-                reader.readAsArrayBuffer(this.files[0]);
+
+                let data = new FormData();
+                let lastName = null;
+                $.each(this.files, function (key, value) {
+                    let timestamp = +new Date();
+                    let blob = value.slice(0, value.size, value.type);
+                    let extension = value.name.split('.').pop();
+                    lastName = timestamp + '.' + extension;
+                    let file = new File([blob], lastName, {type: value.type});
+                    data.append(key, file);
+                });
+
+                self.blog.uploadFileForPost(self.blog.myProfile.last_post_id + 1, data, 'multipart/form-data', null, function (progress) {
+                    let onePercent = progress.total / 100;
+                    let currentPercent = progress.loaded / onePercent;
+                    setProgress(currentPercent);
+                }).then(function (data) {
+                    let url = data.url + lastName;
+                    let fullUrl = data.fullUrl + lastName;
+                    console.log(data);
+                    let postAttachmentTemplate = $('#postAttachment').clone();
+                    $('#attached-content')
+                        .append(postAttachmentTemplate.attr('style', '')
+                            .attr('data-type', fileType).attr('data-url', url)
+                            .html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
+                    self.onAfterHashChange(data.response.data, true);
+                    progressPanel.hide();
+                    setProgress(0);
+                    $('#postOrAttach').removeClass("disabled-content");
+                });
             }
         });
 
@@ -999,22 +1029,6 @@ class Main {
             } else {
                 self.alert('Select photo before save');
             }
-        });
-
-        $('.attach-photo').click(function (e) {
-            e.preventDefault();
-            let input = $('#input-attach-file');
-            input.attr('data-type', 'photo');
-            input.attr('accept', 'image/*');
-            input.click();
-        });
-
-        $('.attach-video').click(function (e) {
-            e.preventDefault();
-            let input = $('#input-attach-file');
-            input.attr('data-type', 'video');
-            input.attr('accept', 'video/*');
-            input.click();
         });
 
         $('.add-youtube-video').click(function (e) {

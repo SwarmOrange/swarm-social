@@ -263,42 +263,10 @@ class Main {
 
         $('.attach-video').click(function (e) {
             e.preventDefault();
-            /*let input = $('#input-attach-file');
+            let input = $('#input-attach-file');
             input.attr('data-type', 'video');
             input.attr('accept', 'video/*');
-            input.click();*/
-            let form = $('.form-submit-files');
-            form.find('input[type=file]').click();
-        });
-
-        $('.form-submit-files input[type=file]').on('change', function () {
-            console.log(this.files);
-            let data = new FormData();
-            $.each(this.files, function (key, value) {
-                let timestamp = +new Date();
-                let blob = value.slice(0, value.size, value.type);
-                let file = new File([blob], timestamp + '.mp4', {type: value.type});
-                data.append(key, file);
-            });
-            console.log('Sending files..');
-            $.ajax({
-                url: self.swarm.getFullUrl('social/post/' + (self.blog.myProfile.last_post_id + 1) + '/file/', self.swarm.applicationHash),
-                type: 'POST',
-                data: data,
-                cache: false,
-                dataType: 'text',
-                processData: false, // Don't process the files
-                contentType: false, // Set content type to false as jQuery will tell the server its a query string request
-                success: function (data, textStatus, jqXHR) {
-                    console.log(data);
-                    self.onAfterHashChange(data, true);
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    // Handle errors here
-                    console.log('ERRORS: ' + textStatus);
-                    // STOP LOADING SPINNER
-                }
-            });
+            input.click();
         });
 
         $('#input-attach-file').on('change', function () {
@@ -309,37 +277,39 @@ class Main {
                 let postProgress = $('#postProgress');
                 progressPanel.show();
                 let fileType = $(this).attr('data-type');
-                let contentType = this.files[0].type;
-                let fileName = this.files[0].name;
                 let setProgress = function (val) {
                     postProgress.css('width', val + '%').attr('aria-valuenow', val);
                 };
-                if (fileType === 'video') {
 
-                } else {
-                    let reader = new FileReader();
-                    reader.onload = function (e) {
-                        self.blog.uploadFileForPost(self.blog.myProfile.last_post_id + 1, e.target.result, contentType, fileName, function (progress) {
-                            let onePercent = progress.total / 100;
-                            let currentPercent = progress.loaded / onePercent;
-                            setProgress(currentPercent);
-                        }).then(function (data) {
-                            let url = data.url;
-                            let fullUrl = data.fullUrl;
-                            console.log(data);
-                            let postAttachmentTemplate = $('#postAttachment').clone();
-                            $('#attached-content')
-                                .append(postAttachmentTemplate.attr('style', '')
-                                    .attr('data-type', fileType).attr('data-url', url)
-                                    .html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
-                            self.onAfterHashChange(data.response.data, true);
-                            progressPanel.hide();
-                            setProgress(0);
-                            $('#postOrAttach').removeClass("disabled-content");
-                        });
-                    };
-                    reader.readAsArrayBuffer(this.files[0]);
-                }
+                let data = new FormData();
+                let lastName = null;
+                $.each(this.files, function (key, value) {
+                    let timestamp = +new Date();
+                    let blob = value.slice(0, value.size, value.type);
+                    let extension = value.name.split('.').pop();
+                    lastName = timestamp + '.' + extension;
+                    let file = new File([blob], lastName, {type: value.type});
+                    data.append(key, file);
+                });
+
+                self.blog.uploadFileForPost(self.blog.myProfile.last_post_id + 1, data, 'multipart/form-data', null, function (progress) {
+                    let onePercent = progress.total / 100;
+                    let currentPercent = progress.loaded / onePercent;
+                    setProgress(currentPercent);
+                }).then(function (data) {
+                    let url = data.url + lastName;
+                    let fullUrl = data.fullUrl + lastName;
+                    console.log(data);
+                    let postAttachmentTemplate = $('#postAttachment').clone();
+                    $('#attached-content')
+                        .append(postAttachmentTemplate.attr('style', '')
+                            .attr('data-type', fileType).attr('data-url', url)
+                            .html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
+                    self.onAfterHashChange(data.response.data, true);
+                    progressPanel.hide();
+                    setProgress(0);
+                    $('#postOrAttach').removeClass("disabled-content");
+                });
             }
         });
 
