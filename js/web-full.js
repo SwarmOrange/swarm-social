@@ -20,8 +20,8 @@ let StartNow = require('./StartNow.js');
 let ImportButtons = require('./ImportButtons.js');
 let News = require('./News.js');
 let Messages = require('./Messages.js');
-let Wallet = require('./Messages.js');
-let Settings = require('./Messages.js');
+let Wallet = require('./Wallet.js');
+let Settings = require('./Settings.js');
 window.socialModules = {
     Main: Main,
     Blog: Blog,
