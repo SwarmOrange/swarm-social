@@ -269,6 +269,14 @@ class Main {
             input.click();
         });
 
+        $('.attach-audio').click(function (e) {
+            e.preventDefault();
+            let input = $('#input-attach-file');
+            input.attr('data-type', 'audio');
+            input.attr('accept', 'audio/*');
+            input.click();
+        });
+
         $('#input-attach-file').on('change', function () {
             if (this.files && this.files[0]) {
                 $('#postOrAttach').addClass("disabled-content");
@@ -754,6 +762,9 @@ class Main {
                     content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
                     content.find('.content').html('<img src="' + self.swarm.getFullUrl(v.url) + '">');
                     userPost.append(content);
+                } else if (v.type === "audio") {
+                    // todo move to html
+                    userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<audio controls style="display: block; width: 100%"> <source src="' + self.swarm.getFullUrl(v.url) + '" type="audio/mpeg"> Your browser does not support the audio element. </audio>'));
                 } else if (v.type === "video") {
                     // todo move to html
                     userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
