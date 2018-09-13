@@ -1775,21 +1775,25 @@ class Photoalbum {
             let content = albumsModal.find('.modal-body');
             albumsModal.modal('show');
             content.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
-            self.main.blog.getPhotoAlbumsInfo().then(function (response) {
-                let data = response.data;
-                data = data || [];
-                if (data.length) {
-                    let html = '<ul class="list-inline preview-images">';
-                    data.forEach(function (v) {
-                        let imgUrl = self.main.swarm.getFullUrl(v.cover_file);
-                        html += '<li class="list-inline-item"><a href="#" class="load-photoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
-                    });
-                    html += '</ul>';
-                    content.html(html);
-                } else {
+            self.main.blog.getPhotoAlbumsInfo()
+                .then(function (response) {
+                    let data = response.data;
+                    data = data || [];
+                    if (data.length) {
+                        let html = '<ul class="list-inline preview-images">';
+                        data.forEach(function (v) {
+                            let imgUrl = self.main.swarm.getFullUrl(v.cover_file);
+                            html += '<li class="list-inline-item"><a href="#" class="load-photoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
+                        });
+                        html += '</ul>';
+                        content.html(html);
+                    } else {
+                        content.html('<p>Albums not found</p>');
+                    }
+                })
+                .catch(function () {
                     content.html('<p>Albums not found</p>');
-                }
-            });
+                });
         });
     }
 
@@ -1849,6 +1853,10 @@ module.exports = Photoalbum;
 class Settings {
     constructor(main) {
         this.main = main;
+        this.zip = null;
+        this.receivedFiles = [];
+        this.currentFileId = 0;
+        this.totalSize = 0;
         this.init();
     }
 
@@ -1856,6 +1864,9 @@ class Settings {
         let self = this;
         $('#v-pills-settings-tab').click(function (e) {
             self.setExportStatus('');
+            $('.export-download-button').hide();
+            $('#exportDataProgress').hide();
+            self.setExportProgress(0);
         });
 
         $('#settings-import-file').on('change', function (evt) {
@@ -1911,41 +1922,60 @@ class Settings {
             $('#settings-import-file').click();
         });
 
-        $('.settings-export-all-data').click(function (e) {
+        $('.settings-export-download').click(function (e) {
             e.preventDefault();
-            let zip = new JSZip();
-            let receivedFiles = [];
-            let currentFileId = 0;
+
+            let progressPanel = $('#exportDataProgress');
+            progressPanel.show();
+            self.setExportProgress(0);
             let downloadNext = function () {
-                if (currentFileId >= receivedFiles.length) {
-                    console.log('COMPLETE');
-                    zip.generateAsync({type: "blob"})
+                if (self.currentFileId >= self.receivedFiles.length) {
+                    self.setExportStatus('All files downloaded! Creating archive..');
+                    self.zip.generateAsync({type: "blob"})
                         .then(function (content) {
+                            self.setExportProgress(0);
                             saveAs.saveAs(content, "social-backup.zip");
                         });
                     return;
                 }
 
-                let fileName = receivedFiles[currentFileId];
+                let fileName = self.receivedFiles[self.currentFileId];
                 let url = self.main.swarm.getFullUrl(fileName);
-                currentFileId++;
                 self.main.swarm.axios.request({
                     url: url,
                     method: 'GET',
                     responseType: 'blob',
                 }).then(function (response) {
-                    zip.file(fileName, response.data);
+                    self.zip.file(fileName, response.data);
+                    self.setExportProgress((self.currentFileId + 1) / self.receivedFiles.length * 100);
+                    self.currentFileId++;
                     downloadNext();
                 });
             };
 
+            downloadNext();
+        });
+
+        $('.settings-export-all-data').click(function (e) {
+            e.preventDefault();
+
+            self.setExportProgress(0);
+            $('.export-download-button').hide();
+            self.zip = new JSZip();
+            self.receivedFiles = [];
+            self.currentFileId = 0;
+            self.totalSize = 0;
             self.setExportStatus('Find all files...');
             self.findAllFiles(null, null, function (files) {
-                self.setExportStatus('Found ' + files.length + ' files. Downloading all to zip archive..');
-                receivedFiles = files;
-                downloadNext();
+                self.setExportStatus('Found ' + files.length + ' files. Total size: ' + (self.totalSize / 1024 / 1024).toFixed(2) + ' Mb');
+                $('.export-download-button').show();
+                self.receivedFiles = files;
             });
         });
+    }
+
+    setExportProgress(val) {
+        $('#exportDataProgressBar').css('width', val + '%').attr('aria-valuenow', val);
     }
 
     setExportStatus(text) {
@@ -1967,28 +1997,31 @@ class Settings {
             foundDirectories = {};
         }
 
-        self.main.swarm.request('get', currentDirectory, '', 'bzz-list:').then(function (response) {
-            let data = response.data;
-            if ('entries' in data) {
-                data.entries.forEach(function (v) {
-                    foundFiles[v.path] = 1;
-                });
-            }
-
-            if ('common_prefixes' in data) {
-                data.common_prefixes.forEach(function (v) {
-                    foundDirectories[v] = 1;
-                });
-            }
-
-            if (Object.keys(foundDirectories).length > 0) {
-                self.findAllFiles(foundFiles, foundDirectories, onComplete);
-            } else {
-                if (onComplete) {
-                    onComplete(Object.keys(foundFiles));
+        self.setExportStatus('Receive files from: ' + currentDirectory);
+        self.main.swarm.request('get', currentDirectory, '', 'bzz-list:')
+            .then(function (response) {
+                let data = response.data;
+                if ('entries' in data) {
+                    data.entries.forEach(function (v) {
+                        foundFiles[v.path] = 1;
+                        self.totalSize += v.size;
+                    });
                 }
-            }
-        });
+
+                if ('common_prefixes' in data) {
+                    data.common_prefixes.forEach(function (v) {
+                        foundDirectories[v] = 1;
+                    });
+                }
+
+                if (Object.keys(foundDirectories).length > 0) {
+                    self.findAllFiles(foundFiles, foundDirectories, onComplete);
+                } else {
+                    if (onComplete) {
+                        onComplete(Object.keys(foundFiles));
+                    }
+                }
+            });
     }
 }
 
@@ -2669,21 +2702,25 @@ class Videoplaylist {
             let content = albumsModal.find('.modal-body');
             albumsModal.modal('show');
             content.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
-            self.main.blog.getVideoAlbumsInfo().then(function (response) {
-                let data = response.data;
-                data = data || [];
-                if (data.length) {
-                    let html = '<ul class="list-inline preview-images">';
-                    data.forEach(function (v) {
-                        let imgUrl = v.type === "video" ? self.main.swarm.getFullUrl(v.cover_file) : v.cover_file;
-                        html += '<li class="list-inline-item"><a href="#" class="load-videoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
-                    });
-                    html += '</ul>';
-                    content.html(html);
-                } else {
-                    content.html('<p>Albums not found</p>');
-                }
-            });
+            self.main.blog.getVideoAlbumsInfo()
+                .then(function (response) {
+                    let data = response.data;
+                    data = data || [];
+                    if (data.length) {
+                        let html = '<ul class="list-inline preview-images">';
+                        data.forEach(function (v) {
+                            let imgUrl = v.type === "video" ? self.main.swarm.getFullUrl(v.cover_file) : v.cover_file;
+                            html += '<li class="list-inline-item"><a href="#" class="load-videoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
+                        });
+                        html += '</ul>';
+                        content.html(html);
+                    } else {
+                        content.html('<p>Playlists not found</p>');
+                    }
+                })
+                .catch(function () {
+                    content.html('<p>Playlists not found</p>');
+                });
         });
     }
 
