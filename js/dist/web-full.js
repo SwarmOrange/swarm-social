@@ -1866,13 +1866,18 @@ class Settings {
             self.setExportStatus('');
             $('.export-download-button').hide();
             $('#exportDataProgress').hide();
+            $('#importDataProgress').hide();
             self.setExportProgress(0);
+            self.setImportProgress(0);
         });
 
         $('#settings-import-file').on('change', function (evt) {
             self.setImportStatus('');
             let userFiles = [];
             if (this.files && this.files.length === 1) {
+                $('#importDataProgress').show();
+                self.setImportProgress(0);
+
                 function uploadFiles() {
                     if (userFiles.length <= 0) {
                         self.setImportStatus('Uploading complete! Refresh this page');
@@ -1883,7 +1888,10 @@ class Settings {
                     let uploadFile = userFiles.shift();
                     uploadFile.async('blob').then(function (content) {
                         self.setImportStatus('Uploading file: ' + uploadFile.name + '...');
-                        return self.main.swarm.post(uploadFile.name, content).then(function (response) {
+                        return self.main.swarm.post(uploadFile.name, content, null, null, null, function (progress) {
+                            self.setImportProgress(progress.loaded / progress.total * 100);
+                        }).then(function (response) {
+                            self.setImportProgress(0);
                             self.main.onAfterHashChange(response.data, true);
                             uploadFiles();
                         });
@@ -1974,6 +1982,10 @@ class Settings {
         });
     }
 
+    setImportProgress(val) {
+        $('#importDataProgressBar').css('width', val + '%').attr('aria-valuenow', val);
+    }
+
     setExportProgress(val) {
         $('#exportDataProgressBar').css('width', val + '%').attr('aria-valuenow', val);
     }
@@ -1997,7 +2009,7 @@ class Settings {
             foundDirectories = {};
         }
 
-        self.setExportStatus('Receive files from: ' + currentDirectory);
+        self.setExportStatus('Receiving files from: ' + currentDirectory);
         self.main.swarm.request('get', currentDirectory, '', 'bzz-list:')
             .then(function (response) {
                 let data = response.data;
