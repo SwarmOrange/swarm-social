@@ -71,21 +71,25 @@ class Videoplaylist {
             let content = albumsModal.find('.modal-body');
             albumsModal.modal('show');
             content.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
-            self.main.blog.getVideoAlbumsInfo().then(function (response) {
-                let data = response.data;
-                data = data || [];
-                if (data.length) {
-                    let html = '<ul class="list-inline preview-images">';
-                    data.forEach(function (v) {
-                        let imgUrl = v.type === "video" ? self.main.swarm.getFullUrl(v.cover_file) : v.cover_file;
-                        html += '<li class="list-inline-item"><a href="#" class="load-videoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
-                    });
-                    html += '</ul>';
-                    content.html(html);
-                } else {
-                    content.html('<p>Albums not found</p>');
-                }
-            });
+            self.main.blog.getVideoAlbumsInfo()
+                .then(function (response) {
+                    let data = response.data;
+                    data = data || [];
+                    if (data.length) {
+                        let html = '<ul class="list-inline preview-images">';
+                        data.forEach(function (v) {
+                            let imgUrl = v.type === "video" ? self.main.swarm.getFullUrl(v.cover_file) : v.cover_file;
+                            html += '<li class="list-inline-item"><a href="#" class="load-videoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
+                        });
+                        html += '</ul>';
+                        content.html(html);
+                    } else {
+                        content.html('<p>Playlists not found</p>');
+                    }
+                })
+                .catch(function () {
+                    content.html('<p>Playlists not found</p>');
+                });
         });
     }
 

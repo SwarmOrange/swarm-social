@@ -72,21 +72,25 @@ class Photoalbum {
             let content = albumsModal.find('.modal-body');
             albumsModal.modal('show');
             content.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
-            self.main.blog.getPhotoAlbumsInfo().then(function (response) {
-                let data = response.data;
-                data = data || [];
-                if (data.length) {
-                    let html = '<ul class="list-inline preview-images">';
-                    data.forEach(function (v) {
-                        let imgUrl = self.main.swarm.getFullUrl(v.cover_file);
-                        html += '<li class="list-inline-item"><a href="#" class="load-photoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
-                    });
-                    html += '</ul>';
-                    content.html(html);
-                } else {
+            self.main.blog.getPhotoAlbumsInfo()
+                .then(function (response) {
+                    let data = response.data;
+                    data = data || [];
+                    if (data.length) {
+                        let html = '<ul class="list-inline preview-images">';
+                        data.forEach(function (v) {
+                            let imgUrl = self.main.swarm.getFullUrl(v.cover_file);
+                            html += '<li class="list-inline-item"><a href="#" class="load-photoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
+                        });
+                        html += '</ul>';
+                        content.html(html);
+                    } else {
+                        content.html('<p>Albums not found</p>');
+                    }
+                })
+                .catch(function () {
                     content.html('<p>Albums not found</p>');
-                }
-            });
+                });
         });
     }
 
