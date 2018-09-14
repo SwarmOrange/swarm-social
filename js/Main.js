@@ -135,7 +135,9 @@ class Main {
                     $(this).remove();
                 });
                 if (type !== 'youtube') {
-                    //todo delete file
+                    self.swarm.delete(url).then(function (response) {
+                        self.onAfterHashChange(response.data, true);
+                    });
                 }
             });
 
