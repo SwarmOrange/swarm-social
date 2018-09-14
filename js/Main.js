@@ -736,6 +736,8 @@ class Main {
             self.blog.getPost(i, self.swarm.applicationHash).then(function (response) {
                 let data = response.data;
                 self.addPostByData(data);
+            }).catch(function () {
+                $('#userPost' + i).remove();
             });
         }
     }
