@@ -126,6 +126,19 @@ class Main {
             });
         });
 
+        $('#postBlock')
+            .on('click', '.delete-post-attachment', function (e) {
+                e.preventDefault();
+                let url = $(this).attr('data-url');
+                let type = $(this).attr('data-type');
+                $('.post-attachment[data-url="' + url + '"]').hide('slow', function () {
+                    $(this).remove();
+                });
+                if (type !== 'youtube') {
+                    //todo delete file
+                }
+            });
+
         $('.publish-post').click(function (e) {
             e.preventDefault();
             let postContentElement = $('#postContent');
@@ -308,11 +321,17 @@ class Main {
                     let url = data.url + lastName;
                     let fullUrl = data.fullUrl + lastName;
                     console.log(data);
-                    let postAttachmentTemplate = $('#postAttachment').clone();
+                    let postAttachmentTemplate = $('#postAttachment')
+                        .clone()
+                        .removeAttr('id')
+                        .attr('style', '')
+                        .attr('data-type', fileType)
+                        .attr('data-url', url);
+                    postAttachmentTemplate
+                        .find('.content')
+                        .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="' + fileType + '"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + fullUrl + '">' + url + '</a>')
                     $('#attached-content')
-                        .append(postAttachmentTemplate.attr('style', '')
-                            .attr('data-type', fileType).attr('data-url', url)
-                            .html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
+                        .append(postAttachmentTemplate);
                     self.onAfterHashChange(data.response.data, true);
                     progressPanel.hide();
                     setProgress(0);
@@ -349,8 +368,16 @@ class Main {
             let url = $('#youtubeUrl').val();
             if (url) {
                 $('#attachYoutubeModal').modal('hide');
-                let postAttachmentTemplate = $('#postAttachment').clone();
-                $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', 'youtube').attr('data-url', url).html('<a target="_blank" href="' + url + '">' + url + '</a>'));
+                let postAttachmentTemplate = $('#postAttachment')
+                    .clone()
+                    .removeAttr('id')
+                    .attr('style', '')
+                    .attr('data-type', 'youtube')
+                    .attr('data-url', url);
+                postAttachmentTemplate
+                    .find('.content')
+                    .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="youtube"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + url + '">' + url + '</a>');
+                $('#attached-content').append(postAttachmentTemplate);
             } else {
                 self.alert('Please, enter url');
             }

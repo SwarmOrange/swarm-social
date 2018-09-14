@@ -316,3 +316,11 @@ li > p:last-child {
     left: 10px;
     cursor: pointer;
 }
+
+.delete-post-attachment {
+    margin-right: 8px;
+}
+
+.delete-post-attachment img {
+    max-width: 12px;
+}
