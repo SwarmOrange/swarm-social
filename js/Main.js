@@ -392,9 +392,10 @@ class Main {
                 if (confirm('Really delete?')) {
                     //$('#my-post').addClass("disabled-content");
                     $('#userPost' + id).hide('slow');
-                    self.blog.deletePost(id).then(function (response) {
-                        self.onAfterHashChange(response.data, true);
-                    });
+                    self.blog.deletePost(id)
+                        .then(function (hash) {
+                            self.onAfterHashChange(hash, true);
+                        });
                 }
             })
             .on('click', '.edit-post', function (e) {

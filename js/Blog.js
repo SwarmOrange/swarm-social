@@ -16,6 +16,10 @@ class Blog {
         }
     }
 
+    deleteFile(file) {
+        return this.swarm.delete(file);
+    }
+
     replaceUrlSwarmHash(newHash) {
         if (this.uploadedToSwarm) {
             window.location.hash = '';
@@ -169,11 +173,35 @@ class Blog {
     }
 
     deletePost(id) {
-        // todo delete all post content
-        return this.swarm.post(this.prefix + "post/" + id + "/info.json", JSON.stringify({
-            id: id,
-            is_deleted: true
-        }), 'application/json');
+        let self = this;
+        return self.getPost(id)
+            .then(function (response) {
+                let data = response.data;
+                return new Promise((resolve, reject) => {
+                    if ('attachments' in data) {
+                        let attachments = data.attachments;
+                        let deleteAttachment = function () {
+                            if (attachments.length <= 0) {
+                                self.deleteFile(self.prefix + 'post/' + id + '/info.json').then(function (response) {
+                                    resolve(response.data);
+                                });
+                                return;
+                            }
+
+                            let attachment = attachments.shift();
+                            console.log('Delete post');
+                            console.log(attachment);
+                            self.deleteFile(attachment.url).then(function (response) {
+                                self.swarm.applicationHash = response.data;
+                                deleteAttachment();
+                            });
+                        };
+                        deleteAttachment();
+                    } else {
+                        resolve(self.swarm.applicationHash);
+                    }
+                });
+            });
     }
 
     deletePostAttachment(postId, attachmentId) {
@@ -181,13 +209,25 @@ class Blog {
         return self.getPost(postId).then(function (response) {
             let data = response.data;
             let newAttachments = [];
+            let toDelete = null;
             data.attachments.forEach(function (v) {
                 if (v.id != attachmentId) {
                     newAttachments.push(v);
+                } else {
+                    toDelete = v;
                 }
             });
 
-            return self.editPost(postId, data.description, newAttachments);
+            if (toDelete) {
+                return self.editPost(postId, data.description, newAttachments)
+                    .then(function (response) {
+                        self.swarm.applicationHash = response.data;
+
+                        return self.deleteFile(toDelete.url);
+                    });
+            } else {
+                throw "Attachment not found";
+            }
         });
     }
 
