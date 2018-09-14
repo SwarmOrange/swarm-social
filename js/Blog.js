@@ -173,35 +173,7 @@ class Blog {
     }
 
     deletePost(id) {
-        let self = this;
-        return self.getPost(id)
-            .then(function (response) {
-                let data = response.data;
-                return new Promise((resolve, reject) => {
-                    if ('attachments' in data) {
-                        let attachments = data.attachments;
-                        let deleteAttachment = function () {
-                            if (attachments.length <= 0) {
-                                self.deleteFile(self.prefix + 'post/' + id + '/info.json').then(function (response) {
-                                    resolve(response.data);
-                                });
-                                return;
-                            }
-
-                            let attachment = attachments.shift();
-                            console.log('Delete post');
-                            console.log(attachment);
-                            self.deleteFile(attachment.url).then(function (response) {
-                                self.swarm.applicationHash = response.data;
-                                deleteAttachment();
-                            });
-                        };
-                        deleteAttachment();
-                    } else {
-                        resolve(self.swarm.applicationHash);
-                    }
-                });
-            });
+        return this.deleteFile(this.prefix + 'post/' + id + '/');
     }
 
     deletePostAttachment(postId, attachmentId) {

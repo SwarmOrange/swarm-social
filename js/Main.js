@@ -393,8 +393,8 @@ class Main {
                     //$('#my-post').addClass("disabled-content");
                     $('#userPost' + id).hide('slow');
                     self.blog.deletePost(id)
-                        .then(function (hash) {
-                            self.onAfterHashChange(hash, true);
+                        .then(function (response) {
+                            self.onAfterHashChange(response.data, true);
                         });
                 }
             })

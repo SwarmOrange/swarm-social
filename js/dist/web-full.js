@@ -17,6 +17,10 @@ class Blog {
         }
     }
 
+    deleteFile(file) {
+        return this.swarm.delete(file);
+    }
+
     replaceUrlSwarmHash(newHash) {
         if (this.uploadedToSwarm) {
             window.location.hash = '';
@@ -170,11 +174,7 @@ class Blog {
     }
 
     deletePost(id) {
-        // todo delete all post content
-        return this.swarm.post(this.prefix + "post/" + id + "/info.json", JSON.stringify({
-            id: id,
-            is_deleted: true
-        }), 'application/json');
+        return this.deleteFile(this.prefix + 'post/' + id + '/');
     }
 
     deletePostAttachment(postId, attachmentId) {
@@ -182,13 +182,25 @@ class Blog {
         return self.getPost(postId).then(function (response) {
             let data = response.data;
             let newAttachments = [];
+            let toDelete = null;
             data.attachments.forEach(function (v) {
                 if (v.id != attachmentId) {
                     newAttachments.push(v);
+                } else {
+                    toDelete = v;
                 }
             });
 
-            return self.editPost(postId, data.description, newAttachments);
+            if (toDelete) {
+                return self.editPost(postId, data.description, newAttachments)
+                    .then(function (response) {
+                        self.swarm.applicationHash = response.data;
+
+                        return self.deleteFile(toDelete.url);
+                    });
+            } else {
+                throw "Attachment not found";
+            }
         });
     }
 
@@ -821,6 +833,21 @@ class Main {
             });
         });
 
+        $('#postBlock')
+            .on('click', '.delete-post-attachment', function (e) {
+                e.preventDefault();
+                let url = $(this).attr('data-url');
+                let type = $(this).attr('data-type');
+                $('.post-attachment[data-url="' + url + '"]').hide('slow', function () {
+                    $(this).remove();
+                });
+                if (type !== 'youtube') {
+                    self.swarm.delete(url).then(function (response) {
+                        self.onAfterHashChange(response.data, true);
+                    });
+                }
+            });
+
         $('.publish-post').click(function (e) {
             e.preventDefault();
             let postContentElement = $('#postContent');
@@ -1003,11 +1030,17 @@ class Main {
                     let url = data.url + lastName;
                     let fullUrl = data.fullUrl + lastName;
                     console.log(data);
-                    let postAttachmentTemplate = $('#postAttachment').clone();
+                    let postAttachmentTemplate = $('#postAttachment')
+                        .clone()
+                        .removeAttr('id')
+                        .attr('style', '')
+                        .attr('data-type', fileType)
+                        .attr('data-url', url);
+                    postAttachmentTemplate
+                        .find('.content')
+                        .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="' + fileType + '"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + fullUrl + '">' + url + '</a>')
                     $('#attached-content')
-                        .append(postAttachmentTemplate.attr('style', '')
-                            .attr('data-type', fileType).attr('data-url', url)
-                            .html('<a target="_blank" href="' + fullUrl + '">' + url + '</a>'));
+                        .append(postAttachmentTemplate);
                     self.onAfterHashChange(data.response.data, true);
                     progressPanel.hide();
                     setProgress(0);
@@ -1044,8 +1077,16 @@ class Main {
             let url = $('#youtubeUrl').val();
             if (url) {
                 $('#attachYoutubeModal').modal('hide');
-                let postAttachmentTemplate = $('#postAttachment').clone();
-                $('#attached-content').append(postAttachmentTemplate.attr('style', '').attr('data-type', 'youtube').attr('data-url', url).html('<a target="_blank" href="' + url + '">' + url + '</a>'));
+                let postAttachmentTemplate = $('#postAttachment')
+                    .clone()
+                    .removeAttr('id')
+                    .attr('style', '')
+                    .attr('data-type', 'youtube')
+                    .attr('data-url', url);
+                postAttachmentTemplate
+                    .find('.content')
+                    .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="youtube"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + url + '">' + url + '</a>');
+                $('#attached-content').append(postAttachmentTemplate);
             } else {
                 self.alert('Please, enter url');
             }
@@ -1058,9 +1099,10 @@ class Main {
                 if (confirm('Really delete?')) {
                     //$('#my-post').addClass("disabled-content");
                     $('#userPost' + id).hide('slow');
-                    self.blog.deletePost(id).then(function (response) {
-                        self.onAfterHashChange(response.data, true);
-                    });
+                    self.blog.deletePost(id)
+                        .then(function (response) {
+                            self.onAfterHashChange(response.data, true);
+                        });
                 }
             })
             .on('click', '.edit-post', function (e) {
