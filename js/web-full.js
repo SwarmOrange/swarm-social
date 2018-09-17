@@ -22,6 +22,7 @@ let News = require('./News.js');
 let Messages = require('./Messages.js');
 let Wallet = require('./Wallet.js');
 let Settings = require('./Settings.js');
+let Utils = require('./Utils.js');
 window.socialModules = {
     Main: Main,
     Blog: Blog,
@@ -35,6 +36,7 @@ window.socialModules = {
     News: News,
     Messages: Messages,
     Wallet: Wallet,
-    Settings: Settings
+    Settings: Settings,
+    Utils: Utils
 };
 require('./initDev.js');

@@ -101,7 +101,7 @@ class Blog {
         return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol, onProgress);
     }
 
-    uploadFileForPost(id, fileContent, contentType, fileName, onUploadProgress) {
+    uploadFileForPost(id, fileContent, contentType, fileName, onUploadProgress, customName) {
         // structure
         // post/ID/file/[timestamp].[extension]
         let self = this;
@@ -109,19 +109,24 @@ class Blog {
         if (fileName) {
             let extension = fileName.split('.').pop();
             let timestamp = +new Date();
-            url = this.prefix + "post/" + id + "/file/" + timestamp + "." + extension;
+            if (customName) {
+                url = this.prefix + "post/" + id + "/file/" + customName + "." + extension;
+            } else {
+                url = this.prefix + "post/" + id + "/file/" + timestamp + "." + extension;
+            }
         } else {
             url = this.prefix + "post/" + id + "/file/";
         }
 
-        return this.sendRawFile(url, fileContent, contentType, null, null, onUploadProgress).then(function (response) {
-                return {
-                    response: response,
-                    url: url,
-                    fullUrl: self.swarm.getFullUrl(url, response.data)
-                };
-            }
-        );
+        return this.sendRawFile(url, fileContent, contentType, null, null, onUploadProgress)
+            .then(function (response) {
+                    return {
+                        response: response,
+                        url: url,
+                        fullUrl: self.swarm.getFullUrl(url, response.data)
+                    };
+                }
+            );
     }
 
     uploadAvatar(fileContent) {

@@ -230,7 +230,6 @@
                                     <h3>Birth: <span id="birthDate">...</span></h3>
                                     <h3>Location: <span id="locationName"></span></h3>
                                     <h3>About: <span id="about"></span></h3>
-                                    <img src="" alt="" id="test">
                                     <p>
                                         <button type="submit" class="btn btn-primary mb-2 save-mru"
                                                 style="display: none">
@@ -1207,28 +1206,6 @@
                     videos.append('</ul>');
                 });
         });
-
-        let img = new Image();
-        img.onload = function () {
-            var c = document.createElement("canvas");
-            var ctx = c.getContext("2d");
-            c.width = this.naturalWidth;     // update canvas size to match image
-            c.height = this.naturalHeight;
-            ctx.drawImage(this, 0, 0);       // draw in image
-            c.toBlob(function (blob) {        // get content as JPEG blob
-                Utils.resizeImages(blob, [{
-                    width: 250,
-                    height: 250
-                }]).then(function (result) {
-                    console.log(result);
-                    let urlCreator = window.URL || window.webkitURL;
-                    $('#test').attr('src', urlCreator.createObjectURL(result['250x250']));
-                });
-            }, "image/jpeg");
-
-        };
-        img.src = 'img/avatars/video.png';
-        //img.src = 'temp.jpg';
     </script>
 
 </body>

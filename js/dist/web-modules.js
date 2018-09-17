@@ -171,7 +171,6 @@ require('bootstrap');
 require('ekko-lightbox');
 window.JSZip = require('jszip');
 window.saveAs = require('file-saver');
-
 },{"./SwarmApi":1,"bootstrap":30,"cropperjs":52,"ekko-lightbox":87,"ethereum-ens":89,"file-saver":90,"jquery":95,"jszip":106}],3:[function(require,module,exports){
 module.exports = require('./lib/axios');
 },{"./lib/axios":5}],4:[function(require,module,exports){

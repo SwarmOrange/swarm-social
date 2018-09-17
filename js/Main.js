@@ -304,40 +304,64 @@ class Main {
                     postProgress.css('width', val + '%').attr('aria-valuenow', val);
                 };
 
-                let data = new FormData();
+                let formData = new FormData();
                 let lastName = null;
+                let lastBlob = null;
+                let lastExtension = null;
                 $.each(this.files, function (key, value) {
                     let timestamp = +new Date();
                     let blob = value.slice(0, value.size, value.type);
+                    lastBlob = blob;
                     let extension = value.name.split('.').pop();
                     lastName = timestamp + '.' + extension;
+                    lastExtension = extension;
                     let file = new File([blob], lastName, {type: value.type});
-                    data.append(key, file);
+                    formData.append(key, file);
                 });
 
-                self.blog.uploadFileForPost(self.blog.myProfile.last_post_id + 1, data, 'multipart/form-data', null, function (progress) {
-                    let onePercent = progress.total / 100;
-                    let currentPercent = progress.loaded / onePercent;
-                    setProgress(currentPercent);
-                }).then(function (data) {
-                    let url = data.url + lastName;
-                    let fullUrl = data.fullUrl + lastName;
-                    console.log(data);
-                    let postAttachmentTemplate = $('#postAttachment')
-                        .clone()
-                        .removeAttr('id')
-                        .attr('style', '')
-                        .attr('data-type', fileType)
-                        .attr('data-url', url);
-                    postAttachmentTemplate
-                        .find('.content')
-                        .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="' + fileType + '"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + fullUrl + '">' + url + '</a>')
-                    $('#attached-content')
-                        .append(postAttachmentTemplate);
-                    self.onAfterHashChange(data.response.data, true);
-                    progressPanel.hide();
-                    setProgress(0);
-                    $('#postOrAttach').removeClass("disabled-content");
+                let currentPostId = self.blog.myProfile.last_post_id + 1;
+                Utils.resizeImages(lastBlob, [{width: 250, height: 250}]).then(function (result) {
+                    let imagePreview = result['250x250'];
+                    // todo show image preview
+                    // todo pass preview as argument
+                    let filenameBase = +new Date();
+                    let filename = filenameBase + '.' + lastExtension;
+                    self.blog.uploadFileForPost(currentPostId, formData, 'multipart/form-data', filename, function (progress) {
+                        let onePercent = progress.total / 100;
+                        let currentPercent = progress.loaded / onePercent;
+                        setProgress(currentPercent);
+                    })
+                        .then(function (data) {
+                            console.log(data);
+                            /*self.onAfterHashChange(data.response.data, true);
+                            // todo get new file name, pass customfilename
+                            self.blog.uploadFileForPost(currentPostId, imagePreview, null, null, function (progress) {
+                                let onePercent = progress.total / 100;
+                                let currentPercent = progress.loaded / onePercent;
+                                setProgress(currentPercent);
+                            })
+                                .then(function (data) {
+                                    console.log(data);
+                                    let url = data.url + lastName;
+                                    let fullUrl = data.fullUrl + lastName;
+                                    console.log(data);
+                                    let postAttachmentTemplate = $('#postAttachment')
+                                        .clone()
+                                        .removeAttr('id')
+                                        .attr('style', '')
+                                        .attr('data-type', fileType)
+                                        .attr('data-url', url);
+                                    postAttachmentTemplate
+                                        .find('.content')
+                                        .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="' + fileType + '"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + fullUrl + '">' + url + '</a>')
+                                    $('#attached-content')
+                                        .append(postAttachmentTemplate);
+                                    self.onAfterHashChange(data.response.data, true);
+                                    progressPanel.hide();
+                                    setProgress(0);
+                                    $('#postOrAttach').removeClass("disabled-content");
+                                });*/
+                        });
                 });
             }
         });
