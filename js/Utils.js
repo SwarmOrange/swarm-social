@@ -5,7 +5,6 @@ class Utils {
     static resizeImages(imageBlob, resultSizes) {
         return new Promise((resolve, reject) => {
             let result = {};
-            let urlCreator = window.URL || window.webkitURL;
             let img = new Image();
             img.onload = function () {
                 resultSizes.forEach(function (v) {
@@ -45,8 +44,13 @@ class Utils {
                     }, mimeType);
                 });
             };
-            img.src = urlCreator.createObjectURL(imageBlob);
+            img.src = Utils.getUrlForBlob(imageBlob);
         });
+    }
+
+    static getUrlForBlob(blob) {
+        let urlCreator = window.URL || window.webkitURL;
+        return urlCreator.createObjectURL(blob);
     }
 }
 

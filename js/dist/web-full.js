@@ -102,24 +102,12 @@ class Blog {
         return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol, onProgress);
     }
 
-    uploadFileForPost(id, fileContent, contentType, fileName, onUploadProgress, customName) {
-        // structure
-        // post/ID/file/[timestamp].[extension]
+    uploadFilesForPost(id, filesFormData, onUploadProgress) {
+        let contentType = 'multipart/form-data';
         let self = this;
-        let url = null;
-        if (fileName) {
-            let extension = fileName.split('.').pop();
-            let timestamp = +new Date();
-            if (customName) {
-                url = this.prefix + "post/" + id + "/file/" + customName + "." + extension;
-            } else {
-                url = this.prefix + "post/" + id + "/file/" + timestamp + "." + extension;
-            }
-        } else {
-            url = this.prefix + "post/" + id + "/file/";
-        }
+        let url = this.prefix + "post/" + id + "/file/";
 
-        return this.sendRawFile(url, fileContent, contentType, null, null, onUploadProgress)
+        return this.sendRawFile(url, filesFormData, contentType, null, null, onUploadProgress)
             .then(function (response) {
                     return {
                         response: response,
@@ -1015,66 +1003,102 @@ class Main {
                 let setProgress = function (val) {
                     postProgress.css('width', val + '%').attr('aria-valuenow', val);
                 };
+                let updateProgress = function (progress) {
+                    let onePercent = progress.total / 100;
+                    let currentPercent = progress.loaded / onePercent;
+                    setProgress(currentPercent);
+                };
 
+                let currentPostId = self.blog.myProfile.last_post_id + 1;
                 let formData = new FormData();
                 let lastName = null;
+                let lastNameWithoutExtension = null;
                 let lastBlob = null;
                 let lastExtension = null;
+                let timestamp = +new Date();
+                let lastValue = null;
                 $.each(this.files, function (key, value) {
-                    let timestamp = +new Date();
+                    lastValue = value;
                     let blob = value.slice(0, value.size, value.type);
                     lastBlob = blob;
                     let extension = value.name.split('.').pop();
-                    lastName = timestamp + '.' + extension;
+                    lastNameWithoutExtension = timestamp + '_' + key;
+                    lastName = lastNameWithoutExtension + '.' + extension;
                     lastExtension = extension;
                     let file = new File([blob], lastName, {type: value.type});
                     formData.append(key, file);
                 });
 
-                let currentPostId = self.blog.myProfile.last_post_id + 1;
-                Utils.resizeImages(lastBlob, [{width: 250, height: 250}]).then(function (result) {
-                    let imagePreview = result['250x250'];
-                    // todo show image preview
+                let afterUploadingFiles = function (data) {
+                    console.log(data);
+                    let url = data.url + lastName;
+                    let fullUrl = data.fullUrl + lastName;
+                    let postAttachmentTemplate = $('#postAttachment')
+                        .clone()
+                        .removeAttr('id')
+                        .attr('style', '')
+                        .attr('data-type', fileType)
+                        .attr('data-url', url);
+                    postAttachmentTemplate
+                        .find('.content')
+                        .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="' + fileType + '"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + fullUrl + '">' + url + '</a>')
+                    $('#attached-content').append(postAttachmentTemplate);
+                    self.onAfterHashChange(data.response.data, true);
+                    progressPanel.hide();
+                    setProgress(0);
+                    $('#postOrAttach').removeClass("disabled-content");
+                };
 
-                    let filenameBase = +new Date();
-                    let filename = filenameBase + '.' + lastExtension;
-                    self.blog.uploadFileForPost(currentPostId, formData, 'multipart/form-data', filename, function (progress) {
-                        let onePercent = progress.total / 100;
-                        let currentPercent = progress.loaded / onePercent;
-                        setProgress(currentPercent);
-                    })
-                        .then(function (data) {
-                            console.log(data);
-                            /*self.onAfterHashChange(data.response.data, true);
-                            // todo get new file name, pass customfilename
-                            self.blog.uploadFileForPost(currentPostId, imagePreview, null, null, function (progress) {
-                                let onePercent = progress.total / 100;
-                                let currentPercent = progress.loaded / onePercent;
-                                setProgress(currentPercent);
-                            })
+                let beforeUploadingPhoto = function (file) {
+                    console.log(file);
+                    let url = Utils.getUrlForBlob(file);
+                    let postAttachmentTemplate = $('#postAttachment')
+                        .clone()
+                        .removeAttr('id')
+                        .attr('style', '')
+                        .attr('data-name', file.name);
+                    postAttachmentTemplate
+                        .find('.content')
+                        .html('<img class="img-preview" src="' + url + '">');
+                    $('#attached-content').append(postAttachmentTemplate);
+                };
+
+                let afterUploadingPhoto = function (previewFile, originalFile, data) {
+                    let previewUrl = Utils.getUrlForBlob(previewFile);
+                    let originalUrl = data.fullUrl + originalFile.name;
+                    let attachment = $('.post-attachment[data-name="' + previewFile.name + '"]');
+                    attachment
+                        .attr('data-type', fileType)
+                        .attr('data-url', data.url + originalFile.name)
+                        .attr('data-preview-url', data.url + previewFile.name);
+                    attachment.find('.content').html('<a target="_blank" href="' + originalUrl + '"><img class="img-preview" src="' + previewUrl + '"></a>');
+                    setProgress(0);
+                    $('#postOrAttach').removeClass("disabled-content");
+                    self.onAfterHashChange(data.response.data, true);
+                };
+
+                if (fileType === 'photo') {
+                    Utils.resizeImages(lastBlob, [{width: 250, height: 250}])
+                        .then(function (result) {
+                            let key = '250x250';
+                            let imagePreview = result[key];
+                            let previewFilename = lastNameWithoutExtension + '_' + key + '.' + lastExtension;
+                            let file = new File([imagePreview], previewFilename, {type: lastValue.type});
+                            beforeUploadingPhoto(file);
+                            // todo change key for multiple
+                            formData.append(1, file);
+                            // todo show image preview
+                            self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
                                 .then(function (data) {
-                                    console.log(data);
-                                    let url = data.url + lastName;
-                                    let fullUrl = data.fullUrl + lastName;
-                                    console.log(data);
-                                    let postAttachmentTemplate = $('#postAttachment')
-                                        .clone()
-                                        .removeAttr('id')
-                                        .attr('style', '')
-                                        .attr('data-type', fileType)
-                                        .attr('data-url', url);
-                                    postAttachmentTemplate
-                                        .find('.content')
-                                        .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="' + fileType + '"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + fullUrl + '">' + url + '</a>')
-                                    $('#attached-content')
-                                        .append(postAttachmentTemplate);
-                                    self.onAfterHashChange(data.response.data, true);
-                                    progressPanel.hide();
-                                    setProgress(0);
-                                    $('#postOrAttach').removeClass("disabled-content");
-                                });*/
+                                    afterUploadingPhoto(file, formData.get(0), data);
+                                });
                         });
-                });
+                } else {
+                    self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
+                        .then(function (data) {
+                            afterUploadingFiles(data);
+                        });
+                }
             }
         });
 
@@ -2322,7 +2346,6 @@ class Utils {
     static resizeImages(imageBlob, resultSizes) {
         return new Promise((resolve, reject) => {
             let result = {};
-            let urlCreator = window.URL || window.webkitURL;
             let img = new Image();
             img.onload = function () {
                 resultSizes.forEach(function (v) {
@@ -2362,8 +2385,13 @@ class Utils {
                     }, mimeType);
                 });
             };
-            img.src = urlCreator.createObjectURL(imageBlob);
+            img.src = Utils.getUrlForBlob(imageBlob);
         });
+    }
+
+    static getUrlForBlob(blob) {
+        let urlCreator = window.URL || window.webkitURL;
+        return urlCreator.createObjectURL(blob);
     }
 }
 

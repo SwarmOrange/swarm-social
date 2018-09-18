@@ -101,24 +101,12 @@ class Blog {
         return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol, onProgress);
     }
 
-    uploadFileForPost(id, fileContent, contentType, fileName, onUploadProgress, customName) {
-        // structure
-        // post/ID/file/[timestamp].[extension]
+    uploadFilesForPost(id, filesFormData, onUploadProgress) {
+        let contentType = 'multipart/form-data';
         let self = this;
-        let url = null;
-        if (fileName) {
-            let extension = fileName.split('.').pop();
-            let timestamp = +new Date();
-            if (customName) {
-                url = this.prefix + "post/" + id + "/file/" + customName + "." + extension;
-            } else {
-                url = this.prefix + "post/" + id + "/file/" + timestamp + "." + extension;
-            }
-        } else {
-            url = this.prefix + "post/" + id + "/file/";
-        }
+        let url = this.prefix + "post/" + id + "/file/";
 
-        return this.sendRawFile(url, fileContent, contentType, null, null, onUploadProgress)
+        return this.sendRawFile(url, filesFormData, contentType, null, null, onUploadProgress)
             .then(function (response) {
                     return {
                         response: response,

@@ -222,7 +222,7 @@ img {
     height: 168px;
 }
 
-.preview-wall-image > li img, .post-photoalbum-item img, .post-videoalbum-item img {
+.preview-wall-image > li img, .post-photoalbum-item img, .post-videoalbum-item img, .post-attachment .img-preview {
     object-fit: cover;
     width: 179px;
     height: 179px;
