@@ -12,7 +12,8 @@ let modules = window.socialModules || {
     Messages: Messages,
     Wallet: Wallet,
     Settings: Settings,
-    Utils: Utils
+    Utils: Utils,
+    Post: Post
 };
 
 window.Blog = new modules.Blog();
@@ -30,3 +31,4 @@ new modules.Messages(myMain);
 new modules.Wallet(myMain);
 new modules.Settings(myMain);
 new modules.Utils();
+new modules.Post(myMain);

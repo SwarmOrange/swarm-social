@@ -23,6 +23,7 @@ let Messages = require('./Messages.js');
 let Wallet = require('./Wallet.js');
 let Settings = require('./Settings.js');
 let Utils = require('./Utils.js');
+let Post = require('./Post.js');
 window.socialModules = {
     Main: Main,
     Blog: Blog,
@@ -37,6 +38,7 @@ window.socialModules = {
     Messages: Messages,
     Wallet: Wallet,
     Settings: Settings,
-    Utils: Utils
+    Utils: Utils,
+    Post: Post
 };
 require('./initDev.js');
