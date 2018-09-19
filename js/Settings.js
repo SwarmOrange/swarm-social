@@ -78,6 +78,16 @@ class Settings {
             $('#settings-import-file').click();
         });
 
+        /*$('.settings-delete-all').click(function (e) {
+            e.preventDefault();
+            if (confirm('Really delete?')) {
+                self.main.swarm.delete(self.main.blog.prefix).then(function (response) {
+                    alert('All data deleted!');
+                    self.main.onAfterHashChange(response.data);
+                });
+            }
+        });*/
+
         $('.settings-export-download').click(function (e) {
             e.preventDefault();
 
