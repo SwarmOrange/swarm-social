@@ -336,17 +336,29 @@ class Main {
                 currentElement.attr('data-type', '');
                 currentElement.addClass('photo-uploaded-insta');
                 console.log('album id ' + self.currentPhotoAlbum);
-                self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId, response.data)
-                    .then(function (data) {
-                        console.log('Photo uploaded');
-                        console.log(data);
-                        self.currentPhotosForAlbum.push({
-                            file: data.fileName,
-                            description: ""
-                        });
-                        self.photoAlbumPhotoId++;
-                        self.onAfterHashChange(data.response, true);
-                        self.uploadAllInstaPhotos();
+                Utils.resizeImages(response.data, [{width: 250, height: 250}])
+                    .then(function (result) {
+                        let key = '250x250';
+                        let imagePreview = result[key];
+
+                        self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId + '_' + key, imagePreview)
+                            .then(function (data) {
+                                let previewFileName = data.fileName;
+                                self.onAfterHashChange(data.response, true);
+                                self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId, response.data)
+                                    .then(function (data) {
+                                        console.log('Photo uploaded');
+                                        console.log(data);
+                                        self.currentPhotosForAlbum.push({
+                                            file: data.fileName,
+                                            description: "",
+                                            previews: {'250x250': previewFileName}
+                                        });
+                                        self.photoAlbumPhotoId++;
+                                        self.onAfterHashChange(data.response, true);
+                                        self.uploadAllInstaPhotos();
+                                    });
+                            });
                     });
             });
         } else {
