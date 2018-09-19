@@ -117,7 +117,10 @@ Difference between short info in 'social/photoalbum/info.json' and full info in 
    "id":5,
    "name":"Uploaded",
    "description":"",
-   "cover_file":"social/photoalbum/5/1.jpg",
+   "cover_file":{
+        "file":"social/photoalbum/5/1.jpg",
+        "previews":{"250x250":"social/photoalbum/5/1_250x250.jpg"}
+   },
    "photos":[
       {
          "file":"social/photoalbum/5/1.jpg",

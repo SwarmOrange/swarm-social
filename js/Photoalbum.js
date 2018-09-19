@@ -84,7 +84,11 @@ class Photoalbum {
                     if (data.length) {
                         let html = '<ul class="list-inline preview-images">';
                         data.forEach(function (v) {
-                            let imgUrl = self.main.swarm.getFullUrl(v.cover_file);
+                            let imgUrl = self.main.swarm.getFullUrl(v.cover_file.file);
+                            if ('previews' in v.cover_file) {
+                                imgUrl = self.main.swarm.getFullUrl(v.cover_file.previews['250x250']);
+                            }
+
                             html += '<li class="list-inline-item"><a href="#" class="load-photoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
                         });
                         html += '</ul>';
@@ -152,11 +156,12 @@ class Photoalbum {
                                         .then(function (response) {
                                             console.log('album created');
                                             console.log(response.data);
-                                            self.main.onAfterHashChange(response.data);
                                             $('#newAlbumModal').modal('hide');
                                             self.main.alert('Album created!', [
-                                                '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + newAlbumId + '">Share</button>'
+                                                '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + currentPhotoalbum + '">Share</button>'
                                             ]);
+                                            self.main.onAfterHashChange(response.data, true);
+
                                         });
                                 }
                             });

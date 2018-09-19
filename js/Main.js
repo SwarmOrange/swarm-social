@@ -468,8 +468,9 @@ class Main {
                     }
 
                     let id = v.id;
+                    let previewUrl = self.swarm.getFullUrl('social/photoalbum/' + id + '/1_250x250.jpg');
                     photoAlbums.append('<li class="list-inline-item col-sm-4 photoalbum-item">' +
-                        '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img class="photoalbum-img" src="' + self.swarm.getFullUrl('social/photoalbum/' + id + '/1.jpg') + '" ></a></li>');
+                        '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img class="photoalbum-img" src="' + previewUrl + '" ></a></li>');
                     i++;
                 });
             }).catch(function (error) {
@@ -626,7 +627,8 @@ class Main {
                     userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
                 } else if (v.type === "photoalbum") {
                     // todo move to html
-                    userPost.append(photoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1.jpg") + '"></a></li>'));
+                    let previewUrl = self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg");
+                    userPost.append(photoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + previewUrl + '"></a></li>'));
                 } else if (v.type === "videoalbum") {
                     // todo move to html
                     let info;

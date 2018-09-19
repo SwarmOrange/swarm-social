@@ -292,7 +292,7 @@ class Blog {
         // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
         // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "photos":[{"file": "123123.jpg", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
         photos = photos || [];
-        let coverFile = photos.length ? photos[0].file : photos;
+        let coverFile = photos.length ? photos[0] : photos;
         let info = {
             id: id,
             name: name,
