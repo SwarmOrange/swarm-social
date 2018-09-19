@@ -40,7 +40,12 @@ class Photoalbum {
                     let data = response.data;
                     viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
                     data.photos.forEach(function (v) {
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
+                        let imgSrc = self.main.swarm.getFullUrl(v.file);
+                        if ('previews' in v) {
+                            imgSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
+                        }
+
+                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + imgSrc + '" class="img-fluid preview-album-photo"></a></li>');
                     });
                     viewAlbumContent.append('</ul>');
                 });
@@ -100,48 +105,63 @@ class Photoalbum {
             return;
         }
 
+        let currentPhotoalbum = self.main.blog.myProfile.last_photoalbum_id + 1;
         let currentFile = this.photoalbumInfo.files.shift();
+        currentFile = currentFile.slice(0, currentFile.size, currentFile.type);
         let progressPanel = $('#progressPanelAlbum');
         let postProgress = $('#postProgressAlbum');
         progressPanel.show();
         let setProgress = function (val) {
             postProgress.css('width', val + '%').attr('aria-valuenow', val);
         };
-        let reader = new FileReader();
-        reader.onload = function (e) {
-            self.main.blog.uploadPhotoToAlbum(self.main.blog.myProfile.last_photoalbum_id + 1, self.photoalbumInfo.uploadedId, e.target.result, function (progress) {
-                let onePercent = progress.total / 100;
-                let currentPercent = progress.loaded / onePercent;
-                setProgress(currentPercent);
-            }).then(function (data) {
-                console.log(data);
-                self.photoalbumInfo.uploadedId++;
-                self.main.onAfterHashChange(data.response, true);
-                progressPanel.hide();
-                setProgress(0);
-                self.photoalbumInfo.uploadedInfo.push({
-                    file: data.fileName,
-                    description: ""
-                });
-
-                if (self.photoalbumInfo.files.length > 0) {
-                    self.sendNextFile();
-                } else {
-                    let newAlbumId = self.main.blog.myProfile.last_photoalbum_id + 1;
-                    self.main.blog.createPhotoAlbum(newAlbumId, 'Uploaded', '', self.photoalbumInfo.uploadedInfo).then(function (response) {
-                        console.log('album created');
-                        console.log(response.data);
-                        self.main.onAfterHashChange(response.data);
-                        $('#newAlbumModal').modal('hide');
-                        self.main.alert('Album created!', [
-                            '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + newAlbumId + '">Share</button>'
-                        ]);
-                    });
-                }
-            });
+        let updateProgress = function (progress) {
+            let onePercent = progress.total / 100;
+            let currentPercent = progress.loaded / onePercent;
+            setProgress(currentPercent);
+        };
+        let uploadPhoto = function (file, postfix) {
+            postfix = postfix || '';
+            return self.main.blog.uploadPhotoToAlbum(currentPhotoalbum, self.photoalbumInfo.uploadedId + postfix, file, updateProgress);
         };
 
-        reader.readAsArrayBuffer(currentFile);
+        Utils.resizeImages(currentFile, [{width: 250, height: 250}])
+            .then(function (result) {
+                let key = '250x250';
+                let imagePreview = result[key];
+                uploadPhoto(imagePreview, '_' + key)
+                    .then(function (data) {
+                        let previewFileName = data.fileName;
+                        self.main.onAfterHashChange(data.response, true);
+                        uploadPhoto(currentFile)
+                            .then(function (data) {
+                                console.log(data);
+                                self.photoalbumInfo.uploadedId++;
+                                self.main.onAfterHashChange(data.response, true);
+                                progressPanel.hide();
+                                setProgress(0);
+                                self.photoalbumInfo.uploadedInfo.push({
+                                    file: data.fileName,
+                                    description: "",
+                                    previews: {'250x250': previewFileName}
+                                });
+
+                                if (self.photoalbumInfo.files.length > 0) {
+                                    self.sendNextFile();
+                                } else {
+                                    self.main.blog.createPhotoAlbum(currentPhotoalbum, 'Uploaded', '', self.photoalbumInfo.uploadedInfo)
+                                        .then(function (response) {
+                                            console.log('album created');
+                                            console.log(response.data);
+                                            self.main.onAfterHashChange(response.data);
+                                            $('#newAlbumModal').modal('hide');
+                                            self.main.alert('Album created!', [
+                                                '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + newAlbumId + '">Share</button>'
+                                            ]);
+                                        });
+                                }
+                            });
+                    });
+            });
     }
 }
 

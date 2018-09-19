@@ -338,10 +338,16 @@ class Blog {
     }
 
     uploadPhotoToAlbum(photoAlbumId, photoId, fileContent, onProgress) {
-        let fileName = this.prefix + "photoalbum/" + photoAlbumId + "/" + photoId + ".jpg";
-        return this.sendRawFile(fileName, fileContent, 'image/jpeg', null, null, onProgress).then(function (response) {
-            return {fileName: fileName, response: response.data};
-        });
+        let path = this.prefix + "photoalbum/" + photoAlbumId + "/";
+        let fileName = path + photoId + ".jpg";
+        return this.sendRawFile(fileName, fileContent, 'image/jpeg', null, null, onProgress)
+            .then(function (response) {
+                return {
+                    path: path,
+                    fileName: fileName,
+                    response: response.data
+                };
+            });
     }
 
     getAlbumInfo(id) {

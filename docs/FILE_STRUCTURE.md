@@ -121,19 +121,23 @@ Difference between short info in 'social/photoalbum/info.json' and full info in 
    "photos":[
       {
          "file":"social/photoalbum/5/1.jpg",
-         "description":""
+         "description":"",
+         "previews":{"250x250":"social/photoalbum/5/1_250x250.jpg"}
       },
       {
          "file":"social/photoalbum/5/2.jpg",
-         "description":""
+         "description":"",
+         "previews":{"250x250":"social/photoalbum/5/2_250x250.jpg"}
       },
       {
          "file":"social/photoalbum/5/3.jpg",
-         "description":""
+         "description":"",
+         "previews":{"250x250":"social/photoalbum/5/3_250x250.jpg"}
       },
       {
          "file":"social/photoalbum/5/4.jpg",
-         "description":""
+         "description":"",
+         "previews":{"250x250":"social/photoalbum/5/4_250x250.jpg"}
       }
    ]
 }

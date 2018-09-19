@@ -191,7 +191,6 @@ class Post {
                             beforeUploadingPhoto(file);
                             // todo change key for multiple
                             formData.append(1, file);
-                            // todo show image preview
                             self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
                                 .then(function (data) {
                                     afterUploadingPhoto(file, formData.get(0), data);
