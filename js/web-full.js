@@ -24,6 +24,7 @@ let Wallet = require('./Wallet.js');
 let Settings = require('./Settings.js');
 let Utils = require('./Utils.js');
 let Post = require('./Post.js');
+let Instagram = require('./Instagram.js');
 window.socialModules = {
     Main: Main,
     Blog: Blog,
@@ -39,6 +40,7 @@ window.socialModules = {
     Wallet: Wallet,
     Settings: Settings,
     Utils: Utils,
-    Post: Post
+    Post: Post,
+    Instagram: Instagram
 };
 require('./initDev.js');

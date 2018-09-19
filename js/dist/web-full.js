@@ -167,7 +167,12 @@ class Blog {
     }
 
     deletePost(id) {
-        return this.deleteFile(this.prefix + 'post/' + id + '/');
+        let self = this;
+        let urlPath = this.prefix + 'post/' + id + '/';
+        return this.deleteFile(urlPath + 'info.json').then(function (response) {
+            self.swarm.applicationHash = response.data;
+            return self.deleteFile(urlPath);
+        });
     }
 
     deletePostAttachment(postId, attachmentId) {
@@ -288,7 +293,7 @@ class Blog {
         // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
         // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "photos":[{"file": "123123.jpg", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
         photos = photos || [];
-        let coverFile = photos.length ? photos[0].file : photos;
+        let coverFile = photos.length ? photos[0] : photos;
         let info = {
             id: id,
             name: name,
@@ -334,10 +339,16 @@ class Blog {
     }
 
     uploadPhotoToAlbum(photoAlbumId, photoId, fileContent, onProgress) {
-        let fileName = this.prefix + "photoalbum/" + photoAlbumId + "/" + photoId + ".jpg";
-        return this.sendRawFile(fileName, fileContent, 'image/jpeg', null, null, onProgress).then(function (response) {
-            return {fileName: fileName, response: response.data};
-        });
+        let path = this.prefix + "photoalbum/" + photoAlbumId + "/";
+        let fileName = path + photoId + ".jpg";
+        return this.sendRawFile(fileName, fileContent, 'image/jpeg', null, null, onProgress)
+            .then(function (response) {
+                return {
+                    path: path,
+                    fileName: fileName,
+                    response: response.data
+                };
+            });
     }
 
     getAlbumInfo(id) {
@@ -698,6 +709,63 @@ class ImportButtons {
 
 module.exports = ImportButtons;
 },{}],5:[function(require,module,exports){
+class Instagram {
+    constructor(main) {
+        this.main = main;
+        this.init();
+    }
+
+    init() {
+        let self = this;
+        $('.import-instagram').click(function (e) {
+            e.preventDefault();
+            let instaNick = $('#instaNick').val();
+            if (!instaNick) {
+                self.main.alert('Incorrect nickname');
+
+                return;
+            }
+
+            $('.import-insta-panel').hide('fast');
+
+            let uploaderPhotos = $('#uploaded-photos');
+            uploaderPhotos.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+            self.main.swarm.axios.get('https://mem.lt/insta/go.php?limit=1&login=' + instaNick).then(function (response) {
+                let data = response.data;
+                $('.upload-all-insta').show();
+                uploaderPhotos.html('');
+
+                if (data && data.length && typeof data === 'object') {
+
+                } else {
+                    $('#newAlbumModal').modal('hide');
+                    self.main.alert('Incorrect login or error while retrieving data');
+                    return;
+                }
+
+                uploaderPhotos.html('<ul id="preview-insta-album" class="list-inline">');
+                data.forEach(function (v) {
+                    uploaderPhotos.append('<li class="list-inline-item"><img class="preview-album-photo" data-type="insta-photo" src="' + v.fullsize + '"></li>');
+                });
+                uploaderPhotos.append('</ul>');
+            }).catch(function (error) {
+                console.log(error);
+                console.log('Insta error');
+            });
+
+            $('#addFromInstaModal').modal('hide');
+            $('#newAlbumModal').modal('show');
+        });
+
+        $('.show-insta-panel').click(function (e) {
+            e.preventDefault();
+            $('.import-insta-panel').show('fast');
+        });
+    }
+}
+
+module.exports = Instagram;
+},{}],6:[function(require,module,exports){
 class Main {
 
     constructor(blogClass, blog) {
@@ -915,7 +983,6 @@ class Main {
                     reader.addEventListener('loadend', () => {
                         const arrayBuffer = reader.result;
                         $('#uploadAvatarModal').modal('hide');
-                        //self.showUploadModal();
                         self.blog.uploadAvatar(arrayBuffer).then(function (response) {
                             console.log(response.data);
                             self.onAfterHashChange(response.data);
@@ -939,9 +1006,8 @@ class Main {
 
         $('.load-more').click(function (e) {
             e.preventDefault();
-            loadPosts();
+            self.loadPosts();
         });
-
 
         $('.add-follower').click(function (e) {
             e.preventDefault();
@@ -992,52 +1058,6 @@ class Main {
                     self.onAfterHashChange(response.data);
                 });
             }
-        });
-
-        $('.show-insta-panel').click(function (e) {
-            e.preventDefault();
-            $('.import-insta-panel').show('fast');
-        });
-
-        $('.import-instagram').click(function (e) {
-            e.preventDefault();
-            let instaNick = $('#instaNick').val();
-            if (!instaNick) {
-                self.alert('Incorrect nickname');
-
-                return;
-            }
-
-            $('.import-insta-panel').hide('fast');
-
-            let uploaderPhotos = $('#uploaded-photos');
-            uploaderPhotos.html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-            self.swarm.axios.get('https://mem.lt/insta/go.php?limit=1&login=' + instaNick).then(function (response) {
-                let data = response.data;
-                $('.upload-all-insta').show();
-                uploaderPhotos.html('');
-
-                if (data && data.length && typeof data === 'object') {
-
-                } else {
-                    $('#newAlbumModal').modal('hide');
-                    self.alert('Incorrect login or error while retrieving data');
-                    return;
-                }
-
-                uploaderPhotos.html('<ul id="preview-insta-album" class="list-inline">');
-                data.forEach(function (v) {
-                    uploaderPhotos.append('<li class="list-inline-item"><img class="preview-album-photo" data-type="insta-photo" src="' + v.fullsize + '"></li>');
-                });
-                uploaderPhotos.append('</ul>');
-            }).catch(function (error) {
-                console.log(error);
-                console.log('Insta error');
-            });
-
-            $('#addFromInstaModal').modal('hide');
-            $('#newAlbumModal').modal('show');
-
         });
 
         $('.create-album').click(function (e) {
@@ -1170,8 +1190,9 @@ class Main {
                     }
 
                     let id = v.id;
+                    let previewUrl = self.swarm.getFullUrl('social/photoalbum/' + id + '/1_250x250.jpg');
                     photoAlbums.append('<li class="list-inline-item col-sm-4 photoalbum-item">' +
-                        '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img class="photoalbum-img" src="' + self.swarm.getFullUrl('social/photoalbum/' + id + '/1.jpg') + '" ></a></li>');
+                        '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img class="photoalbum-img" src="' + previewUrl + '" ></a></li>');
                     i++;
                 });
             }).catch(function (error) {
@@ -1304,9 +1325,21 @@ class Main {
                         '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
                         '</div>'));
                 } else if (v.type === "photo") {
-                    let content = photoAttachment.clone().attr('id', '').attr('style', '').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
+                    let content = photoAttachment
+                        .clone()
+                        .attr('id', '')
+                        .attr('style', '')
+                        .attr('data-post-id', data.id)
+                        .attr('data-attachment-id', v.id);
                     content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
-                    content.find('.content').html('<img src="' + self.swarm.getFullUrl(v.url) + '">');
+                    let url = self.swarm.getFullUrl(v.url);
+                    if ('previews' in v) {
+                        url = self.swarm.getFullUrl(v.previews['250x250']);
+                        content.addClass('list-inline-item').find('.content').html('<img class="size-179" src="' + url + '">');
+                    } else {
+                        content.find('.content').html('<img src="' + url + '">');
+                    }
+
                     userPost.append(content);
                 } else if (v.type === "audio") {
                     // todo move to html
@@ -1316,7 +1349,8 @@ class Main {
                     userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
                 } else if (v.type === "photoalbum") {
                     // todo move to html
-                    userPost.append(photoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1.jpg") + '"></a></li>'));
+                    let previewUrl = self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg");
+                    userPost.append(photoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + previewUrl + '"></a></li>'));
                 } else if (v.type === "videoalbum") {
                     // todo move to html
                     let info;
@@ -1354,7 +1388,7 @@ class Main {
 }
 
 module.exports = Main;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 class Messages {
     constructor(main) {
         this.main = main;
@@ -1463,7 +1497,7 @@ class Messages {
 }
 
 module.exports = Messages;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 class News {
     constructor(main) {
         this.main = main;
@@ -1551,7 +1585,7 @@ class News {
 }
 
 module.exports = News;
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 class Photoalbum {
     constructor(main) {
         this.main = main;
@@ -1594,7 +1628,12 @@ class Photoalbum {
                     let data = response.data;
                     viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
                     data.photos.forEach(function (v) {
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.file) + '" class="img-fluid preview-album-photo"></a></li>');
+                        let imgSrc = self.main.swarm.getFullUrl(v.file);
+                        if ('previews' in v) {
+                            imgSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
+                        }
+
+                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + imgSrc + '" class="img-fluid preview-album-photo"></a></li>');
                     });
                     viewAlbumContent.append('</ul>');
                 });
@@ -1633,7 +1672,11 @@ class Photoalbum {
                     if (data.length) {
                         let html = '<ul class="list-inline preview-images">';
                         data.forEach(function (v) {
-                            let imgUrl = self.main.swarm.getFullUrl(v.cover_file);
+                            let imgUrl = self.main.swarm.getFullUrl(v.cover_file.file);
+                            if ('previews' in v.cover_file) {
+                                imgUrl = self.main.swarm.getFullUrl(v.cover_file.previews['250x250']);
+                            }
+
                             html += '<li class="list-inline-item"><a href="#" class="load-photoalbum" data-album-id="' + v.id + '"><img class="preview-album-photo" src="' + imgUrl + '">' + '</a></li>';
                         });
                         html += '</ul>';
@@ -1654,53 +1697,69 @@ class Photoalbum {
             return;
         }
 
+        let currentPhotoalbum = self.main.blog.myProfile.last_photoalbum_id + 1;
         let currentFile = this.photoalbumInfo.files.shift();
+        currentFile = currentFile.slice(0, currentFile.size, currentFile.type);
         let progressPanel = $('#progressPanelAlbum');
         let postProgress = $('#postProgressAlbum');
         progressPanel.show();
         let setProgress = function (val) {
             postProgress.css('width', val + '%').attr('aria-valuenow', val);
         };
-        let reader = new FileReader();
-        reader.onload = function (e) {
-            self.main.blog.uploadPhotoToAlbum(self.main.blog.myProfile.last_photoalbum_id + 1, self.photoalbumInfo.uploadedId, e.target.result, function (progress) {
-                let onePercent = progress.total / 100;
-                let currentPercent = progress.loaded / onePercent;
-                setProgress(currentPercent);
-            }).then(function (data) {
-                console.log(data);
-                self.photoalbumInfo.uploadedId++;
-                self.main.onAfterHashChange(data.response, true);
-                progressPanel.hide();
-                setProgress(0);
-                self.photoalbumInfo.uploadedInfo.push({
-                    file: data.fileName,
-                    description: ""
-                });
-
-                if (self.photoalbumInfo.files.length > 0) {
-                    self.sendNextFile();
-                } else {
-                    let newAlbumId = self.main.blog.myProfile.last_photoalbum_id + 1;
-                    self.main.blog.createPhotoAlbum(newAlbumId, 'Uploaded', '', self.photoalbumInfo.uploadedInfo).then(function (response) {
-                        console.log('album created');
-                        console.log(response.data);
-                        self.main.onAfterHashChange(response.data);
-                        $('#newAlbumModal').modal('hide');
-                        self.main.alert('Album created!', [
-                            '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + newAlbumId + '">Share</button>'
-                        ]);
-                    });
-                }
-            });
+        let updateProgress = function (progress) {
+            let onePercent = progress.total / 100;
+            let currentPercent = progress.loaded / onePercent;
+            setProgress(currentPercent);
+        };
+        let uploadPhoto = function (file, postfix) {
+            postfix = postfix || '';
+            return self.main.blog.uploadPhotoToAlbum(currentPhotoalbum, self.photoalbumInfo.uploadedId + postfix, file, updateProgress);
         };
 
-        reader.readAsArrayBuffer(currentFile);
+        Utils.resizeImages(currentFile, [{width: 250, height: 250}])
+            .then(function (result) {
+                let key = '250x250';
+                let imagePreview = result[key];
+                uploadPhoto(imagePreview, '_' + key)
+                    .then(function (data) {
+                        let previewFileName = data.fileName;
+                        self.main.onAfterHashChange(data.response, true);
+                        uploadPhoto(currentFile)
+                            .then(function (data) {
+                                console.log(data);
+                                self.photoalbumInfo.uploadedId++;
+                                self.main.onAfterHashChange(data.response, true);
+                                progressPanel.hide();
+                                setProgress(0);
+                                self.photoalbumInfo.uploadedInfo.push({
+                                    file: data.fileName,
+                                    description: "",
+                                    previews: {'250x250': previewFileName}
+                                });
+
+                                if (self.photoalbumInfo.files.length > 0) {
+                                    self.sendNextFile();
+                                } else {
+                                    self.main.blog.createPhotoAlbum(currentPhotoalbum, 'Uploaded', '', self.photoalbumInfo.uploadedInfo)
+                                        .then(function (response) {
+                                            console.log('album created');
+                                            console.log(response.data);
+                                            $('#newAlbumModal').modal('hide');
+                                            self.main.alert('Album created!', [
+                                                '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + currentPhotoalbum + '">Share</button>'
+                                            ]);
+                                            self.main.onAfterHashChange(response.data, true);
+
+                                        });
+                                }
+                            });
+                    });
+            });
     }
 }
 
 module.exports = Photoalbum;
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 class Post {
     constructor(main) {
         this.init();
@@ -1719,11 +1778,14 @@ class Post {
             $('.post-attachment').each(function (k, v) {
                 let type = $(v).attr('data-type');
                 let url = $(v).attr('data-url');
+                let previews = $(v).attr('data-previews');
+                previews = previews ? JSON.parse(previews) : {};
                 if (type && url) {
                     attachments.push({
                         id: id,
                         type: type,
-                        url: url
+                        url: url,
+                        previews: previews
                     });
                     id++;
                 }
@@ -1735,7 +1797,7 @@ class Post {
             }
 
             let newPostId = self.blog.myProfile.last_post_id + 1;
-            self.addPostByData({
+            self.main.addPostByData({
                 id: newPostId,
                 description: description,
                 attachments: attachments
@@ -1766,7 +1828,7 @@ class Post {
                     $(this).remove();
                 });
                 if (type !== 'youtube') {
-                    self.swarm.delete(url).then(function (response) {
+                    self.main.swarm.delete(url).then(function (response) {
                         self.main.onAfterHashChange(response.data, true);
                     });
                 }
@@ -1854,10 +1916,10 @@ class Post {
                 };
 
                 let beforeUploadingPhoto = function (file) {
-                    console.log(file);
                     let url = Utils.getUrlForBlob(file);
                     let postAttachmentTemplate = $('#postAttachment')
                         .clone()
+                        .addClass('list-inline-item')
                         .removeAttr('id')
                         .attr('style', '')
                         .attr('data-name', file.name);
@@ -1874,7 +1936,7 @@ class Post {
                     attachment
                         .attr('data-type', fileType)
                         .attr('data-url', data.url + originalFile.name)
-                        .attr('data-preview-url', data.url + previewFile.name);
+                        .attr('data-previews', JSON.stringify({'250x250': data.url + previewFile.name}));
                     attachment.find('.content').html('<a target="_blank" href="' + originalUrl + '"><img class="img-preview" src="' + previewUrl + '"></a>');
                     setProgress(0);
                     $('#postOrAttach').removeClass("disabled-content");
@@ -1891,7 +1953,6 @@ class Post {
                             beforeUploadingPhoto(file);
                             // todo change key for multiple
                             formData.append(1, file);
-                            // todo show image preview
                             self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
                                 .then(function (data) {
                                     afterUploadingPhoto(file, formData.get(0), data);
@@ -1931,9 +1992,8 @@ class Post {
                 e.preventDefault();
                 let id = $(this).attr('data-id');
                 if (confirm('Really delete?')) {
-                    //$('#my-post').addClass("disabled-content");
                     $('#userPost' + id).hide('slow');
-                    self.blog.deletePost(id)
+                    self.main.blog.deletePost(id)
                         .then(function (response) {
                             self.main.onAfterHashChange(response.data, true);
                         });
@@ -1959,7 +2019,7 @@ class Post {
 }
 
 module.exports = Post;
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 class Settings {
     constructor(main) {
         this.main = main;
@@ -2039,6 +2099,16 @@ class Settings {
             e.preventDefault();
             $('#settings-import-file').click();
         });
+
+        /*$('.settings-delete-all').click(function (e) {
+            e.preventDefault();
+            if (confirm('Really delete?')) {
+                self.main.swarm.delete(self.main.blog.prefix).then(function (response) {
+                    alert('All data deleted!');
+                    self.main.onAfterHashChange(response.data);
+                });
+            }
+        });*/
 
         $('.settings-export-download').click(function (e) {
             e.preventDefault();
@@ -2148,7 +2218,7 @@ class Settings {
 }
 
 module.exports = Settings;
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 class StartNow {
     constructor() {
         this.init();
@@ -2189,7 +2259,7 @@ class StartNow {
 }
 
 module.exports = StartNow;
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 class SwarmApi {
     constructor(apiUrl, applicationHash) {
         this.isWeb = typeof window !== undefined;
@@ -2351,7 +2421,7 @@ class SwarmApi {
 }
 
 module.exports = SwarmApi;
-},{"axios":19}],13:[function(require,module,exports){
+},{"axios":20}],14:[function(require,module,exports){
 class Utils {
     constructor() {
     }
@@ -2409,7 +2479,7 @@ class Utils {
 }
 
 module.exports = Utils;
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 class VKImport {
     constructor(main) {
         this.vkSettings = {
@@ -2808,7 +2878,7 @@ class VKImport {
 }
 
 module.exports = VKImport;
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 class Videoplaylist {
     constructor(main) {
         this.main = main;
@@ -2965,7 +3035,7 @@ class Videoplaylist {
 }
 
 module.exports = Videoplaylist;
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 class Wallet {
     constructor(main) {
         this.main = main;
@@ -2999,7 +3069,7 @@ class Wallet {
 }
 
 module.exports = Wallet;
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 let modules = window.socialModules || {
     Main: Main,
     Blog: Blog,
@@ -3015,7 +3085,8 @@ let modules = window.socialModules || {
     Wallet: Wallet,
     Settings: Settings,
     Utils: Utils,
-    Post: Post
+    Post: Post,
+    Instagram: Instagram
 };
 
 window.Blog = new modules.Blog();
@@ -3034,8 +3105,9 @@ new modules.Wallet(myMain);
 new modules.Settings(myMain);
 new modules.Utils();
 new modules.Post(myMain);
+new modules.Instagram(myMain);
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /* All scripts for production */
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -3062,6 +3134,7 @@ let Wallet = require('./Wallet.js');
 let Settings = require('./Settings.js');
 let Utils = require('./Utils.js');
 let Post = require('./Post.js');
+let Instagram = require('./Instagram.js');
 window.socialModules = {
     Main: Main,
     Blog: Blog,
@@ -3077,12 +3150,13 @@ window.socialModules = {
     Wallet: Wallet,
     Settings: Settings,
     Utils: Utils,
-    Post: Post
+    Post: Post,
+    Instagram: Instagram
 };
 require('./initDev.js');
-},{"./Blog.js":1,"./EnsUtility.js":2,"./FacebookImport.js":3,"./ImportButtons.js":4,"./Main":5,"./Messages.js":6,"./News.js":7,"./Photoalbum.js":8,"./Post.js":9,"./Settings.js":10,"./StartNow.js":11,"./SwarmApi":12,"./Utils.js":13,"./VKImport.js":14,"./Videoplaylist.js":15,"./Wallet.js":16,"./initDev.js":17,"bootstrap":46,"cropperjs":68,"ekko-lightbox":103,"ethereum-ens":105,"file-saver":106,"jquery":111,"jszip":122}],19:[function(require,module,exports){
+},{"./Blog.js":1,"./EnsUtility.js":2,"./FacebookImport.js":3,"./ImportButtons.js":4,"./Instagram.js":5,"./Main":6,"./Messages.js":7,"./News.js":8,"./Photoalbum.js":9,"./Post.js":10,"./Settings.js":11,"./StartNow.js":12,"./SwarmApi":13,"./Utils.js":14,"./VKImport.js":15,"./Videoplaylist.js":16,"./Wallet.js":17,"./initDev.js":18,"bootstrap":47,"cropperjs":69,"ekko-lightbox":104,"ethereum-ens":106,"file-saver":107,"jquery":112,"jszip":123}],20:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":21}],20:[function(require,module,exports){
+},{"./lib/axios":22}],21:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3266,7 +3340,7 @@ module.exports = function xhrAdapter(config) {
 };
 
 }).call(this,require('_process'))
-},{"../core/createError":27,"./../core/settle":30,"./../helpers/btoa":34,"./../helpers/buildURL":35,"./../helpers/cookies":37,"./../helpers/isURLSameOrigin":39,"./../helpers/parseHeaders":41,"./../utils":43,"_process":232}],21:[function(require,module,exports){
+},{"../core/createError":28,"./../core/settle":31,"./../helpers/btoa":35,"./../helpers/buildURL":36,"./../helpers/cookies":38,"./../helpers/isURLSameOrigin":40,"./../helpers/parseHeaders":42,"./../utils":44,"_process":233}],22:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -3320,7 +3394,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":22,"./cancel/CancelToken":23,"./cancel/isCancel":24,"./core/Axios":25,"./defaults":32,"./helpers/bind":33,"./helpers/spread":42,"./utils":43}],22:[function(require,module,exports){
+},{"./cancel/Cancel":23,"./cancel/CancelToken":24,"./cancel/isCancel":25,"./core/Axios":26,"./defaults":33,"./helpers/bind":34,"./helpers/spread":43,"./utils":44}],23:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3341,7 +3415,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -3400,14 +3474,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":22}],24:[function(require,module,exports){
+},{"./Cancel":23}],25:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 var defaults = require('./../defaults');
@@ -3488,7 +3562,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"./../defaults":32,"./../utils":43,"./InterceptorManager":26,"./dispatchRequest":28}],26:[function(require,module,exports){
+},{"./../defaults":33,"./../utils":44,"./InterceptorManager":27,"./dispatchRequest":29}],27:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3542,7 +3616,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":43}],27:[function(require,module,exports){
+},{"./../utils":44}],28:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -3562,7 +3636,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":29}],28:[function(require,module,exports){
+},{"./enhanceError":30}],29:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3650,7 +3724,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":24,"../defaults":32,"./../helpers/combineURLs":36,"./../helpers/isAbsoluteURL":38,"./../utils":43,"./transformData":31}],29:[function(require,module,exports){
+},{"../cancel/isCancel":25,"../defaults":33,"./../helpers/combineURLs":37,"./../helpers/isAbsoluteURL":39,"./../utils":44,"./transformData":32}],30:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3673,7 +3747,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -3701,7 +3775,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":27}],31:[function(require,module,exports){
+},{"./createError":28}],32:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3723,7 +3797,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":43}],32:[function(require,module,exports){
+},{"./../utils":44}],33:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3823,7 +3897,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this,require('_process'))
-},{"./adapters/http":20,"./adapters/xhr":20,"./helpers/normalizeHeaderName":40,"./utils":43,"_process":232}],33:[function(require,module,exports){
+},{"./adapters/http":21,"./adapters/xhr":21,"./helpers/normalizeHeaderName":41,"./utils":44,"_process":233}],34:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -3836,7 +3910,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 // btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
@@ -3874,7 +3948,7 @@ function btoa(input) {
 
 module.exports = btoa;
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3942,7 +4016,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":43}],36:[function(require,module,exports){
+},{"./../utils":44}],37:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3958,7 +4032,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4013,7 +4087,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":43}],38:[function(require,module,exports){
+},{"./../utils":44}],39:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4029,7 +4103,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4099,7 +4173,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":43}],40:[function(require,module,exports){
+},{"./../utils":44}],41:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -4113,7 +4187,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":43}],41:[function(require,module,exports){
+},{"../utils":44}],42:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4168,7 +4242,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":43}],42:[function(require,module,exports){
+},{"./../utils":44}],43:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4197,7 +4271,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -4502,7 +4576,7 @@ module.exports = {
   trim: trim
 };
 
-},{"./helpers/bind":33,"is-buffer":110}],44:[function(require,module,exports){
+},{"./helpers/bind":34,"is-buffer":111}],45:[function(require,module,exports){
 /*! bignumber.js v4.1.0 https://github.com/MikeMcl/bignumber.js/LICENCE */
 
 ;(function (globalObj) {
@@ -7238,7 +7312,7 @@ module.exports = {
     }
 })(this);
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 (function (process,global,setImmediate){
 /* @preserve
  * The MIT License (MIT)
@@ -12864,7 +12938,7 @@ module.exports = ret;
 },{"./es5":13}]},{},[4])(4)
 });                    ;if (typeof window !== 'undefined' && window !== null) {                               window.P = window.Promise;                                                     } else if (typeof self !== 'undefined' && self !== null) {                             self.P = self.Promise;                                                         }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":232,"timers":250}],46:[function(require,module,exports){
+},{"_process":233,"timers":251}],47:[function(require,module,exports){
 /*!
   * Bootstrap v4.1.3 (https://getbootstrap.com/)
   * Copyright 2011-2018 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
@@ -16810,30 +16884,30 @@ module.exports = ret;
 })));
 
 
-},{"jquery":111,"popper.js":165}],47:[function(require,module,exports){
+},{"jquery":112,"popper.js":166}],48:[function(require,module,exports){
 require('../modules/web.immediate');
 module.exports = require('../modules/_core').setImmediate;
-},{"../modules/_core":51,"../modules/web.immediate":67}],48:[function(require,module,exports){
+},{"../modules/_core":52,"../modules/web.immediate":68}],49:[function(require,module,exports){
 module.exports = function(it){
   if(typeof it != 'function')throw TypeError(it + ' is not a function!');
   return it;
 };
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 var isObject = require('./_is-object');
 module.exports = function(it){
   if(!isObject(it))throw TypeError(it + ' is not an object!');
   return it;
 };
-},{"./_is-object":62}],50:[function(require,module,exports){
+},{"./_is-object":63}],51:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = function(it){
   return toString.call(it).slice(8, -1);
 };
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 var core = module.exports = {version: '2.3.0'};
 if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 // optional / simple context binding
 var aFunction = require('./_a-function');
 module.exports = function(fn, that, length){
@@ -16854,12 +16928,12 @@ module.exports = function(fn, that, length){
     return fn.apply(that, arguments);
   };
 };
-},{"./_a-function":48}],53:[function(require,module,exports){
+},{"./_a-function":49}],54:[function(require,module,exports){
 // Thank's IE8 for his funny defineProperty
 module.exports = !require('./_fails')(function(){
   return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./_fails":56}],54:[function(require,module,exports){
+},{"./_fails":57}],55:[function(require,module,exports){
 var isObject = require('./_is-object')
   , document = require('./_global').document
   // in old IE typeof document.createElement is 'object'
@@ -16867,7 +16941,7 @@ var isObject = require('./_is-object')
 module.exports = function(it){
   return is ? document.createElement(it) : {};
 };
-},{"./_global":57,"./_is-object":62}],55:[function(require,module,exports){
+},{"./_global":58,"./_is-object":63}],56:[function(require,module,exports){
 var global    = require('./_global')
   , core      = require('./_core')
   , ctx       = require('./_ctx')
@@ -16929,7 +17003,7 @@ $export.W = 32;  // wrap
 $export.U = 64;  // safe
 $export.R = 128; // real proto method for `library` 
 module.exports = $export;
-},{"./_core":51,"./_ctx":52,"./_global":57,"./_hide":58}],56:[function(require,module,exports){
+},{"./_core":52,"./_ctx":53,"./_global":58,"./_hide":59}],57:[function(require,module,exports){
 module.exports = function(exec){
   try {
     return !!exec();
@@ -16937,12 +17011,12 @@ module.exports = function(exec){
     return true;
   }
 };
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 var global = module.exports = typeof window != 'undefined' && window.Math == Math
   ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
 if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 var dP         = require('./_object-dp')
   , createDesc = require('./_property-desc');
 module.exports = require('./_descriptors') ? function(object, key, value){
@@ -16951,13 +17025,13 @@ module.exports = require('./_descriptors') ? function(object, key, value){
   object[key] = value;
   return object;
 };
-},{"./_descriptors":53,"./_object-dp":63,"./_property-desc":64}],59:[function(require,module,exports){
+},{"./_descriptors":54,"./_object-dp":64,"./_property-desc":65}],60:[function(require,module,exports){
 module.exports = require('./_global').document && document.documentElement;
-},{"./_global":57}],60:[function(require,module,exports){
+},{"./_global":58}],61:[function(require,module,exports){
 module.exports = !require('./_descriptors') && !require('./_fails')(function(){
   return Object.defineProperty(require('./_dom-create')('div'), 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./_descriptors":53,"./_dom-create":54,"./_fails":56}],61:[function(require,module,exports){
+},{"./_descriptors":54,"./_dom-create":55,"./_fails":57}],62:[function(require,module,exports){
 // fast apply, http://jsperf.lnkit.com/fast-apply/5
 module.exports = function(fn, args, that){
   var un = that === undefined;
@@ -16974,11 +17048,11 @@ module.exports = function(fn, args, that){
                       : fn.call(that, args[0], args[1], args[2], args[3]);
   } return              fn.apply(that, args);
 };
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 module.exports = function(it){
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 var anObject       = require('./_an-object')
   , IE8_DOM_DEFINE = require('./_ie8-dom-define')
   , toPrimitive    = require('./_to-primitive')
@@ -16995,7 +17069,7 @@ exports.f = require('./_descriptors') ? Object.defineProperty : function defineP
   if('value' in Attributes)O[P] = Attributes.value;
   return O;
 };
-},{"./_an-object":49,"./_descriptors":53,"./_ie8-dom-define":60,"./_to-primitive":66}],64:[function(require,module,exports){
+},{"./_an-object":50,"./_descriptors":54,"./_ie8-dom-define":61,"./_to-primitive":67}],65:[function(require,module,exports){
 module.exports = function(bitmap, value){
   return {
     enumerable  : !(bitmap & 1),
@@ -17004,7 +17078,7 @@ module.exports = function(bitmap, value){
     value       : value
   };
 };
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 var ctx                = require('./_ctx')
   , invoke             = require('./_invoke')
   , html               = require('./_html')
@@ -17080,7 +17154,7 @@ module.exports = {
   set:   setTask,
   clear: clearTask
 };
-},{"./_cof":50,"./_ctx":52,"./_dom-create":54,"./_global":57,"./_html":59,"./_invoke":61}],66:[function(require,module,exports){
+},{"./_cof":51,"./_ctx":53,"./_dom-create":55,"./_global":58,"./_html":60,"./_invoke":62}],67:[function(require,module,exports){
 // 7.1.1 ToPrimitive(input [, PreferredType])
 var isObject = require('./_is-object');
 // instead of the ES6 spec version, we didn't implement @@toPrimitive case
@@ -17093,14 +17167,14 @@ module.exports = function(it, S){
   if(!S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it)))return val;
   throw TypeError("Can't convert object to primitive value");
 };
-},{"./_is-object":62}],67:[function(require,module,exports){
+},{"./_is-object":63}],68:[function(require,module,exports){
 var $export = require('./_export')
   , $task   = require('./_task');
 $export($export.G + $export.B, {
   setImmediate:   $task.set,
   clearImmediate: $task.clear
 });
-},{"./_export":55,"./_task":65}],68:[function(require,module,exports){
+},{"./_export":56,"./_task":66}],69:[function(require,module,exports){
 /*!
  * Cropper.js v1.4.1
  * https://fengyuanchen.github.io/cropperjs
@@ -20820,7 +20894,7 @@ assign(Cropper.prototype, render, preview, events, handlers, change, methods);
 
 module.exports = Cropper;
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -21053,7 +21127,7 @@ module.exports = Cropper;
 	return CryptoJS.AES;
 
 }));
-},{"./cipher-core":70,"./core":71,"./enc-base64":72,"./evpkdf":74,"./md5":79}],70:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72,"./enc-base64":73,"./evpkdf":75,"./md5":80}],71:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -21929,7 +22003,7 @@ module.exports = Cropper;
 
 
 }));
-},{"./core":71}],71:[function(require,module,exports){
+},{"./core":72}],72:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22690,7 +22764,7 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22826,7 +22900,7 @@ module.exports = Cropper;
 	return CryptoJS.enc.Base64;
 
 }));
-},{"./core":71}],73:[function(require,module,exports){
+},{"./core":72}],74:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22976,7 +23050,7 @@ module.exports = Cropper;
 	return CryptoJS.enc.Utf16;
 
 }));
-},{"./core":71}],74:[function(require,module,exports){
+},{"./core":72}],75:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23109,7 +23183,7 @@ module.exports = Cropper;
 	return CryptoJS.EvpKDF;
 
 }));
-},{"./core":71,"./hmac":76,"./sha1":95}],75:[function(require,module,exports){
+},{"./core":72,"./hmac":77,"./sha1":96}],76:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23176,7 +23250,7 @@ module.exports = Cropper;
 	return CryptoJS.format.Hex;
 
 }));
-},{"./cipher-core":70,"./core":71}],76:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],77:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23320,7 +23394,7 @@ module.exports = Cropper;
 
 
 }));
-},{"./core":71}],77:[function(require,module,exports){
+},{"./core":72}],78:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23339,7 +23413,7 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{"./aes":69,"./cipher-core":70,"./core":71,"./enc-base64":72,"./enc-utf16":73,"./evpkdf":74,"./format-hex":75,"./hmac":76,"./lib-typedarrays":78,"./md5":79,"./mode-cfb":80,"./mode-ctr":82,"./mode-ctr-gladman":81,"./mode-ecb":83,"./mode-ofb":84,"./pad-ansix923":85,"./pad-iso10126":86,"./pad-iso97971":87,"./pad-nopadding":88,"./pad-zeropadding":89,"./pbkdf2":90,"./rabbit":92,"./rabbit-legacy":91,"./rc4":93,"./ripemd160":94,"./sha1":95,"./sha224":96,"./sha256":97,"./sha3":98,"./sha384":99,"./sha512":100,"./tripledes":101,"./x64-core":102}],78:[function(require,module,exports){
+},{"./aes":70,"./cipher-core":71,"./core":72,"./enc-base64":73,"./enc-utf16":74,"./evpkdf":75,"./format-hex":76,"./hmac":77,"./lib-typedarrays":79,"./md5":80,"./mode-cfb":81,"./mode-ctr":83,"./mode-ctr-gladman":82,"./mode-ecb":84,"./mode-ofb":85,"./pad-ansix923":86,"./pad-iso10126":87,"./pad-iso97971":88,"./pad-nopadding":89,"./pad-zeropadding":90,"./pbkdf2":91,"./rabbit":93,"./rabbit-legacy":92,"./rc4":94,"./ripemd160":95,"./sha1":96,"./sha224":97,"./sha256":98,"./sha3":99,"./sha384":100,"./sha512":101,"./tripledes":102,"./x64-core":103}],79:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23416,7 +23490,7 @@ module.exports = Cropper;
 	return CryptoJS.lib.WordArray;
 
 }));
-},{"./core":71}],79:[function(require,module,exports){
+},{"./core":72}],80:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23685,7 +23759,7 @@ module.exports = Cropper;
 	return CryptoJS.MD5;
 
 }));
-},{"./core":71}],80:[function(require,module,exports){
+},{"./core":72}],81:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23764,7 +23838,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CFB;
 
 }));
-},{"./cipher-core":70,"./core":71}],81:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],82:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23881,7 +23955,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CTRGladman;
 
 }));
-},{"./cipher-core":70,"./core":71}],82:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],83:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23940,7 +24014,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CTR;
 
 }));
-},{"./cipher-core":70,"./core":71}],83:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],84:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23981,7 +24055,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.ECB;
 
 }));
-},{"./cipher-core":70,"./core":71}],84:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],85:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24036,7 +24110,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.OFB;
 
 }));
-},{"./cipher-core":70,"./core":71}],85:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],86:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24086,7 +24160,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Ansix923;
 
 }));
-},{"./cipher-core":70,"./core":71}],86:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],87:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24131,7 +24205,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Iso10126;
 
 }));
-},{"./cipher-core":70,"./core":71}],87:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],88:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24172,7 +24246,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Iso97971;
 
 }));
-},{"./cipher-core":70,"./core":71}],88:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],89:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24203,7 +24277,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.NoPadding;
 
 }));
-},{"./cipher-core":70,"./core":71}],89:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],90:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24249,7 +24323,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.ZeroPadding;
 
 }));
-},{"./cipher-core":70,"./core":71}],90:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72}],91:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24395,7 +24469,7 @@ module.exports = Cropper;
 	return CryptoJS.PBKDF2;
 
 }));
-},{"./core":71,"./hmac":76,"./sha1":95}],91:[function(require,module,exports){
+},{"./core":72,"./hmac":77,"./sha1":96}],92:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24586,7 +24660,7 @@ module.exports = Cropper;
 	return CryptoJS.RabbitLegacy;
 
 }));
-},{"./cipher-core":70,"./core":71,"./enc-base64":72,"./evpkdf":74,"./md5":79}],92:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72,"./enc-base64":73,"./evpkdf":75,"./md5":80}],93:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24779,7 +24853,7 @@ module.exports = Cropper;
 	return CryptoJS.Rabbit;
 
 }));
-},{"./cipher-core":70,"./core":71,"./enc-base64":72,"./evpkdf":74,"./md5":79}],93:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72,"./enc-base64":73,"./evpkdf":75,"./md5":80}],94:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24919,7 +24993,7 @@ module.exports = Cropper;
 	return CryptoJS.RC4;
 
 }));
-},{"./cipher-core":70,"./core":71,"./enc-base64":72,"./evpkdf":74,"./md5":79}],94:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72,"./enc-base64":73,"./evpkdf":75,"./md5":80}],95:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25187,7 +25261,7 @@ module.exports = Cropper;
 	return CryptoJS.RIPEMD160;
 
 }));
-},{"./core":71}],95:[function(require,module,exports){
+},{"./core":72}],96:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25338,7 +25412,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA1;
 
 }));
-},{"./core":71}],96:[function(require,module,exports){
+},{"./core":72}],97:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25419,7 +25493,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA224;
 
 }));
-},{"./core":71,"./sha256":97}],97:[function(require,module,exports){
+},{"./core":72,"./sha256":98}],98:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25619,7 +25693,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA256;
 
 }));
-},{"./core":71}],98:[function(require,module,exports){
+},{"./core":72}],99:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25943,7 +26017,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA3;
 
 }));
-},{"./core":71,"./x64-core":102}],99:[function(require,module,exports){
+},{"./core":72,"./x64-core":103}],100:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -26027,7 +26101,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA384;
 
 }));
-},{"./core":71,"./sha512":100,"./x64-core":102}],100:[function(require,module,exports){
+},{"./core":72,"./sha512":101,"./x64-core":103}],101:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -26351,7 +26425,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA512;
 
 }));
-},{"./core":71,"./x64-core":102}],101:[function(require,module,exports){
+},{"./core":72,"./x64-core":103}],102:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -27122,7 +27196,7 @@ module.exports = Cropper;
 	return CryptoJS.TripleDES;
 
 }));
-},{"./cipher-core":70,"./core":71,"./enc-base64":72,"./evpkdf":74,"./md5":79}],102:[function(require,module,exports){
+},{"./cipher-core":71,"./core":72,"./enc-base64":73,"./evpkdf":75,"./md5":80}],103:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -27427,10 +27501,10 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{"./core":71}],103:[function(require,module,exports){
+},{"./core":72}],104:[function(require,module,exports){
 +function(a){"use strict";function b(a,b){if(!(a instanceof b))throw new TypeError("Cannot call a class as a function")}var c=function(){function a(a,b){for(var c=0;c<b.length;c++){var d=b[c];d.enumerable=d.enumerable||!1,d.configurable=!0,"value"in d&&(d.writable=!0),Object.defineProperty(a,d.key,d)}}return function(b,c,d){return c&&a(b.prototype,c),d&&a(b,d),b}}();(function(a){var d="ekkoLightbox",e=a.fn[d],f={title:"",footer:"",maxWidth:9999,maxHeight:9999,showArrows:!0,wrapping:!0,type:null,alwaysShowClose:!1,loadingMessage:'<div class="ekko-lightbox-loader"><div><div></div><div></div></div></div>',leftArrow:"<span>&#10094;</span>",rightArrow:"<span>&#10095;</span>",strings:{close:"Close",fail:"Failed to load image:",type:"Could not detect remote target type. Force the type using data-type"},doc:document,onShow:function(){},onShown:function(){},onHide:function(){},onHidden:function(){},onNavigate:function(){},onContentLoaded:function(){}},g=function(){function d(c,e){var g=this;b(this,d),this._config=a.extend({},f,e),this._$modalArrows=null,this._galleryIndex=0,this._galleryName=null,this._padding=null,this._border=null,this._titleIsShown=!1,this._footerIsShown=!1,this._wantedWidth=0,this._wantedHeight=0,this._touchstartX=0,this._touchendX=0,this._modalId="ekkoLightbox-"+Math.floor(1e3*Math.random()+1),this._$element=c instanceof jQuery?c:a(c),this._isBootstrap3=3==a.fn.modal.Constructor.VERSION[0];var h='<h4 class="modal-title">'+(this._config.title||"&nbsp;")+"</h4>",i='<button type="button" class="close" data-dismiss="modal" aria-label="'+this._config.strings.close+'"><span aria-hidden="true">&times;</span></button>',j='<div class="modal-header'+(this._config.title||this._config.alwaysShowClose?"":" hide")+'">'+(this._isBootstrap3?i+h:h+i)+"</div>",k='<div class="modal-footer'+(this._config.footer?"":" hide")+'">'+(this._config.footer||"&nbsp;")+"</div>",l='<div class="modal-body"><div class="ekko-lightbox-container"><div class="ekko-lightbox-item fade in show"></div><div class="ekko-lightbox-item fade"></div></div></div>',m='<div class="modal-dialog" role="document"><div class="modal-content">'+j+l+k+"</div></div>";a(this._config.doc.body).append('<div id="'+this._modalId+'" class="ekko-lightbox modal fade" tabindex="-1" tabindex="-1" role="dialog" aria-hidden="true">'+m+"</div>"),this._$modal=a("#"+this._modalId,this._config.doc),this._$modalDialog=this._$modal.find(".modal-dialog").first(),this._$modalContent=this._$modal.find(".modal-content").first(),this._$modalBody=this._$modal.find(".modal-body").first(),this._$modalHeader=this._$modal.find(".modal-header").first(),this._$modalFooter=this._$modal.find(".modal-footer").first(),this._$lightboxContainer=this._$modalBody.find(".ekko-lightbox-container").first(),this._$lightboxBodyOne=this._$lightboxContainer.find("> div:first-child").first(),this._$lightboxBodyTwo=this._$lightboxContainer.find("> div:last-child").first(),this._border=this._calculateBorders(),this._padding=this._calculatePadding(),this._galleryName=this._$element.data("gallery"),this._galleryName&&(this._$galleryItems=a(document.body).find('*[data-gallery="'+this._galleryName+'"]'),this._galleryIndex=this._$galleryItems.index(this._$element),a(document).on("keydown.ekkoLightbox",this._navigationalBinder.bind(this)),this._config.showArrows&&this._$galleryItems.length>1&&(this._$lightboxContainer.append('<div class="ekko-lightbox-nav-overlay"><a href="#">'+this._config.leftArrow+'</a><a href="#">'+this._config.rightArrow+"</a></div>"),this._$modalArrows=this._$lightboxContainer.find("div.ekko-lightbox-nav-overlay").first(),this._$lightboxContainer.on("click","a:first-child",function(a){return a.preventDefault(),g.navigateLeft()}),this._$lightboxContainer.on("click","a:last-child",function(a){return a.preventDefault(),g.navigateRight()}),this.updateNavigation())),this._$modal.on("show.bs.modal",this._config.onShow.bind(this)).on("shown.bs.modal",function(){return g._toggleLoading(!0),g._handle(),g._config.onShown.call(g)}).on("hide.bs.modal",this._config.onHide.bind(this)).on("hidden.bs.modal",function(){return g._galleryName&&(a(document).off("keydown.ekkoLightbox"),a(window).off("resize.ekkoLightbox")),g._$modal.remove(),g._config.onHidden.call(g)}).modal(this._config),a(window).on("resize.ekkoLightbox",function(){g._resize(g._wantedWidth,g._wantedHeight)}),this._$lightboxContainer.on("touchstart",function(){g._touchstartX=event.changedTouches[0].screenX}).on("touchend",function(){g._touchendX=event.changedTouches[0].screenX,g._swipeGesure()})}return c(d,null,[{key:"Default",get:function(){return f}}]),c(d,[{key:"element",value:function(){return this._$element}},{key:"modal",value:function(){return this._$modal}},{key:"navigateTo",value:function(b){return b<0||b>this._$galleryItems.length-1?this:(this._galleryIndex=b,this.updateNavigation(),this._$element=a(this._$galleryItems.get(this._galleryIndex)),void this._handle())}},{key:"navigateLeft",value:function(){if(this._$galleryItems&&1!==this._$galleryItems.length){if(0===this._galleryIndex){if(!this._config.wrapping)return;this._galleryIndex=this._$galleryItems.length-1}else this._galleryIndex--;return this._config.onNavigate.call(this,"left",this._galleryIndex),this.navigateTo(this._galleryIndex)}}},{key:"navigateRight",value:function(){if(this._$galleryItems&&1!==this._$galleryItems.length){if(this._galleryIndex===this._$galleryItems.length-1){if(!this._config.wrapping)return;this._galleryIndex=0}else this._galleryIndex++;return this._config.onNavigate.call(this,"right",this._galleryIndex),this.navigateTo(this._galleryIndex)}}},{key:"updateNavigation",value:function(){if(!this._config.wrapping){var a=this._$lightboxContainer.find("div.ekko-lightbox-nav-overlay");0===this._galleryIndex?a.find("a:first-child").addClass("disabled"):a.find("a:first-child").removeClass("disabled"),this._galleryIndex===this._$galleryItems.length-1?a.find("a:last-child").addClass("disabled"):a.find("a:last-child").removeClass("disabled")}}},{key:"close",value:function(){return this._$modal.modal("hide")}},{key:"_navigationalBinder",value:function(a){return a=a||window.event,39===a.keyCode?this.navigateRight():37===a.keyCode?this.navigateLeft():void 0}},{key:"_detectRemoteType",value:function(a,b){return b=b||!1,!b&&this._isImage(a)&&(b="image"),!b&&this._getYoutubeId(a)&&(b="youtube"),!b&&this._getVimeoId(a)&&(b="vimeo"),!b&&this._getInstagramId(a)&&(b="instagram"),(!b||["image","youtube","vimeo","instagram","video","url"].indexOf(b)<0)&&(b="url"),b}},{key:"_isImage",value:function(a){return a&&a.match(/(^data:image\/.*,)|(\.(jp(e|g|eg)|gif|png|bmp|webp|svg)((\?|#).*)?$)/i)}},{key:"_containerToUse",value:function(){var a=this,b=this._$lightboxBodyTwo,c=this._$lightboxBodyOne;return this._$lightboxBodyTwo.hasClass("in")&&(b=this._$lightboxBodyOne,c=this._$lightboxBodyTwo),c.removeClass("in show"),setTimeout(function(){a._$lightboxBodyTwo.hasClass("in")||a._$lightboxBodyTwo.empty(),a._$lightboxBodyOne.hasClass("in")||a._$lightboxBodyOne.empty()},500),b.addClass("in show"),b}},{key:"_handle",value:function(){var a=this._containerToUse();this._updateTitleAndFooter();var b=this._$element.attr("data-remote")||this._$element.attr("href"),c=this._detectRemoteType(b,this._$element.attr("data-type")||!1);if(["image","youtube","vimeo","instagram","video","url"].indexOf(c)<0)return this._error(this._config.strings.type);switch(c){case"image":this._preloadImage(b,a),this._preloadImageByIndex(this._galleryIndex,3);break;case"youtube":this._showYoutubeVideo(b,a);break;case"vimeo":this._showVimeoVideo(this._getVimeoId(b),a);break;case"instagram":this._showInstagramVideo(this._getInstagramId(b),a);break;case"video":this._showHtml5Video(b,a);break;default:this._loadRemoteContent(b,a)}return this}},{key:"_getYoutubeId",value:function(a){if(!a)return!1;var b=a.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);return!(!b||11!==b[2].length)&&b[2]}},{key:"_getVimeoId",value:function(a){return!!(a&&a.indexOf("vimeo")>0)&&a}},{key:"_getInstagramId",value:function(a){return!!(a&&a.indexOf("instagram")>0)&&a}},{key:"_toggleLoading",value:function(b){return b=b||!1,b?(this._$modalDialog.css("display","none"),this._$modal.removeClass("in show"),a(".modal-backdrop").append(this._config.loadingMessage)):(this._$modalDialog.css("display","block"),this._$modal.addClass("in show"),a(".modal-backdrop").find(".ekko-lightbox-loader").remove()),this}},{key:"_calculateBorders",value:function(){return{top:this._totalCssByAttribute("border-top-width"),right:this._totalCssByAttribute("border-right-width"),bottom:this._totalCssByAttribute("border-bottom-width"),left:this._totalCssByAttribute("border-left-width")}}},{key:"_calculatePadding",value:function(){return{top:this._totalCssByAttribute("padding-top"),right:this._totalCssByAttribute("padding-right"),bottom:this._totalCssByAttribute("padding-bottom"),left:this._totalCssByAttribute("padding-left")}}},{key:"_totalCssByAttribute",value:function(a){return parseInt(this._$modalDialog.css(a),10)+parseInt(this._$modalContent.css(a),10)+parseInt(this._$modalBody.css(a),10)}},{key:"_updateTitleAndFooter",value:function(){var a=this._$element.data("title")||"",b=this._$element.data("footer")||"";return this._titleIsShown=!1,a||this._config.alwaysShowClose?(this._titleIsShown=!0,this._$modalHeader.css("display","").find(".modal-title").html(a||"&nbsp;")):this._$modalHeader.css("display","none"),this._footerIsShown=!1,b?(this._footerIsShown=!0,this._$modalFooter.css("display","").html(b)):this._$modalFooter.css("display","none"),this}},{key:"_showYoutubeVideo",value:function(a,b){var c=this._getYoutubeId(a),d=a.indexOf("&")>0?a.substr(a.indexOf("&")):"",e=this._$element.data("width")||560,f=this._$element.data("height")||e/(560/315);return this._showVideoIframe("//www.youtube.com/embed/"+c+"?badge=0&autoplay=1&html5=1"+d,e,f,b)}},{key:"_showVimeoVideo",value:function(a,b){var c=this._$element.data("width")||500,d=this._$element.data("height")||c/(560/315);return this._showVideoIframe(a+"?autoplay=1",c,d,b)}},{key:"_showInstagramVideo",value:function(a,b){var c=this._$element.data("width")||612,d=c+80;return a="/"!==a.substr(-1)?a+"/":a,b.html('<iframe width="'+c+'" height="'+d+'" src="'+a+'embed/" frameborder="0" allowfullscreen></iframe>'),this._resize(c,d),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_showVideoIframe",value:function(a,b,c,d){return c=c||b,d.html('<div class="embed-responsive embed-responsive-16by9"><iframe width="'+b+'" height="'+c+'" src="'+a+'" frameborder="0" allowfullscreen class="embed-responsive-item"></iframe></div>'),this._resize(b,c),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_showHtml5Video",value:function(a,b){var c=this._$element.data("width")||560,d=this._$element.data("height")||c/(560/315);return b.html('<div class="embed-responsive embed-responsive-16by9"><video width="'+c+'" height="'+d+'" src="'+a+'" preload="auto" autoplay controls class="embed-responsive-item"></video></div>'),this._resize(c,d),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_loadRemoteContent",value:function(b,c){var d=this,e=this._$element.data("width")||560,f=this._$element.data("height")||560,g=this._$element.data("disableExternalCheck")||!1;return this._toggleLoading(!1),g||this._isExternal(b)?(c.html('<iframe src="'+b+'" frameborder="0" allowfullscreen></iframe>'),this._config.onContentLoaded.call(this)):c.load(b,a.proxy(function(){return d._$element.trigger("loaded.bs.modal")})),this._$modalArrows&&this._$modalArrows.css("display","none"),this._resize(e,f),this}},{key:"_isExternal",value:function(a){var b=a.match(/^([^:\/?#]+:)?(?:\/\/([^\/?#]*))?([^?#]+)?(\?[^#]*)?(#.*)?/);return"string"==typeof b[1]&&b[1].length>0&&b[1].toLowerCase()!==location.protocol||"string"==typeof b[2]&&b[2].length>0&&b[2].replace(new RegExp(":("+{"http:":80,"https:":443}[location.protocol]+")?$"),"")!==location.host}},{key:"_error",value:function(a){return console.error(a),this._containerToUse().html(a),this._resize(300,300),this}},{key:"_preloadImageByIndex",value:function(b,c){if(this._$galleryItems){var d=a(this._$galleryItems.get(b),!1);if("undefined"!=typeof d){var e=d.attr("data-remote")||d.attr("href");return("image"===d.attr("data-type")||this._isImage(e))&&this._preloadImage(e,!1),c>0?this._preloadImageByIndex(b+1,c-1):void 0}}}},{key:"_preloadImage",value:function(b,c){var d=this;c=c||!1;var e=new Image;return c&&!function(){var f=setTimeout(function(){c.append(d._config.loadingMessage)},200);e.onload=function(){f&&clearTimeout(f),f=null;var b=a("<img />");return b.attr("src",e.src),b.addClass("img-fluid"),b.css("width","100%"),c.html(b),d._$modalArrows&&d._$modalArrows.css("display",""),d._resize(e.width,e.height),d._toggleLoading(!1),d._config.onContentLoaded.call(d)},e.onerror=function(){return d._toggleLoading(!1),d._error(d._config.strings.fail+("  "+b))}}(),e.src=b,e}},{key:"_swipeGesure",value:function(){return this._touchendX<this._touchstartX?this.navigateRight():this._touchendX>this._touchstartX?this.navigateLeft():void 0}},{key:"_resize",value:function(b,c){c=c||b,this._wantedWidth=b,this._wantedHeight=c;var d=b/c,e=this._padding.left+this._padding.right+this._border.left+this._border.right,f=this._config.doc.body.clientWidth>575?20:0,g=this._config.doc.body.clientWidth>575?0:20,h=Math.min(b+e,this._config.doc.body.clientWidth-f,this._config.maxWidth);b+e>h?(c=(h-e-g)/d,b=h):b+=e;var i=0,j=0;this._footerIsShown&&(j=this._$modalFooter.outerHeight(!0)||55),this._titleIsShown&&(i=this._$modalHeader.outerHeight(!0)||67);var k=this._padding.top+this._padding.bottom+this._border.bottom+this._border.top,l=parseFloat(this._$modalDialog.css("margin-top"))+parseFloat(this._$modalDialog.css("margin-bottom")),m=Math.min(c,a(window).height()-k-l-i-j,this._config.maxHeight-k-i-j);c>m&&(b=Math.ceil(m*d)+e),this._$lightboxContainer.css("height",m),this._$modalDialog.css("flex",1).css("maxWidth",b);var n=this._$modal.data("bs.modal");if(n)try{n._handleUpdate()}catch(o){n.handleUpdate()}return this}}],[{key:"_jQueryInterface",value:function(b){var c=this;return b=b||{},this.each(function(){var e=a(c),f=a.extend({},d.Default,e.data(),"object"==typeof b&&b);new d(c,f)})}}]),d}();return a.fn[d]=g._jQueryInterface,a.fn[d].Constructor=g,a.fn[d].noConflict=function(){return a.fn[d]=e,g._jQueryInterface},g})(jQuery)}(jQuery);
 
-},{}],104:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 (function (Buffer){
 var sha3 = require('js-sha3').keccak_256
 var uts46 = require('idna-uts46-hx')
@@ -27464,7 +27538,7 @@ exports.hash = namehash
 exports.normalize = normalize
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":224,"idna-uts46-hx":108,"js-sha3":112}],105:[function(require,module,exports){
+},{"buffer":225,"idna-uts46-hx":109,"js-sha3":113}],106:[function(require,module,exports){
 /*
     This file is part of ethereum-ens.
     ethereum-ens is free software: you can redistribute it and/or modify
@@ -28008,7 +28082,7 @@ ENS.prototype.setSubnodeOwner = function(name, addr, params) {
 
 module.exports = ENS;
 
-},{"bluebird":45,"eth-ens-namehash":104,"js-sha3":112,"pako":149,"text-encoding":166,"underscore":169,"web3":171}],106:[function(require,module,exports){
+},{"bluebird":46,"eth-ens-namehash":105,"js-sha3":113,"pako":150,"text-encoding":167,"underscore":170,"web3":172}],107:[function(require,module,exports){
 /* FileSaver.js
  * A saveAs() FileSaver implementation.
  * 1.3.2
@@ -28198,7 +28272,7 @@ if (typeof module !== "undefined" && module.exports) {
   });
 }
 
-},{}],107:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 /* This file is generated from the Unicode IDNA table, using
    the build-unicode-tables.py script. Please edit that
    script instead of this file. */
@@ -28957,7 +29031,7 @@ return {
 };
 }));
 
-},{}],108:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 (function(root, factory) {
   /* istanbul ignore next */
   if (typeof define === 'function' && define.amd) {
@@ -29091,7 +29165,7 @@ return {
   };
 }));
 
-},{"./idna-map":107,"punycode":233}],109:[function(require,module,exports){
+},{"./idna-map":108,"punycode":234}],110:[function(require,module,exports){
 (function (global){
 'use strict';
 var Mutation = global.MutationObserver || global.WebKitMutationObserver;
@@ -29164,7 +29238,7 @@ function immediate(task) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],110:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -29187,7 +29261,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],111:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.3.1
  * https://jquery.com/
@@ -39553,7 +39627,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],112:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 (function (process,global){
 /**
  * [js-sha3]{@link https://github.com/emn178/js-sha3}
@@ -40032,7 +40106,7 @@ return jQuery;
 })();
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":232}],113:[function(require,module,exports){
+},{"_process":233}],114:[function(require,module,exports){
 'use strict';
 var utils = require('./utils');
 var support = require('./support');
@@ -40140,7 +40214,7 @@ exports.decode = function(input) {
     return output;
 };
 
-},{"./support":142,"./utils":144}],114:[function(require,module,exports){
+},{"./support":143,"./utils":145}],115:[function(require,module,exports){
 'use strict';
 
 var external = require("./external");
@@ -40217,7 +40291,7 @@ CompressedObject.createWorkerFrom = function (uncompressedWorker, compression, c
 
 module.exports = CompressedObject;
 
-},{"./external":118,"./stream/Crc32Probe":137,"./stream/DataLengthProbe":138,"./stream/DataWorker":139}],115:[function(require,module,exports){
+},{"./external":119,"./stream/Crc32Probe":138,"./stream/DataLengthProbe":139,"./stream/DataWorker":140}],116:[function(require,module,exports){
 'use strict';
 
 var GenericWorker = require("./stream/GenericWorker");
@@ -40233,7 +40307,7 @@ exports.STORE = {
 };
 exports.DEFLATE = require('./flate');
 
-},{"./flate":119,"./stream/GenericWorker":140}],116:[function(require,module,exports){
+},{"./flate":120,"./stream/GenericWorker":141}],117:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -40312,7 +40386,7 @@ module.exports = function crc32wrapper(input, crc) {
     }
 };
 
-},{"./utils":144}],117:[function(require,module,exports){
+},{"./utils":145}],118:[function(require,module,exports){
 'use strict';
 exports.base64 = false;
 exports.binary = false;
@@ -40325,7 +40399,7 @@ exports.comment = null;
 exports.unixPermissions = null;
 exports.dosPermissions = null;
 
-},{}],118:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 /* global Promise */
 'use strict';
 
@@ -40346,7 +40420,7 @@ module.exports = {
     Promise: ES6Promise
 };
 
-},{"lie":148}],119:[function(require,module,exports){
+},{"lie":149}],120:[function(require,module,exports){
 'use strict';
 var USE_TYPEDARRAY = (typeof Uint8Array !== 'undefined') && (typeof Uint16Array !== 'undefined') && (typeof Uint32Array !== 'undefined');
 
@@ -40433,7 +40507,7 @@ exports.uncompressWorker = function () {
     return new FlateWorker("Inflate", {});
 };
 
-},{"./stream/GenericWorker":140,"./utils":144,"pako":149}],120:[function(require,module,exports){
+},{"./stream/GenericWorker":141,"./utils":145,"pako":150}],121:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -40975,7 +41049,7 @@ ZipFileWorker.prototype.lock = function () {
 
 module.exports = ZipFileWorker;
 
-},{"../crc32":116,"../signature":135,"../stream/GenericWorker":140,"../utf8":143,"../utils":144}],121:[function(require,module,exports){
+},{"../crc32":117,"../signature":136,"../stream/GenericWorker":141,"../utf8":144,"../utils":145}],122:[function(require,module,exports){
 'use strict';
 
 var compressions = require('../compressions');
@@ -41034,7 +41108,7 @@ exports.generateWorker = function (zip, options, comment) {
     return zipFileWorker;
 };
 
-},{"../compressions":115,"./ZipFileWorker":120}],122:[function(require,module,exports){
+},{"../compressions":116,"./ZipFileWorker":121}],123:[function(require,module,exports){
 'use strict';
 
 /**
@@ -41088,7 +41162,7 @@ JSZip.loadAsync = function (content, options) {
 JSZip.external = require("./external");
 module.exports = JSZip;
 
-},{"./defaults":117,"./external":118,"./load":123,"./object":127,"./support":142}],123:[function(require,module,exports){
+},{"./defaults":118,"./external":119,"./load":124,"./object":128,"./support":143}],124:[function(require,module,exports){
 'use strict';
 var utils = require('./utils');
 var external = require("./external");
@@ -41172,7 +41246,7 @@ module.exports = function(data, options) {
     });
 };
 
-},{"./external":118,"./nodejsUtils":126,"./stream/Crc32Probe":137,"./utf8":143,"./utils":144,"./zipEntries":145}],124:[function(require,module,exports){
+},{"./external":119,"./nodejsUtils":127,"./stream/Crc32Probe":138,"./utf8":144,"./utils":145,"./zipEntries":146}],125:[function(require,module,exports){
 "use strict";
 
 var utils = require('../utils');
@@ -41248,7 +41322,7 @@ NodejsStreamInputAdapter.prototype.resume = function () {
 
 module.exports = NodejsStreamInputAdapter;
 
-},{"../stream/GenericWorker":140,"../utils":144}],125:[function(require,module,exports){
+},{"../stream/GenericWorker":141,"../utils":145}],126:[function(require,module,exports){
 'use strict';
 
 var Readable = require('readable-stream').Readable;
@@ -41292,7 +41366,7 @@ NodejsStreamOutputAdapter.prototype._read = function() {
 
 module.exports = NodejsStreamOutputAdapter;
 
-},{"../utils":144,"readable-stream":128}],126:[function(require,module,exports){
+},{"../utils":145,"readable-stream":129}],127:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -41348,7 +41422,7 @@ module.exports = {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":224}],127:[function(require,module,exports){
+},{"buffer":225}],128:[function(require,module,exports){
 'use strict';
 var utf8 = require('./utf8');
 var utils = require('./utils');
@@ -41739,7 +41813,7 @@ var out = {
 };
 module.exports = out;
 
-},{"./compressedObject":114,"./defaults":117,"./generate":121,"./nodejs/NodejsStreamInputAdapter":124,"./nodejsUtils":126,"./stream/GenericWorker":140,"./stream/StreamHelper":141,"./utf8":143,"./utils":144,"./zipObject":147}],128:[function(require,module,exports){
+},{"./compressedObject":115,"./defaults":118,"./generate":122,"./nodejs/NodejsStreamInputAdapter":125,"./nodejsUtils":127,"./stream/GenericWorker":141,"./stream/StreamHelper":142,"./utf8":144,"./utils":145,"./zipObject":148}],129:[function(require,module,exports){
 /*
  * This file is used by module bundlers (browserify/webpack/etc) when
  * including a stream implementation. We use "readable-stream" to get a
@@ -41750,7 +41824,7 @@ module.exports = out;
  */
 module.exports = require("stream");
 
-},{"stream":248}],129:[function(require,module,exports){
+},{"stream":249}],130:[function(require,module,exports){
 'use strict';
 var DataReader = require('./DataReader');
 var utils = require('../utils');
@@ -41809,7 +41883,7 @@ ArrayReader.prototype.readData = function(size) {
 };
 module.exports = ArrayReader;
 
-},{"../utils":144,"./DataReader":130}],130:[function(require,module,exports){
+},{"../utils":145,"./DataReader":131}],131:[function(require,module,exports){
 'use strict';
 var utils = require('../utils');
 
@@ -41927,7 +42001,7 @@ DataReader.prototype = {
 };
 module.exports = DataReader;
 
-},{"../utils":144}],131:[function(require,module,exports){
+},{"../utils":145}],132:[function(require,module,exports){
 'use strict';
 var Uint8ArrayReader = require('./Uint8ArrayReader');
 var utils = require('../utils');
@@ -41948,7 +42022,7 @@ NodeBufferReader.prototype.readData = function(size) {
 };
 module.exports = NodeBufferReader;
 
-},{"../utils":144,"./Uint8ArrayReader":133}],132:[function(require,module,exports){
+},{"../utils":145,"./Uint8ArrayReader":134}],133:[function(require,module,exports){
 'use strict';
 var DataReader = require('./DataReader');
 var utils = require('../utils');
@@ -41988,7 +42062,7 @@ StringReader.prototype.readData = function(size) {
 };
 module.exports = StringReader;
 
-},{"../utils":144,"./DataReader":130}],133:[function(require,module,exports){
+},{"../utils":145,"./DataReader":131}],134:[function(require,module,exports){
 'use strict';
 var ArrayReader = require('./ArrayReader');
 var utils = require('../utils');
@@ -42012,7 +42086,7 @@ Uint8ArrayReader.prototype.readData = function(size) {
 };
 module.exports = Uint8ArrayReader;
 
-},{"../utils":144,"./ArrayReader":129}],134:[function(require,module,exports){
+},{"../utils":145,"./ArrayReader":130}],135:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -42042,7 +42116,7 @@ module.exports = function (data) {
     return new ArrayReader(utils.transformTo("array", data));
 };
 
-},{"../support":142,"../utils":144,"./ArrayReader":129,"./NodeBufferReader":131,"./StringReader":132,"./Uint8ArrayReader":133}],135:[function(require,module,exports){
+},{"../support":143,"../utils":145,"./ArrayReader":130,"./NodeBufferReader":132,"./StringReader":133,"./Uint8ArrayReader":134}],136:[function(require,module,exports){
 'use strict';
 exports.LOCAL_FILE_HEADER = "PK\x03\x04";
 exports.CENTRAL_FILE_HEADER = "PK\x01\x02";
@@ -42051,7 +42125,7 @@ exports.ZIP64_CENTRAL_DIRECTORY_LOCATOR = "PK\x06\x07";
 exports.ZIP64_CENTRAL_DIRECTORY_END = "PK\x06\x06";
 exports.DATA_DESCRIPTOR = "PK\x07\x08";
 
-},{}],136:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 'use strict';
 
 var GenericWorker = require('./GenericWorker');
@@ -42079,7 +42153,7 @@ ConvertWorker.prototype.processChunk = function (chunk) {
 };
 module.exports = ConvertWorker;
 
-},{"../utils":144,"./GenericWorker":140}],137:[function(require,module,exports){
+},{"../utils":145,"./GenericWorker":141}],138:[function(require,module,exports){
 'use strict';
 
 var GenericWorker = require('./GenericWorker');
@@ -42105,7 +42179,7 @@ Crc32Probe.prototype.processChunk = function (chunk) {
 };
 module.exports = Crc32Probe;
 
-},{"../crc32":116,"../utils":144,"./GenericWorker":140}],138:[function(require,module,exports){
+},{"../crc32":117,"../utils":145,"./GenericWorker":141}],139:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -42136,7 +42210,7 @@ DataLengthProbe.prototype.processChunk = function (chunk) {
 module.exports = DataLengthProbe;
 
 
-},{"../utils":144,"./GenericWorker":140}],139:[function(require,module,exports){
+},{"../utils":145,"./GenericWorker":141}],140:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -42254,7 +42328,7 @@ DataWorker.prototype._tick = function() {
 
 module.exports = DataWorker;
 
-},{"../utils":144,"./GenericWorker":140}],140:[function(require,module,exports){
+},{"../utils":145,"./GenericWorker":141}],141:[function(require,module,exports){
 'use strict';
 
 /**
@@ -42519,7 +42593,7 @@ GenericWorker.prototype = {
 
 module.exports = GenericWorker;
 
-},{}],141:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -42735,7 +42809,7 @@ StreamHelper.prototype = {
 module.exports = StreamHelper;
 
 }).call(this,require("buffer").Buffer)
-},{"../base64":113,"../external":118,"../nodejs/NodejsStreamOutputAdapter":125,"../support":142,"../utils":144,"./ConvertWorker":136,"./GenericWorker":140,"buffer":224}],142:[function(require,module,exports){
+},{"../base64":114,"../external":119,"../nodejs/NodejsStreamOutputAdapter":126,"../support":143,"../utils":145,"./ConvertWorker":137,"./GenericWorker":141,"buffer":225}],143:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -42777,7 +42851,7 @@ try {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":224,"readable-stream":128}],143:[function(require,module,exports){
+},{"buffer":225,"readable-stream":129}],144:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -43054,7 +43128,7 @@ Utf8EncodeWorker.prototype.processChunk = function (chunk) {
 };
 exports.Utf8EncodeWorker = Utf8EncodeWorker;
 
-},{"./nodejsUtils":126,"./stream/GenericWorker":140,"./support":142,"./utils":144}],144:[function(require,module,exports){
+},{"./nodejsUtils":127,"./stream/GenericWorker":141,"./support":143,"./utils":145}],145:[function(require,module,exports){
 'use strict';
 
 var support = require('./support');
@@ -43532,7 +43606,7 @@ exports.prepareContent = function(name, inputData, isBinary, isOptimizedBinarySt
     });
 };
 
-},{"./base64":113,"./external":118,"./nodejsUtils":126,"./support":142,"core-js/library/fn/set-immediate":47}],145:[function(require,module,exports){
+},{"./base64":114,"./external":119,"./nodejsUtils":127,"./support":143,"core-js/library/fn/set-immediate":48}],146:[function(require,module,exports){
 'use strict';
 var readerFor = require('./reader/readerFor');
 var utils = require('./utils');
@@ -43796,7 +43870,7 @@ ZipEntries.prototype = {
 // }}} end of ZipEntries
 module.exports = ZipEntries;
 
-},{"./reader/readerFor":134,"./signature":135,"./support":142,"./utf8":143,"./utils":144,"./zipEntry":146}],146:[function(require,module,exports){
+},{"./reader/readerFor":135,"./signature":136,"./support":143,"./utf8":144,"./utils":145,"./zipEntry":147}],147:[function(require,module,exports){
 'use strict';
 var readerFor = require('./reader/readerFor');
 var utils = require('./utils');
@@ -44090,7 +44164,7 @@ ZipEntry.prototype = {
 };
 module.exports = ZipEntry;
 
-},{"./compressedObject":114,"./compressions":115,"./crc32":116,"./reader/readerFor":134,"./support":142,"./utf8":143,"./utils":144}],147:[function(require,module,exports){
+},{"./compressedObject":115,"./compressions":116,"./crc32":117,"./reader/readerFor":135,"./support":143,"./utf8":144,"./utils":145}],148:[function(require,module,exports){
 'use strict';
 
 var StreamHelper = require('./stream/StreamHelper');
@@ -44225,7 +44299,7 @@ for(var i = 0; i < removedMethods.length; i++) {
 }
 module.exports = ZipObject;
 
-},{"./compressedObject":114,"./stream/DataWorker":139,"./stream/GenericWorker":140,"./stream/StreamHelper":141,"./utf8":143}],148:[function(require,module,exports){
+},{"./compressedObject":115,"./stream/DataWorker":140,"./stream/GenericWorker":141,"./stream/StreamHelper":142,"./utf8":144}],149:[function(require,module,exports){
 'use strict';
 var immediate = require('immediate');
 
@@ -44480,7 +44554,7 @@ function race(iterable) {
   }
 }
 
-},{"immediate":109}],149:[function(require,module,exports){
+},{"immediate":110}],150:[function(require,module,exports){
 // Top level file is just a mixin of submodules & constants
 'use strict';
 
@@ -44496,7 +44570,7 @@ assign(pako, deflate, inflate, constants);
 
 module.exports = pako;
 
-},{"./lib/deflate":150,"./lib/inflate":151,"./lib/utils/common":152,"./lib/zlib/constants":155}],150:[function(require,module,exports){
+},{"./lib/deflate":151,"./lib/inflate":152,"./lib/utils/common":153,"./lib/zlib/constants":156}],151:[function(require,module,exports){
 'use strict';
 
 
@@ -44898,7 +44972,7 @@ exports.deflate = deflate;
 exports.deflateRaw = deflateRaw;
 exports.gzip = gzip;
 
-},{"./utils/common":152,"./utils/strings":153,"./zlib/deflate":157,"./zlib/messages":162,"./zlib/zstream":164}],151:[function(require,module,exports){
+},{"./utils/common":153,"./utils/strings":154,"./zlib/deflate":158,"./zlib/messages":163,"./zlib/zstream":165}],152:[function(require,module,exports){
 'use strict';
 
 
@@ -45318,7 +45392,7 @@ exports.inflate = inflate;
 exports.inflateRaw = inflateRaw;
 exports.ungzip  = inflate;
 
-},{"./utils/common":152,"./utils/strings":153,"./zlib/constants":155,"./zlib/gzheader":158,"./zlib/inflate":160,"./zlib/messages":162,"./zlib/zstream":164}],152:[function(require,module,exports){
+},{"./utils/common":153,"./utils/strings":154,"./zlib/constants":156,"./zlib/gzheader":159,"./zlib/inflate":161,"./zlib/messages":163,"./zlib/zstream":165}],153:[function(require,module,exports){
 'use strict';
 
 
@@ -45425,7 +45499,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],153:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 // String encode/decode helpers
 'use strict';
 
@@ -45612,7 +45686,7 @@ exports.utf8border = function (buf, max) {
   return (pos + _utf8len[buf[pos]] > max) ? pos : max;
 };
 
-},{"./common":152}],154:[function(require,module,exports){
+},{"./common":153}],155:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -45665,7 +45739,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],155:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -45735,7 +45809,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],156:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -45796,7 +45870,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],157:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -47672,7 +47746,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":152,"./adler32":154,"./crc32":156,"./messages":162,"./trees":163}],158:[function(require,module,exports){
+},{"../utils/common":153,"./adler32":155,"./crc32":157,"./messages":163,"./trees":164}],159:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -47732,7 +47806,7 @@ function GZheader() {
 
 module.exports = GZheader;
 
-},{}],159:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -48079,7 +48153,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],160:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -49637,7 +49711,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":152,"./adler32":154,"./crc32":156,"./inffast":159,"./inftrees":161}],161:[function(require,module,exports){
+},{"../utils/common":153,"./adler32":155,"./crc32":157,"./inffast":160,"./inftrees":162}],162:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -49982,7 +50056,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":152}],162:[function(require,module,exports){
+},{"../utils/common":153}],163:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -50016,7 +50090,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],163:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -51238,7 +51312,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":152}],164:[function(require,module,exports){
+},{"../utils/common":153}],165:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -51287,7 +51361,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],165:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 (function (global){
 /**!
  * @fileOverview Kickass library to create and place poppers near their reference elements.
@@ -53831,7 +53905,7 @@ return Popper;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],166:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 // This is free and unencumbered software released into the public domain.
 // See LICENSE.md for more information.
 
@@ -53842,7 +53916,7 @@ module.exports = {
   TextDecoder: encoding.TextDecoder,
 };
 
-},{"./lib/encoding.js":168}],167:[function(require,module,exports){
+},{"./lib/encoding.js":169}],168:[function(require,module,exports){
 (function(global) {
   'use strict';
 
@@ -53890,7 +53964,7 @@ module.exports = {
 // For strict environments where `this` inside the global scope
 // is `undefined`, take a pure object instead
 }(this || {}));
-},{}],168:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 // This is free and unencumbered software released into the public domain.
 // See LICENSE.md for more information.
 
@@ -57204,7 +57278,7 @@ module.exports = {
 // For strict environments where `this` inside the global scope
 // is `undefined`, take a pure object instead
 }(this || {}));
-},{"./encoding-indexes.js":167}],169:[function(require,module,exports){
+},{"./encoding-indexes.js":168}],170:[function(require,module,exports){
 (function (global){
 //     Underscore.js 1.9.1
 //     http://underscorejs.org
@@ -58900,7 +58974,7 @@ module.exports = {
 }());
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],170:[function(require,module,exports){
+},{}],171:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/utf8js v2.1.2 by @mathias */
 ;(function(root) {
@@ -59148,7 +59222,7 @@ module.exports = {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],171:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 var Web3 = require('./lib/web3');
 
 // dont override global variable
@@ -59158,7 +59232,7 @@ if (typeof window !== 'undefined' && typeof window.Web3 === 'undefined') {
 
 module.exports = Web3;
 
-},{"./lib/web3":193}],172:[function(require,module,exports){
+},{"./lib/web3":194}],173:[function(require,module,exports){
 module.exports=[
   {
     "constant": true,
@@ -59414,7 +59488,7 @@ module.exports=[
   }
 ]
 
-},{}],173:[function(require,module,exports){
+},{}],174:[function(require,module,exports){
 module.exports=[
   {
     "constant": true,
@@ -59524,7 +59598,7 @@ module.exports=[
   }
 ]
 
-},{}],174:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 module.exports=[
   {
     "constant": false,
@@ -59673,7 +59747,7 @@ module.exports=[
   }
 ]
 
-},{}],175:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -59701,7 +59775,7 @@ SolidityTypeAddress.prototype.isType = function (name) {
 
 module.exports = SolidityTypeAddress;
 
-},{"./formatters":180,"./type":185}],176:[function(require,module,exports){
+},{"./formatters":181,"./type":186}],177:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -59729,7 +59803,7 @@ SolidityTypeBool.prototype.isType = function (name) {
 
 module.exports = SolidityTypeBool;
 
-},{"./formatters":180,"./type":185}],177:[function(require,module,exports){
+},{"./formatters":181,"./type":186}],178:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -59760,7 +59834,7 @@ SolidityTypeBytes.prototype.isType = function (name) {
 
 module.exports = SolidityTypeBytes;
 
-},{"./formatters":180,"./type":185}],178:[function(require,module,exports){
+},{"./formatters":181,"./type":186}],179:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60025,7 +60099,7 @@ var coder = new SolidityCoder([
 
 module.exports = coder;
 
-},{"./address":175,"./bool":176,"./bytes":177,"./dynamicbytes":179,"./formatters":180,"./int":181,"./real":183,"./string":184,"./uint":186,"./ureal":187}],179:[function(require,module,exports){
+},{"./address":176,"./bool":177,"./bytes":178,"./dynamicbytes":180,"./formatters":181,"./int":182,"./real":184,"./string":185,"./uint":187,"./ureal":188}],180:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -60047,7 +60121,7 @@ SolidityTypeDynamicBytes.prototype.isDynamicType = function () {
 
 module.exports = SolidityTypeDynamicBytes;
 
-},{"./formatters":180,"./type":185}],180:[function(require,module,exports){
+},{"./formatters":181,"./type":186}],181:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60301,7 +60375,7 @@ module.exports = {
     formatOutputAddress: formatOutputAddress
 };
 
-},{"../utils/config":189,"../utils/utils":191,"./param":182,"bignumber.js":44}],181:[function(require,module,exports){
+},{"../utils/config":190,"../utils/utils":192,"./param":183,"bignumber.js":45}],182:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -60335,7 +60409,7 @@ SolidityTypeInt.prototype.isType = function (name) {
 
 module.exports = SolidityTypeInt;
 
-},{"./formatters":180,"./type":185}],182:[function(require,module,exports){
+},{"./formatters":181,"./type":186}],183:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60489,7 +60563,7 @@ SolidityParam.encodeList = function (params) {
 module.exports = SolidityParam;
 
 
-},{"../utils/utils":191}],183:[function(require,module,exports){
+},{"../utils/utils":192}],184:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -60523,7 +60597,7 @@ SolidityTypeReal.prototype.isType = function (name) {
 
 module.exports = SolidityTypeReal;
 
-},{"./formatters":180,"./type":185}],184:[function(require,module,exports){
+},{"./formatters":181,"./type":186}],185:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -60545,7 +60619,7 @@ SolidityTypeString.prototype.isDynamicType = function () {
 
 module.exports = SolidityTypeString;
 
-},{"./formatters":180,"./type":185}],185:[function(require,module,exports){
+},{"./formatters":181,"./type":186}],186:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityParam = require('./param');
 
@@ -60802,7 +60876,7 @@ SolidityType.prototype.decode = function (bytes, offset, name) {
 
 module.exports = SolidityType;
 
-},{"./formatters":180,"./param":182}],186:[function(require,module,exports){
+},{"./formatters":181,"./param":183}],187:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -60836,7 +60910,7 @@ SolidityTypeUInt.prototype.isType = function (name) {
 
 module.exports = SolidityTypeUInt;
 
-},{"./formatters":180,"./type":185}],187:[function(require,module,exports){
+},{"./formatters":181,"./type":186}],188:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -60870,7 +60944,7 @@ SolidityTypeUReal.prototype.isType = function (name) {
 
 module.exports = SolidityTypeUReal;
 
-},{"./formatters":180,"./type":185}],188:[function(require,module,exports){
+},{"./formatters":181,"./type":186}],189:[function(require,module,exports){
 'use strict';
 
 // go env doesn't have and need XMLHttpRequest
@@ -60881,7 +60955,7 @@ if (typeof XMLHttpRequest === 'undefined') {
 }
 
 
-},{}],189:[function(require,module,exports){
+},{}],190:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60962,7 +61036,7 @@ module.exports = {
 };
 
 
-},{"bignumber.js":44}],190:[function(require,module,exports){
+},{"bignumber.js":45}],191:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61002,7 +61076,7 @@ module.exports = function (value, options) {
 };
 
 
-},{"crypto-js":77,"crypto-js/sha3":98}],191:[function(require,module,exports){
+},{"crypto-js":78,"crypto-js/sha3":99}],192:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61633,12 +61707,12 @@ module.exports = {
     isTopic: isTopic,
 };
 
-},{"./sha3.js":190,"bignumber.js":44,"utf8":170}],192:[function(require,module,exports){
+},{"./sha3.js":191,"bignumber.js":45,"utf8":171}],193:[function(require,module,exports){
 module.exports={
     "version": "0.19.1"
 }
 
-},{}],193:[function(require,module,exports){
+},{}],194:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61792,7 +61866,7 @@ Web3.prototype.createBatch = function () {
 module.exports = Web3;
 
 
-},{"./utils/sha3":190,"./utils/utils":191,"./version.json":192,"./web3/batch":195,"./web3/extend":199,"./web3/httpprovider":203,"./web3/iban":204,"./web3/ipcprovider":205,"./web3/methods/db":208,"./web3/methods/eth":209,"./web3/methods/net":210,"./web3/methods/personal":211,"./web3/methods/shh":212,"./web3/methods/swarm":213,"./web3/property":216,"./web3/requestmanager":217,"./web3/settings":218,"bignumber.js":44}],194:[function(require,module,exports){
+},{"./utils/sha3":191,"./utils/utils":192,"./version.json":193,"./web3/batch":196,"./web3/extend":200,"./web3/httpprovider":204,"./web3/iban":205,"./web3/ipcprovider":206,"./web3/methods/db":209,"./web3/methods/eth":210,"./web3/methods/net":211,"./web3/methods/personal":212,"./web3/methods/shh":213,"./web3/methods/swarm":214,"./web3/property":217,"./web3/requestmanager":218,"./web3/settings":219,"bignumber.js":45}],195:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61882,7 +61956,7 @@ AllSolidityEvents.prototype.attachToContract = function (contract) {
 module.exports = AllSolidityEvents;
 
 
-},{"../utils/sha3":190,"../utils/utils":191,"./event":198,"./filter":200,"./formatters":201,"./methods/watches":214}],195:[function(require,module,exports){
+},{"../utils/sha3":191,"../utils/utils":192,"./event":199,"./filter":201,"./formatters":202,"./methods/watches":215}],196:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61950,7 +62024,7 @@ Batch.prototype.execute = function () {
 module.exports = Batch;
 
 
-},{"./errors":197,"./jsonrpc":206}],196:[function(require,module,exports){
+},{"./errors":198,"./jsonrpc":207}],197:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -62262,7 +62336,7 @@ var Contract = function (eth, abi, address) {
 
 module.exports = ContractFactory;
 
-},{"../solidity/coder":178,"../utils/utils":191,"./allevents":194,"./event":198,"./function":202}],197:[function(require,module,exports){
+},{"../solidity/coder":179,"../utils/utils":192,"./allevents":195,"./event":199,"./function":203}],198:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -62307,7 +62381,7 @@ module.exports = {
     }
 };
 
-},{}],198:[function(require,module,exports){
+},{}],199:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -62517,7 +62591,7 @@ SolidityEvent.prototype.attachToContract = function (contract) {
 module.exports = SolidityEvent;
 
 
-},{"../solidity/coder":178,"../utils/sha3":190,"../utils/utils":191,"./filter":200,"./formatters":201,"./methods/watches":214}],199:[function(require,module,exports){
+},{"../solidity/coder":179,"../utils/sha3":191,"../utils/utils":192,"./filter":201,"./formatters":202,"./methods/watches":215}],200:[function(require,module,exports){
 var formatters = require('./formatters');
 var utils = require('./../utils/utils');
 var Method = require('./method');
@@ -62567,7 +62641,7 @@ var extend = function (web3) {
 module.exports = extend;
 
 
-},{"./../utils/utils":191,"./formatters":201,"./method":207,"./property":216}],200:[function(require,module,exports){
+},{"./../utils/utils":192,"./formatters":202,"./method":208,"./property":217}],201:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -62806,7 +62880,7 @@ Filter.prototype.get = function (callback) {
 module.exports = Filter;
 
 
-},{"../utils/utils":191,"./formatters":201}],201:[function(require,module,exports){
+},{"../utils/utils":192,"./formatters":202}],202:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -63111,7 +63185,7 @@ module.exports = {
 };
 
 
-},{"../utils/config":189,"../utils/utils":191,"./iban":204}],202:[function(require,module,exports){
+},{"../utils/config":190,"../utils/utils":192,"./iban":205}],203:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -63393,7 +63467,7 @@ SolidityFunction.prototype.attachToContract = function (contract) {
 
 module.exports = SolidityFunction;
 
-},{"../solidity/coder":178,"../utils/sha3":190,"../utils/utils":191,"./errors":197,"./formatters":201}],203:[function(require,module,exports){
+},{"../solidity/coder":179,"../utils/sha3":191,"../utils/utils":192,"./errors":198,"./formatters":202}],204:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -63548,7 +63622,7 @@ HttpProvider.prototype.isConnected = function() {
 
 module.exports = HttpProvider;
 
-},{"./errors":197,"xhr2":221,"xmlhttprequest":188}],204:[function(require,module,exports){
+},{"./errors":198,"xhr2":222,"xmlhttprequest":189}],205:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -63777,7 +63851,7 @@ Iban.prototype.toString = function () {
 module.exports = Iban;
 
 
-},{"bignumber.js":44}],205:[function(require,module,exports){
+},{"bignumber.js":45}],206:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -63986,7 +64060,7 @@ IpcProvider.prototype.sendAsync = function (payload, callback) {
 module.exports = IpcProvider;
 
 
-},{"../utils/utils":191,"./errors":197}],206:[function(require,module,exports){
+},{"../utils/utils":192,"./errors":198}],207:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64073,7 +64147,7 @@ Jsonrpc.toBatchPayload = function (messages) {
 module.exports = Jsonrpc;
 
 
-},{}],207:[function(require,module,exports){
+},{}],208:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64239,7 +64313,7 @@ Method.prototype.request = function () {
 
 module.exports = Method;
 
-},{"../utils/utils":191,"./errors":197}],208:[function(require,module,exports){
+},{"../utils/utils":192,"./errors":198}],209:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64307,7 +64381,7 @@ var methods = function () {
 
 module.exports = DB;
 
-},{"../method":207}],209:[function(require,module,exports){
+},{"../method":208}],210:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64663,7 +64737,7 @@ Eth.prototype.isSyncing = function (callback) {
 
 module.exports = Eth;
 
-},{"../../utils/config":189,"../../utils/utils":191,"../contract":196,"../filter":200,"../formatters":201,"../iban":204,"../method":207,"../namereg":215,"../property":216,"../syncing":219,"../transfer":220,"./watches":214}],210:[function(require,module,exports){
+},{"../../utils/config":190,"../../utils/utils":192,"../contract":197,"../filter":201,"../formatters":202,"../iban":205,"../method":208,"../namereg":216,"../property":217,"../syncing":220,"../transfer":221,"./watches":215}],211:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64717,7 +64791,7 @@ var properties = function () {
 
 module.exports = Net;
 
-},{"../../utils/utils":191,"../property":216}],211:[function(require,module,exports){
+},{"../../utils/utils":192,"../property":217}],212:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64834,7 +64908,7 @@ var properties = function () {
 
 module.exports = Personal;
 
-},{"../formatters":201,"../method":207,"../property":216}],212:[function(require,module,exports){
+},{"../formatters":202,"../method":208,"../property":217}],213:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64922,7 +64996,7 @@ var methods = function () {
 module.exports = Shh;
 
 
-},{"../filter":200,"../formatters":201,"../method":207,"./watches":214}],213:[function(require,module,exports){
+},{"../filter":201,"../formatters":202,"../method":208,"./watches":215}],214:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65069,7 +65143,7 @@ var properties = function () {
 
 module.exports = Swarm;
 
-},{"../method":207,"../property":216}],214:[function(require,module,exports){
+},{"../method":208,"../property":217}],215:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65185,7 +65259,7 @@ module.exports = {
 };
 
 
-},{"../method":207}],215:[function(require,module,exports){
+},{"../method":208}],216:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65226,7 +65300,7 @@ module.exports = {
 };
 
 
-},{"../contracts/GlobalRegistrar.json":172,"../contracts/ICAPRegistrar.json":173}],216:[function(require,module,exports){
+},{"../contracts/GlobalRegistrar.json":173,"../contracts/ICAPRegistrar.json":174}],217:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65372,7 +65446,7 @@ Property.prototype.request = function () {
 module.exports = Property;
 
 
-},{"../utils/utils":191}],217:[function(require,module,exports){
+},{"../utils/utils":192}],218:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65639,7 +65713,7 @@ RequestManager.prototype.poll = function () {
 module.exports = RequestManager;
 
 
-},{"../utils/config":189,"../utils/utils":191,"./errors":197,"./jsonrpc":206}],218:[function(require,module,exports){
+},{"../utils/config":190,"../utils/utils":192,"./errors":198,"./jsonrpc":207}],219:[function(require,module,exports){
 
 
 var Settings = function () {
@@ -65650,7 +65724,7 @@ var Settings = function () {
 module.exports = Settings;
 
 
-},{}],219:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65745,7 +65819,7 @@ IsSyncing.prototype.stopWatching = function () {
 module.exports = IsSyncing;
 
 
-},{"../utils/utils":191,"./formatters":201}],220:[function(require,module,exports){
+},{"../utils/utils":192,"./formatters":202}],221:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65839,10 +65913,10 @@ var deposit = function (eth, from, to, value, client, callback) {
 module.exports = transfer;
 
 
-},{"../contracts/SmartExchange.json":174,"./iban":204}],221:[function(require,module,exports){
+},{"../contracts/SmartExchange.json":175,"./iban":205}],222:[function(require,module,exports){
 module.exports = XMLHttpRequest;
 
-},{}],222:[function(require,module,exports){
+},{}],223:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -65995,9 +66069,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],223:[function(require,module,exports){
-
 },{}],224:[function(require,module,exports){
+
+},{}],225:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -67735,7 +67809,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":222,"ieee754":227}],225:[function(require,module,exports){
+},{"base64-js":223,"ieee754":228}],226:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -67846,7 +67920,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":229}],226:[function(require,module,exports){
+},{"../../is-buffer/index.js":230}],227:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -68371,7 +68445,7 @@ function functionBindPolyfill(context) {
   };
 }
 
-},{}],227:[function(require,module,exports){
+},{}],228:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -68457,7 +68531,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],228:[function(require,module,exports){
+},{}],229:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -68482,16 +68556,16 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],229:[function(require,module,exports){
-arguments[4][110][0].apply(exports,arguments)
-},{"dup":110}],230:[function(require,module,exports){
+},{}],230:[function(require,module,exports){
+arguments[4][111][0].apply(exports,arguments)
+},{"dup":111}],231:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],231:[function(require,module,exports){
+},{}],232:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -68539,7 +68613,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 
 
 }).call(this,require('_process'))
-},{"_process":232}],232:[function(require,module,exports){
+},{"_process":233}],233:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -68725,7 +68799,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],233:[function(require,module,exports){
+},{}],234:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -69262,10 +69336,10 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],234:[function(require,module,exports){
+},{}],235:[function(require,module,exports){
 module.exports = require('./lib/_stream_duplex.js');
 
-},{"./lib/_stream_duplex.js":235}],235:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":236}],236:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -69397,7 +69471,7 @@ Duplex.prototype._destroy = function (err, cb) {
 
   pna.nextTick(cb, err);
 };
-},{"./_stream_readable":237,"./_stream_writable":239,"core-util-is":225,"inherits":228,"process-nextick-args":231}],236:[function(require,module,exports){
+},{"./_stream_readable":238,"./_stream_writable":240,"core-util-is":226,"inherits":229,"process-nextick-args":232}],237:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -69445,7 +69519,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":238,"core-util-is":225,"inherits":228}],237:[function(require,module,exports){
+},{"./_stream_transform":239,"core-util-is":226,"inherits":229}],238:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -70467,7 +70541,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":235,"./internal/streams/BufferList":240,"./internal/streams/destroy":241,"./internal/streams/stream":242,"_process":232,"core-util-is":225,"events":226,"inherits":228,"isarray":230,"process-nextick-args":231,"safe-buffer":247,"string_decoder/":249,"util":223}],238:[function(require,module,exports){
+},{"./_stream_duplex":236,"./internal/streams/BufferList":241,"./internal/streams/destroy":242,"./internal/streams/stream":243,"_process":233,"core-util-is":226,"events":227,"inherits":229,"isarray":231,"process-nextick-args":232,"safe-buffer":248,"string_decoder/":250,"util":224}],239:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -70682,7 +70756,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":235,"core-util-is":225,"inherits":228}],239:[function(require,module,exports){
+},{"./_stream_duplex":236,"core-util-is":226,"inherits":229}],240:[function(require,module,exports){
 (function (process,global,setImmediate){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -71372,7 +71446,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"./_stream_duplex":235,"./internal/streams/destroy":241,"./internal/streams/stream":242,"_process":232,"core-util-is":225,"inherits":228,"process-nextick-args":231,"safe-buffer":247,"timers":250,"util-deprecate":251}],240:[function(require,module,exports){
+},{"./_stream_duplex":236,"./internal/streams/destroy":242,"./internal/streams/stream":243,"_process":233,"core-util-is":226,"inherits":229,"process-nextick-args":232,"safe-buffer":248,"timers":251,"util-deprecate":252}],241:[function(require,module,exports){
 'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -71452,7 +71526,7 @@ if (util && util.inspect && util.inspect.custom) {
     return this.constructor.name + ' ' + obj;
   };
 }
-},{"safe-buffer":247,"util":223}],241:[function(require,module,exports){
+},{"safe-buffer":248,"util":224}],242:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -71527,13 +71601,13 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":231}],242:[function(require,module,exports){
+},{"process-nextick-args":232}],243:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":226}],243:[function(require,module,exports){
+},{"events":227}],244:[function(require,module,exports){
 module.exports = require('./readable').PassThrough
 
-},{"./readable":244}],244:[function(require,module,exports){
+},{"./readable":245}],245:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -71542,13 +71616,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":235,"./lib/_stream_passthrough.js":236,"./lib/_stream_readable.js":237,"./lib/_stream_transform.js":238,"./lib/_stream_writable.js":239}],245:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":236,"./lib/_stream_passthrough.js":237,"./lib/_stream_readable.js":238,"./lib/_stream_transform.js":239,"./lib/_stream_writable.js":240}],246:[function(require,module,exports){
 module.exports = require('./readable').Transform
 
-},{"./readable":244}],246:[function(require,module,exports){
+},{"./readable":245}],247:[function(require,module,exports){
 module.exports = require('./lib/_stream_writable.js');
 
-},{"./lib/_stream_writable.js":239}],247:[function(require,module,exports){
+},{"./lib/_stream_writable.js":240}],248:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -71612,7 +71686,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":224}],248:[function(require,module,exports){
+},{"buffer":225}],249:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -71741,7 +71815,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":226,"inherits":228,"readable-stream/duplex.js":234,"readable-stream/passthrough.js":243,"readable-stream/readable.js":244,"readable-stream/transform.js":245,"readable-stream/writable.js":246}],249:[function(require,module,exports){
+},{"events":227,"inherits":229,"readable-stream/duplex.js":235,"readable-stream/passthrough.js":244,"readable-stream/readable.js":245,"readable-stream/transform.js":246,"readable-stream/writable.js":247}],250:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -72038,7 +72112,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":247}],250:[function(require,module,exports){
+},{"safe-buffer":248}],251:[function(require,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -72117,7 +72191,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":232,"timers":250}],251:[function(require,module,exports){
+},{"process/browser.js":233,"timers":251}],252:[function(require,module,exports){
 (function (global){
 
 /**
@@ -72188,4 +72262,4 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[18]);
+},{}]},{},[19]);

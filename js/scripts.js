@@ -22,6 +22,7 @@ if (host === 'localhost') {
         '<script src="js/Settings.js"></script>' +
         '<script src="js/Utils.js"></script>' +
         '<script src="js/Post.js"></script>' +
+        '<script src="js/Instagram.js"></script>' +
         '<script src="js/anal.js"></script>' +
         '<script src="js/initDev.js"></script>'
         //'<script src="js/youtube-load.js"></script>'

@@ -13,7 +13,8 @@ let modules = window.socialModules || {
     Wallet: Wallet,
     Settings: Settings,
     Utils: Utils,
-    Post: Post
+    Post: Post,
+    Instagram: Instagram
 };
 
 window.Blog = new modules.Blog();
@@ -32,3 +33,4 @@ new modules.Wallet(myMain);
 new modules.Settings(myMain);
 new modules.Utils();
 new modules.Post(myMain);
+new modules.Instagram(myMain);
