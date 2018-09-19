@@ -239,7 +239,10 @@ Info about posts. 'info.json' contain info about post text and attachments. All 
    "attachments":[
       {
          "type":"photo",
-         "url":"social/post/4/file/1536065858565.jpg"
+         "url":"social/post/4/file/1536065858565.jpg",
+         "previews":{
+            "250x250":"social/post/4/file/1536065858565_250x250.jpg"
+         }
       },
       {
          "type":"video",

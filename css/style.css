@@ -297,6 +297,11 @@ li > p:last-child {
     max-height: 36px;
 }
 
+.size-179 {
+    max-width: 179px;
+    max-height: 179px;
+}
+
 .message-dialogs-info {
     margin-top: 18px;
 }
@@ -323,4 +328,8 @@ li > p:last-child {
 
 .delete-post-attachment img {
     max-width: 12px;
+}
+
+.post-attachment.list-inline-item {
+    margin-bottom: 8px;
 }

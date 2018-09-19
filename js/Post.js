@@ -16,11 +16,14 @@ class Post {
             $('.post-attachment').each(function (k, v) {
                 let type = $(v).attr('data-type');
                 let url = $(v).attr('data-url');
+                let previews = $(v).attr('data-previews');
+                previews = previews ? JSON.parse(previews) : {};
                 if (type && url) {
                     attachments.push({
                         id: id,
                         type: type,
-                        url: url
+                        url: url,
+                        previews: previews
                     });
                     id++;
                 }
@@ -151,10 +154,10 @@ class Post {
                 };
 
                 let beforeUploadingPhoto = function (file) {
-                    console.log(file);
                     let url = Utils.getUrlForBlob(file);
                     let postAttachmentTemplate = $('#postAttachment')
                         .clone()
+                        .addClass('list-inline-item')
                         .removeAttr('id')
                         .attr('style', '')
                         .attr('data-name', file.name);
@@ -171,7 +174,7 @@ class Post {
                     attachment
                         .attr('data-type', fileType)
                         .attr('data-url', data.url + originalFile.name)
-                        .attr('data-preview-url', data.url + previewFile.name);
+                        .attr('data-previews', JSON.stringify({'250x250': data.url + previewFile.name}));
                     attachment.find('.content').html('<a target="_blank" href="' + originalUrl + '"><img class="img-preview" src="' + previewUrl + '"></a>');
                     setProgress(0);
                     $('#postOrAttach').removeClass("disabled-content");
@@ -228,9 +231,8 @@ class Post {
                 e.preventDefault();
                 let id = $(this).attr('data-id');
                 if (confirm('Really delete?')) {
-                    //$('#my-post').addClass("disabled-content");
                     $('#userPost' + id).hide('slow');
-                    self.blog.deletePost(id)
+                    self.main.blog.deletePost(id)
                         .then(function (response) {
                             self.main.onAfterHashChange(response.data, true);
                         });

@@ -602,9 +602,21 @@ class Main {
                         '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
                         '</div>'));
                 } else if (v.type === "photo") {
-                    let content = photoAttachment.clone().attr('id', '').attr('style', '').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
+                    let content = photoAttachment
+                        .clone()
+                        .attr('id', '')
+                        .attr('style', '')
+                        .attr('data-post-id', data.id)
+                        .attr('data-attachment-id', v.id);
                     content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
-                    content.find('.content').html('<img src="' + self.swarm.getFullUrl(v.url) + '">');
+                    let url = self.swarm.getFullUrl(v.url);
+                    if ('previews' in v) {
+                        url = self.swarm.getFullUrl(v.previews['250x250']);
+                        content.addClass('list-inline-item').find('.content').html('<img class="size-179" src="' + url + '">');
+                    } else {
+                        content.find('.content').html('<img src="' + url + '">');
+                    }
+
                     userPost.append(content);
                 } else if (v.type === "audio") {
                     // todo move to html
