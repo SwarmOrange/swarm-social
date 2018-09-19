@@ -1104,28 +1104,42 @@ class Main {
                 currentElement.attr('data-type', '');
                 currentElement.addClass('photo-uploaded-insta');
                 console.log('album id ' + self.currentPhotoAlbum);
-                self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId, response.data).then(function (data) {
-                    console.log('Photo uploaded');
-                    console.log(data);
-                    self.currentPhotosForAlbum.push({
-                        file: data.fileName,
-                        description: ""
+                Utils.resizeImages(response.data, [{width: 250, height: 250}])
+                    .then(function (result) {
+                        let key = '250x250';
+                        let imagePreview = result[key];
+
+                        self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId + '_' + key, imagePreview)
+                            .then(function (data) {
+                                let previewFileName = data.fileName;
+                                self.onAfterHashChange(data.response, true);
+                                self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId, response.data)
+                                    .then(function (data) {
+                                        console.log('Photo uploaded');
+                                        console.log(data);
+                                        self.currentPhotosForAlbum.push({
+                                            file: data.fileName,
+                                            description: "",
+                                            previews: {'250x250': previewFileName}
+                                        });
+                                        self.photoAlbumPhotoId++;
+                                        self.onAfterHashChange(data.response, true);
+                                        self.uploadAllInstaPhotos();
+                                    });
+                            });
                     });
-                    self.photoAlbumPhotoId++;
-                    self.onAfterHashChange(data.response, true);
-                    self.uploadAllInstaPhotos();
-                });
             });
         } else {
-            self.blog.createPhotoAlbum(self.currentPhotoAlbum, 'Insta', '', self.currentPhotosForAlbum).then(function (response) {
-                console.log('album created');
-                console.log(response.data);
-                self.onAfterHashChange(response.data);
-                $('#newAlbumModal').modal('hide');
-                self.alert('Album created!', [
-                    '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum from Instagram!" data-id="' + self.currentPhotoAlbum + '">Share</button>'
-                ]);
-            });
+            self.blog.createPhotoAlbum(self.currentPhotoAlbum, 'Insta', '', self.currentPhotosForAlbum)
+                .then(function (response) {
+                    console.log('album created');
+                    console.log(response.data);
+                    self.onAfterHashChange(response.data);
+                    $('#newAlbumModal').modal('hide');
+                    self.alert('Album created!', [
+                        '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum from Instagram!" data-id="' + self.currentPhotoAlbum + '">Share</button>'
+                    ]);
+                });
         }
     }
 
@@ -1332,12 +1346,13 @@ class Main {
                         .attr('data-post-id', data.id)
                         .attr('data-attachment-id', v.id);
                     content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
-                    let url = self.swarm.getFullUrl(v.url);
+                    let fullUrl = self.swarm.getFullUrl(v.url);
+                    let previewUrl = self.swarm.getFullUrl(v.url);
                     if ('previews' in v) {
-                        url = self.swarm.getFullUrl(v.previews['250x250']);
-                        content.addClass('list-inline-item').find('.content').html('<img class="size-179" src="' + url + '">');
+                        previewUrl = self.swarm.getFullUrl(v.previews['250x250']);
+                        content.addClass('list-inline-item').find('.content').html('<a href="' + fullUrl + '" data-toggle="lightbox" data-title="View photo" data-footer="" data-gallery="post-images-' + data.id + '"><img class="size-179" src="' + previewUrl + '"></a>');
                     } else {
-                        content.find('.content').html('<img src="' + url + '">');
+                        content.find('.content').html('<img src="' + fullUrl + '">');
                     }
 
                     userPost.append(content);
@@ -2512,6 +2527,16 @@ class VKImport {
             $('#receiveVkPhotos').text('');
             $('#importFromVKModal').modal('show');
         });
+
+        $('#importFromVKModal')
+            .on('click', '.vk-albums-select-all', function (e) {
+                e.preventDefault();
+                $('.vk-checkbox-photo').attr('checked', 'checked');
+            })
+            .on('click', '.vk-albums-deselect-all', function (e) {
+                e.preventDefault();
+                $('.vk-checkbox-photo').removeAttr('checked');
+            });
     }
 
     vkAuthInfo(response) {
@@ -2528,7 +2553,7 @@ class VKImport {
                 console.log(r);
                 if (r.response) {
                     let albums = r.response.items;
-                    vkListPhotos.html('');
+                    vkListPhotos.html('<p><a class="vk-albums-select-all" href="#">Select all</a> / <a class="vk-albums-deselect-all"  href="#">Deselect all</a></p>');
                     albums.forEach(function (v) {
                         let thumb = v.sizes.length >= 4 ? v.sizes[3].src : v.sizes[v.sizes.length - 1].src;
                         vkListPhotos.append('<li class="list-inline-item col-sm-3" style="margin-bottom: 18px">' +
@@ -2687,6 +2712,8 @@ class VKImport {
             .consistently(photos, function (photo, onComplete) {
                 let result = [];
                 let url = photo.sizes[photo.sizes.length - 1].url;
+                let downloadedPhoto = null;
+                let previewUrl = null;
 
                 self.main.swarm.axios
                     .request({
@@ -2695,21 +2722,36 @@ class VKImport {
                         responseType: 'blob',
                     })
                     .then(function (response) {
+                        return response.data;
+                    })
+                    .then(function (photo) {
+                        downloadedPhoto = photo;
                         console.log('VK photo downloaded ');
-                        //console.log(response);
-                        self.main.blog
-                            .uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId, response.data)
-                            .then(function (data) {
-                                console.log('Photo uploaded');
-                                console.log(data);
-                                result.push({
-                                    file: data.fileName,
-                                    description: ""
-                                });
-                                uploadedPhotoId++;
-                                self.main.onAfterHashChange(data.response, true);
-                                onComplete(result);
-                            });
+                        return Utils.resizeImages(downloadedPhoto, [{width: 250, height: 250}]);
+                    })
+                    .then(function (r) {
+                        let key = '250x250';
+                        return {key: key, value: r[key]};
+                    })
+                    .then(function (r) {
+                        return self.main.blog.uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId + '_' + r.key, r.value);
+                    })
+                    .then(function (data) {
+                        previewUrl = data.fileName;
+                        self.main.onAfterHashChange(data.response, true);
+                        return self.main.blog.uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId, downloadedPhoto);
+                    })
+                    .then(function (data) {
+                        console.log('Photo uploaded');
+                        console.log(data);
+                        result.push({
+                            file: data.fileName,
+                            description: "",
+                            previews: {'250x250': previewUrl}
+                        });
+                        uploadedPhotoId++;
+                        self.main.onAfterHashChange(data.response, true);
+                        onComplete(result);
                     });
             });
     }
