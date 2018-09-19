@@ -48,6 +48,8 @@ class Videoplaylist {
                 data.videos.forEach(function (v) {
                     if (v.type === "youtube") {
                         viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                    } else if (v.type === "vk") {
+                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
                     } else {
                         viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
                     }

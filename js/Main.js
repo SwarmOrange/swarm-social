@@ -473,6 +473,9 @@ class Main {
                     if (v.type === "youtube") {
                         videoPlaylists.append('<li class="list-unstyled">' +
                             '<a href="#" class="load-videoalbum page-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-youtube" src="' + v.cover_file + '"></a></li>');
+                    } else if (v.type === "vk") {
+                        videoPlaylists.append('<li class="list-unstyled">' +
+                            '<a href="#" class="load-videoalbum page-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-vk" src="' + v.cover_file + '"></a></li>');
                     } else {
                         videoPlaylists.append('<li class="list-unstyled">' +
                             '<a data-type="video" href="#" class="load-videoalbum page-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
