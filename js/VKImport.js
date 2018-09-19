@@ -30,6 +30,16 @@ class VKImport {
             $('#receiveVkPhotos').text('');
             $('#importFromVKModal').modal('show');
         });
+
+        $('#importFromVKModal')
+            .on('click', '.vk-albums-select-all', function (e) {
+                e.preventDefault();
+                $('.vk-checkbox-photo').attr('checked', 'checked');
+            })
+            .on('click', '.vk-albums-deselect-all', function (e) {
+                e.preventDefault();
+                $('.vk-checkbox-photo').removeAttr('checked');
+            });
     }
 
     vkAuthInfo(response) {
@@ -46,7 +56,7 @@ class VKImport {
                 console.log(r);
                 if (r.response) {
                     let albums = r.response.items;
-                    vkListPhotos.html('');
+                    vkListPhotos.html('<p><a class="vk-albums-select-all" href="#">Select all</a> / <a class="vk-albums-deselect-all"  href="#">Deselect all</a></p>');
                     albums.forEach(function (v) {
                         let thumb = v.sizes.length >= 4 ? v.sizes[3].src : v.sizes[v.sizes.length - 1].src;
                         vkListPhotos.append('<li class="list-inline-item col-sm-3" style="margin-bottom: 18px">' +
@@ -213,20 +223,32 @@ class VKImport {
                         responseType: 'blob',
                     })
                     .then(function (response) {
+                        let downloadedPhoto = response.data;
                         console.log('VK photo downloaded ');
-                        //console.log(response);
-                        self.main.blog
-                            .uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId, response.data)
-                            .then(function (data) {
-                                console.log('Photo uploaded');
-                                console.log(data);
-                                result.push({
-                                    file: data.fileName,
-                                    description: ""
-                                });
-                                uploadedPhotoId++;
-                                self.main.onAfterHashChange(data.response, true);
-                                onComplete(result);
+                        Utils.resizeImages(downloadedPhoto, [{width: 250, height: 250}])
+                            .then(function (r) {
+                                let key = '250x250';
+                                let imagePreview = r[key];
+                                self.main.blog
+                                    .uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId + '_' + key, imagePreview)
+                                    .then(function (data) {
+                                        let previewUrl = data.fileName;
+                                        self.main.onAfterHashChange(data.response, true);
+                                        self.main.blog
+                                            .uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId, downloadedPhoto)
+                                            .then(function (data) {
+                                                console.log('Photo uploaded');
+                                                console.log(data);
+                                                result.push({
+                                                    file: data.fileName,
+                                                    description: "",
+                                                    previews: {'250x250': previewUrl}
+                                                });
+                                                uploadedPhotoId++;
+                                                self.main.onAfterHashChange(data.response, true);
+                                                onComplete(result);
+                                            });
+                                    });
                             });
                     });
             });
