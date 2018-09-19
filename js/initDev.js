@@ -31,6 +31,7 @@ new modules.News(myMain);
 new modules.Messages(myMain);
 new modules.Wallet(myMain);
 new modules.Settings(myMain);
+window.Utils = modules.Utils;
 new modules.Utils();
 new modules.Post(myMain);
 new modules.Instagram(myMain);
