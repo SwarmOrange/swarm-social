@@ -41,7 +41,7 @@ https://swarm-gateways.net/bzz:/07ef1099b4931a414f3601fcd1f69cd6404f5fc2b7360379
 
 ## Development process
 
-Dependencies installed through npm version 6.3.0.
+Dependencies installed through npm version 6.4.1.
 
 Check your npm version:
 ```
@@ -75,10 +75,6 @@ node css/uglify.js > css/uglify.css
 
 Compile all files to HTML
 ```
-node ./build.js 
+npm run-script build
 ```
 
-Or
-```
-browserify js/web-full.js > js/dist/web-full.js && uglifyjs --compress -- ./js/dist/web-full.js > ./js/dist/web-full.min.js && node ./build.js 
-```
