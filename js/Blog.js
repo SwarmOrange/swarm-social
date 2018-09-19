@@ -166,7 +166,12 @@ class Blog {
     }
 
     deletePost(id) {
-        return this.deleteFile(this.prefix + 'post/' + id + '/');
+        let self = this;
+        let urlPath = this.prefix + 'post/' + id + '/';
+        return this.deleteFile(urlPath + 'info.json').then(function (response) {
+            self.swarm.applicationHash = response.data;
+            return self.deleteFile(urlPath);
+        });
     }
 
     deletePostAttachment(postId, attachmentId) {
