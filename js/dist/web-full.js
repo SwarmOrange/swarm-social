@@ -17,6 +17,26 @@ class Blog {
         }
     }
 
+    getDefaultProfile() {
+        return {
+            "first_name": "SWARM",
+            "last_name": "User",
+            "birth_date": "24/07/2018",
+            "location": {
+                "coordinates": {},
+                "name": "Belarus, Minsk"
+            },
+            "photo": {
+                "original": "social/file/avatar/original.jpg"
+            },
+            "about": "My SWARM page. You can edit this information",
+            "i_follow": [],
+            "last_post_id": 0,
+            "last_photoalbum_id": 0,
+            "last_videoalbum_id": 0
+        };
+    }
+
     deleteFile(file) {
         return this.swarm.delete(file);
     }
@@ -1659,12 +1679,25 @@ class Photoalbum {
             .on('click', '.delete-post-content', function (e) {
                 let postId = $(this).attr('data-post-id');
                 let attachmentId = $(this).attr('data-attachment-id');
-                if (confirm('Really delete?')) {
-                    $('.photo-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
+                let url = $(this).attr('data-url');
 
-                    self.main.blog.deletePostAttachment(postId, attachmentId).then(function (response) {
-                        self.main.onAfterHashChange(response.data, true);
-                    });
+                if (confirm('Really delete?')) {
+                    if (url) {
+                        let content = $('.post-attachment[data-url="' + url + '"]');
+                        content.hide('slow', function () {
+                            content.remove();
+                        });
+                        self.main.swarm.delete(url)
+                            .then(function (response) {
+                                self.main.onAfterHashChange(response.data, true);
+                            });
+                    } else {
+                        $('.photo-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
+                        self.main.blog.deletePostAttachment(postId, attachmentId)
+                            .then(function (response) {
+                                self.main.onAfterHashChange(response.data, true);
+                            });
+                    }
                 }
             });
 
@@ -1810,7 +1843,7 @@ class Post {
             });
             let isContentExists = description.length || attachments.length;
             if (!isContentExists) {
-                self.alert('Please, write text or add attachments');
+                self.main.alert('Please, write text or add attachments');
                 return;
             }
 
@@ -1950,11 +1983,13 @@ class Post {
                 let afterUploadingPhoto = function (previewFile, originalFile, data) {
                     let previewUrl = Utils.getUrlForBlob(previewFile);
                     let originalUrl = data.fullUrl + originalFile.name;
+                    let dataUrl = data.url + originalFile.name;
                     let attachment = $('.post-attachment[data-name="' + previewFile.name + '"]');
                     attachment
                         .attr('data-type', fileType)
-                        .attr('data-url', data.url + originalFile.name)
+                        .attr('data-url', dataUrl)
                         .attr('data-previews', JSON.stringify({'250x250': data.url + previewFile.name}));
+                    attachment.append('<div class="delete-post-content" data-url="' + dataUrl + '">×</div>');
                     attachment.find('.content').html('<a target="_blank" href="' + originalUrl + '"><img class="img-preview" src="' + previewUrl + '"></a>');
                     setProgress(0);
                     $('#postOrAttach').removeClass("disabled-content");
@@ -2001,7 +2036,7 @@ class Post {
                     .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="youtube"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + url + '">' + url + '</a>');
                 $('#attached-content').append(postAttachmentTemplate);
             } else {
-                self.alert('Please, enter url');
+                self.main.alert('Please, enter url');
             }
         });
 
@@ -2118,15 +2153,32 @@ class Settings {
             $('#settings-import-file').click();
         });
 
-        /*$('.settings-delete-all').click(function (e) {
+        $('.settings-delete-all').click(function (e) {
             e.preventDefault();
             if (confirm('Really delete?')) {
-                self.main.swarm.delete(self.main.blog.prefix).then(function (response) {
-                    alert('All data deleted!');
-                    self.main.onAfterHashChange(response.data);
-                });
+                self.main.swarm.delete(self.main.blog.prefix)
+                    .then(function (response) {
+                        self.main.onAfterHashChange(response.data, true);
+                        return self.main.swarm.axios.request({
+                            url: 'img/swarm-avatar.jpg',
+                            method: 'GET',
+                            responseType: 'blob',
+                        });
+                    })
+                    .then(function (response) {
+                        let data = response.data;
+                        return self.main.blog.uploadAvatar(data);
+                    })
+                    .then(function (response) {
+                        self.main.onAfterHashChange(response.data, true);
+                        return self.main.blog.saveProfile(self.main.blog.getDefaultProfile());
+                    })
+                    .then(function (response) {
+                        self.main.onAfterHashChange(response.data);
+                        self.main.alert('All data deleted! Reload this page.');
+                    });
             }
-        });*/
+        });
 
         $('.settings-export-download').click(function (e) {
             e.preventDefault();
