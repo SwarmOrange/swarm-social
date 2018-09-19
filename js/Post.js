@@ -32,7 +32,7 @@ class Post {
             }
 
             let newPostId = self.blog.myProfile.last_post_id + 1;
-            self.addPostByData({
+            self.main.addPostByData({
                 id: newPostId,
                 description: description,
                 attachments: attachments
