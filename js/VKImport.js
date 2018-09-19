@@ -215,6 +215,8 @@ class VKImport {
             .consistently(photos, function (photo, onComplete) {
                 let result = [];
                 let url = photo.sizes[photo.sizes.length - 1].url;
+                let downloadedPhoto = null;
+                let previewUrl = null;
 
                 self.main.swarm.axios
                     .request({
@@ -223,33 +225,36 @@ class VKImport {
                         responseType: 'blob',
                     })
                     .then(function (response) {
-                        let downloadedPhoto = response.data;
+                        return response.data;
+                    })
+                    .then(function (photo) {
+                        downloadedPhoto = photo;
                         console.log('VK photo downloaded ');
-                        Utils.resizeImages(downloadedPhoto, [{width: 250, height: 250}])
-                            .then(function (r) {
-                                let key = '250x250';
-                                let imagePreview = r[key];
-                                self.main.blog
-                                    .uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId + '_' + key, imagePreview)
-                                    .then(function (data) {
-                                        let previewUrl = data.fileName;
-                                        self.main.onAfterHashChange(data.response, true);
-                                        self.main.blog
-                                            .uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId, downloadedPhoto)
-                                            .then(function (data) {
-                                                console.log('Photo uploaded');
-                                                console.log(data);
-                                                result.push({
-                                                    file: data.fileName,
-                                                    description: "",
-                                                    previews: {'250x250': previewUrl}
-                                                });
-                                                uploadedPhotoId++;
-                                                self.main.onAfterHashChange(data.response, true);
-                                                onComplete(result);
-                                            });
-                                    });
-                            });
+                        return Utils.resizeImages(downloadedPhoto, [{width: 250, height: 250}]);
+                    })
+                    .then(function (r) {
+                        let key = '250x250';
+                        return {key: key, value: r[key]};
+                    })
+                    .then(function (r) {
+                        return self.main.blog.uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId + '_' + r.key, r.value);
+                    })
+                    .then(function (data) {
+                        previewUrl = data.fileName;
+                        self.main.onAfterHashChange(data.response, true);
+                        return self.main.blog.uploadPhotoToAlbum(currentPhotoAlbum, uploadedPhotoId, downloadedPhoto);
+                    })
+                    .then(function (data) {
+                        console.log('Photo uploaded');
+                        console.log(data);
+                        result.push({
+                            file: data.fileName,
+                            description: "",
+                            previews: {'250x250': previewUrl}
+                        });
+                        uploadedPhotoId++;
+                        self.main.onAfterHashChange(data.response, true);
+                        onComplete(result);
                     });
             });
     }
