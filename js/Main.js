@@ -578,12 +578,13 @@ class Main {
                         .attr('data-post-id', data.id)
                         .attr('data-attachment-id', v.id);
                     content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
-                    let url = self.swarm.getFullUrl(v.url);
+                    let fullUrl = self.swarm.getFullUrl(v.url);
+                    let previewUrl = self.swarm.getFullUrl(v.url);
                     if ('previews' in v) {
-                        url = self.swarm.getFullUrl(v.previews['250x250']);
-                        content.addClass('list-inline-item').find('.content').html('<img class="size-179" src="' + url + '">');
+                        previewUrl = self.swarm.getFullUrl(v.previews['250x250']);
+                        content.addClass('list-inline-item').find('.content').html('<a href="' + fullUrl + '" data-toggle="lightbox" data-title="View photo" data-footer="" data-gallery="post-images-' + data.id + '"><img class="size-179" src="' + previewUrl + '"></a>');
                     } else {
-                        content.find('.content').html('<img src="' + url + '">');
+                        content.find('.content').html('<img src="' + fullUrl + '">');
                     }
 
                     userPost.append(content);
