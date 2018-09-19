@@ -16,6 +16,26 @@ class Blog {
         }
     }
 
+    getDefaultProfile() {
+        return {
+            "first_name": "SWARM",
+            "last_name": "User",
+            "birth_date": "24/07/2018",
+            "location": {
+                "coordinates": {},
+                "name": "Belarus, Minsk"
+            },
+            "photo": {
+                "original": "social/file/avatar/original.jpg"
+            },
+            "about": "My SWARM page. You can edit this information",
+            "i_follow": [],
+            "last_post_id": 0,
+            "last_photoalbum_id": 0,
+            "last_videoalbum_id": 0
+        };
+    }
+
     deleteFile(file) {
         return this.swarm.delete(file);
     }

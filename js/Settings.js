@@ -78,15 +78,32 @@ class Settings {
             $('#settings-import-file').click();
         });
 
-        /*$('.settings-delete-all').click(function (e) {
+        $('.settings-delete-all').click(function (e) {
             e.preventDefault();
             if (confirm('Really delete?')) {
-                self.main.swarm.delete(self.main.blog.prefix).then(function (response) {
-                    alert('All data deleted!');
-                    self.main.onAfterHashChange(response.data);
-                });
+                self.main.swarm.delete(self.main.blog.prefix)
+                    .then(function (response) {
+                        self.main.onAfterHashChange(response.data, true);
+                        return self.main.swarm.axios.request({
+                            url: 'img/swarm-avatar.jpg',
+                            method: 'GET',
+                            responseType: 'blob',
+                        });
+                    })
+                    .then(function (response) {
+                        let data = response.data;
+                        return self.main.blog.uploadAvatar(data);
+                    })
+                    .then(function (response) {
+                        self.main.onAfterHashChange(response.data, true);
+                        return self.main.blog.saveProfile(self.main.blog.getDefaultProfile());
+                    })
+                    .then(function (response) {
+                        self.main.onAfterHashChange(response.data);
+                        self.main.alert('All data deleted! Reload this page.');
+                    });
             }
-        });*/
+        });
 
         $('.settings-export-download').click(function (e) {
             e.preventDefault();
