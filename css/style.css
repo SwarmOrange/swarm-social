@@ -310,7 +310,7 @@ li > p:last-child {
     margin-top: 8px;
 }
 
-.photo-attachment {
+.photo-attachment, .post-attachment[data-type="photo"] {
     position: relative;
 }
 
@@ -319,6 +319,7 @@ li > p:last-child {
     font-size: 35px;
     color: white;
     left: 15px;
+    top: 0;
     cursor: pointer;
 }
 

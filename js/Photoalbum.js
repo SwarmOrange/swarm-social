@@ -53,12 +53,25 @@ class Photoalbum {
             .on('click', '.delete-post-content', function (e) {
                 let postId = $(this).attr('data-post-id');
                 let attachmentId = $(this).attr('data-attachment-id');
-                if (confirm('Really delete?')) {
-                    $('.photo-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
+                let url = $(this).attr('data-url');
 
-                    self.main.blog.deletePostAttachment(postId, attachmentId).then(function (response) {
-                        self.main.onAfterHashChange(response.data, true);
-                    });
+                if (confirm('Really delete?')) {
+                    if (url) {
+                        let content = $('.post-attachment[data-url="' + url + '"]');
+                        content.hide('slow', function () {
+                            content.remove();
+                        });
+                        self.main.swarm.delete(url)
+                            .then(function (response) {
+                                self.main.onAfterHashChange(response.data, true);
+                            });
+                    } else {
+                        $('.photo-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
+                        self.main.blog.deletePostAttachment(postId, attachmentId)
+                            .then(function (response) {
+                                self.main.onAfterHashChange(response.data, true);
+                            });
+                    }
                 }
             });
 

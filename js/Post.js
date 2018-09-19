@@ -30,7 +30,7 @@ class Post {
             });
             let isContentExists = description.length || attachments.length;
             if (!isContentExists) {
-                self.alert('Please, write text or add attachments');
+                self.main.alert('Please, write text or add attachments');
                 return;
             }
 
@@ -170,11 +170,13 @@ class Post {
                 let afterUploadingPhoto = function (previewFile, originalFile, data) {
                     let previewUrl = Utils.getUrlForBlob(previewFile);
                     let originalUrl = data.fullUrl + originalFile.name;
+                    let dataUrl = data.url + originalFile.name;
                     let attachment = $('.post-attachment[data-name="' + previewFile.name + '"]');
                     attachment
                         .attr('data-type', fileType)
-                        .attr('data-url', data.url + originalFile.name)
+                        .attr('data-url', dataUrl)
                         .attr('data-previews', JSON.stringify({'250x250': data.url + previewFile.name}));
+                    attachment.append('<div class="delete-post-content" data-url="' + dataUrl + '">×</div>');
                     attachment.find('.content').html('<a target="_blank" href="' + originalUrl + '"><img class="img-preview" src="' + previewUrl + '"></a>');
                     setProgress(0);
                     $('#postOrAttach').removeClass("disabled-content");
@@ -221,7 +223,7 @@ class Post {
                     .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="youtube"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + url + '">' + url + '</a>');
                 $('#attached-content').append(postAttachmentTemplate);
             } else {
-                self.alert('Please, enter url');
+                self.main.alert('Please, enter url');
             }
         });
 
