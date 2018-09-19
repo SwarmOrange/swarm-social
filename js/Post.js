@@ -63,7 +63,7 @@ class Post {
                     $(this).remove();
                 });
                 if (type !== 'youtube') {
-                    self.swarm.delete(url).then(function (response) {
+                    self.main.swarm.delete(url).then(function (response) {
                         self.main.onAfterHashChange(response.data, true);
                     });
                 }

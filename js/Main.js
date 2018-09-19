@@ -215,7 +215,6 @@ class Main {
                     reader.addEventListener('loadend', () => {
                         const arrayBuffer = reader.result;
                         $('#uploadAvatarModal').modal('hide');
-                        //self.showUploadModal();
                         self.blog.uploadAvatar(arrayBuffer).then(function (response) {
                             console.log(response.data);
                             self.onAfterHashChange(response.data);
@@ -239,9 +238,8 @@ class Main {
 
         $('.load-more').click(function (e) {
             e.preventDefault();
-            loadPosts();
+            self.loadPosts();
         });
-
 
         $('.add-follower').click(function (e) {
             e.preventDefault();
