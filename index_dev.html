@@ -489,729 +489,733 @@
                             Delete all
                         </button>
                     </div>-->
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="templates" style="display: none">
-        <div id="userPost" class="wall-post col-sm-12" style="display: none">
-            <a href="#" class="delete-post float-right">
-                <img src="img/delete.png" alt="">
-            </a>
-            <a href="#" class="edit-post float-right">
-                <img src="img/empty-black.png" alt="">
-            </a>
-            <div class="clear-both"></div>
-            <div class="description"></div>
-            <div class="edit-post-block" style="display: none">
-                <div class="form-group">
-                    <textarea class="form-control" rows="3"></textarea>
-                </div>
-                <p>
-                    <button type="button" class="btn btn-primary save-post">Save</button>
-                </p>
-            </div>
-        </div>
-        <div id="postAttachment" class="post-attachment" style="display: none">
-            <div class="content"></div>
-        </div>
-        <div id="wallYoutubeAttachment" class="wall-attachment" style="display: none">
-
-        </div>
-        <div id="photoAttachment" class="wall-attachment photo-attachment" style="display: none">
-            <div class="delete-post-content">&times;</div>
-            <div class="content"></div>
-        </div>
-        <div id="videoAttachment" class="wall-attachment" style="display: none">
-
-        </div>
-        <div id="photoalbumAttachment" class="wall-attachment photoalbum-attachment" style="display: none">
-
-        </div>
-        <div id="videoalbumAttachment" class="wall-attachment videoalbum-attachment" style="display: none">
-
-        </div>
-    </div>
-
-    <!-- Upload Avatar Modal -->
-    <div class="modal fade" id="uploadAvatarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Upload avatar</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
+        <div class="templates" style="display: none">
+            <div id="userPost" class="wall-post col-sm-12" style="display: none">
+                <a href="#" class="delete-post float-right">
+                    <img src="img/delete.png" alt="">
+                </a>
+                <a href="#" class="edit-post float-right">
+                    <img src="img/empty-black.png" alt="">
+                </a>
+                <div class="clear-both"></div>
+                <div class="description"></div>
+                <div class="edit-post-block" style="display: none">
+                    <div class="form-group">
+                        <textarea class="form-control" rows="3"></textarea>
+                    </div>
                     <p>
-                        <img id="avatarUpload">
+                        <button type="button" class="btn btn-primary save-post">Save</button>
                     </p>
-                    <p>
-                        <input id="file-input" type="file">
-                    </p>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary save-avatar">Save</button>
                 </div>
             </div>
-        </div>
-    </div>
+            <div id="postAttachment" class="post-attachment" style="display: none">
+                <div class="content"></div>
+            </div>
+            <div id="wallYoutubeAttachment" class="wall-attachment" style="display: none">
 
-    <!-- Attach Youtube Modal -->
-    <div class="modal fade" id="attachYoutubeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Attach Youtube Video</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="youtubeUrl" placeholder="Youtube Video URL">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
-                    <button type="button" class="btn btn-primary add-youtube-video">Add</button>
-                </div>
+            </div>
+            <div id="photoAttachment" class="wall-attachment photo-attachment" style="display: none">
+                <div class="delete-post-content">&times;</div>
+                <div class="content"></div>
+            </div>
+            <div id="videoAttachment" class="wall-attachment" style="display: none">
+
+            </div>
+            <div id="photoalbumAttachment" class="wall-attachment photoalbum-attachment" style="display: none">
+
+            </div>
+            <div id="videoalbumAttachment" class="wall-attachment videoalbum-attachment" style="display: none">
+
             </div>
         </div>
-    </div>
 
-    <!-- Add Follower Modal -->
-    <div class="modal fade" id="addFollowerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add follower</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="followerHash" placeholder="Follower SWARM hash">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
-                    <button type="button" class="btn btn-primary add-follower">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Update ENS Modal -->
-    <div class="modal fade" id="updateEnsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Update ENS domain with current hash</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="ensDomain" placeholder="Your ENS domain">
-                    </div>
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="currentHash" placeholder="Current page hash"
-                               disabled>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
-                    <button type="button" class="btn btn-primary send-ens-transaction">Send transaction</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alert Modal -->
-    <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Message</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div id="messageBody" class="modal-body">
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                    <div class="additional-buttons">
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Load Modal -->
-    <div class="modal fade" id="loadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Transfer SWARM data</h5>
-                </div>
-                <div id="loadContent" class="modal-body">
-                    <div class="col-sm-4 offset-sm-4">
-                        <div class="loader-animation"></div>
-                    </div>
-                </div>
-                <!--<div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>-->
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade bd-example-modal-lg" id="showAllPhotoalbumsModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">All photoalbums</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex justify-content-center">
-                        <div class="loader-animation"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade bd-example-modal-lg" id="showAllVideoalbumsModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">All Video Playlists</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex justify-content-center">
-                        <div class="loader-animation"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- View Album Modal -->
-    <div class="modal fade bd-example-modal-lg" id="viewAlbumModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">View Photo Album</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <button type="button" class="btn btn-sm btn-danger float-right btn-delete-album" data-album-id="0">
-                        Delete
-                    </button>
-
-                    <div class="clear-both"></div>
-                    <div id="viewAlbumContent" class="preview-images">
-
-                    </div>
-                </div>
-                <!--<div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>-->
-            </div>
-        </div>
-    </div>
-
-    <!-- View Video Modal -->
-    <div class="modal fade bd-example-modal-lg" id="viewVideoAlbumModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">View Video Playlist</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!--<button type="button" class="btn btn-sm btn-danger float-right btn-delete-album" data-album-id="0">
-                        Delete
-                    </button>-->
-
-                    <div class="clear-both"></div>
-                    <div id="viewVideoAlbumContent">
-
-                    </div>
-                </div>
-                <!--<div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>-->
-            </div>
-        </div>
-    </div>
-
-    <!-- Create/Edit Album Modal -->
-    <div class="modal fade bd-example-modal-lg" id="newAlbumModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create/Edit Album</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div id="newAlbumContent" class="modal-body">
-                    <!--<p class="float-left">Hello </p><button type="button" class="btn btn-sm btn-primary add-photo-album float-right">Add photos</button>-->
-                    <p>
-                        <input id="input-upload-photo-album" type="file" class="hide" accept="image/*" multiple>
-                        <button type="button" class="btn btn-primary upload-photos">Upload photos</button>
-                        <button type="button" class="btn btn-primary show-insta-panel">Import photos from Instagram
+        <!-- Upload Avatar Modal -->
+        <div class="modal fade" id="uploadAvatarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Upload avatar</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
                         </button>
-                        <button type="button" class="btn btn-success upload-all-insta">Upload all from Instagram
-                        </button>
-                    </p>
-                    <p>
-                    <div id="progressPanelAlbum" class="hide">
-                        <div class="clear-both"></div>
-                        <div class="progress" style="height: 20px;">
-                            <div id="postProgressAlbum" class="progress-bar progress-bar-striped" role="progressbar"
-                                 style="width: 0%"
-                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
                     </div>
-                    <div class="import-insta-panel hide">
+                    <div class="modal-body">
+                        <p>
+                            <img id="avatarUpload">
+                        </p>
+                        <p>
+                            <input id="file-input" type="file">
+                        </p>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary save-avatar">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attach Youtube Modal -->
+        <div class="modal fade" id="attachYoutubeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Attach Youtube Video</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
                         <div class="form-group">
-                            <input type="text" class="form-control" id="instaNick" placeholder="Instagram nickname">
+                            <input type="text" class="form-control" id="youtubeUrl" placeholder="Youtube Video URL">
                         </div>
-                        <button type="button" class="btn btn-primary import-instagram">Import</button>
-                        <button type="button" class="btn btn-secondary import-instagram-cancel">Cancel</button>
                     </div>
-                    <div class="clear-both"></div>
-                    <hr>
-                    <div id="uploaded-photos" class="preview-images">
-
+                    <div class="modal-footer">
+                        <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+                        <button type="button" class="btn btn-primary add-youtube-video">Add</button>
                     </div>
                 </div>
-                <!--<div class="modal-footer">
-                    <button type="button" class="btn btn-primary send-ens-transaction">Save</button>
-                </div>-->
             </div>
         </div>
-    </div>
 
-    <!-- Create/Edit Video Album Modal -->
-    <div class="modal fade bd-example-modal-lg" id="newVideoModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create/Edit Album</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+        <!-- Add Follower Modal -->
+        <div class="modal fade" id="addFollowerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add follower</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="followerHash" placeholder="Follower SWARM hash">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+                        <button type="button" class="btn btn-primary add-follower">Add</button>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <p>
-                        <input id="input-upload-video-album" type="file" style="display: none;" accept="video/*"
-                               multiple>
-                        <button type="button" class="btn btn-primary upload-videos">Upload videos</button>
-                    </p>
-                    <p>
-                    <div id="progressPanelVideoAlbum" style="display:none;">
+            </div>
+        </div>
+
+        <!-- Update ENS Modal -->
+        <div class="modal fade" id="updateEnsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update ENS domain with current hash</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="ensDomain" placeholder="Your ENS domain">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="currentHash" placeholder="Current page hash"
+                                   disabled>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+                        <button type="button" class="btn btn-primary send-ens-transaction">Send transaction</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Modal -->
+        <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Message</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div id="messageBody" class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                        <div class="additional-buttons">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load Modal -->
+        <div class="modal fade" id="loadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Transfer SWARM data</h5>
+                    </div>
+                    <div id="loadContent" class="modal-body">
+                        <div class="col-sm-4 offset-sm-4">
+                            <div class="loader-animation"></div>
+                        </div>
+                    </div>
+                    <!--<div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade bd-example-modal-lg" id="showAllPhotoalbumsModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">All photoalbums</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-center">
+                            <div class="loader-animation"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade bd-example-modal-lg" id="showAllVideoalbumsModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">All Video Playlists</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-center">
+                            <div class="loader-animation"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Album Modal -->
+        <div class="modal fade bd-example-modal-lg" id="viewAlbumModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">View Photo Album</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <button type="button" class="btn btn-sm btn-danger float-right btn-delete-album"
+                                data-album-id="0">
+                            Delete
+                        </button>
+
                         <div class="clear-both"></div>
-                        <div class="progress" style="height: 20px;">
-                            <div id="postProgressVideoAlbum" class="progress-bar progress-bar-striped"
-                                 role="progressbar"
-                                 style="width: 0%"
-                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div id="viewAlbumContent" class="preview-images">
+
                         </div>
                     </div>
-
-                    <div class="clear-both"></div>
-                    <hr>
-                    <div id="uploaded-videos">
-
-                    </div>
+                    <!--<div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                    </div>-->
                 </div>
-                <!--<div class="modal-footer">
-                    <button type="button" class="btn btn-primary send-ens-transaction">Save</button>
-                </div>-->
             </div>
         </div>
-    </div>
 
-    <!--Youtube Import Modal -->
-    <div class="modal fade bd-example-modal-lg" id="youtubeImportModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Import YouTube Videos</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-
-                    <div class="d-flex justify-content-center">
-                        <button id="execute-request-button" type="button" class="btn btn-primary">Authorize with YouTube
+        <!-- View Video Modal -->
+        <div class="modal fade bd-example-modal-lg" id="viewVideoAlbumModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">View Video Playlist</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
+                    <div class="modal-body">
+                        <!--<button type="button" class="btn btn-sm btn-danger float-right btn-delete-album" data-album-id="0">
+                            Delete
+                        </button>-->
 
-                    <div id="youtubeImportContent" style="margin-top: 8px">
+                        <div class="clear-both"></div>
+                        <div id="viewVideoAlbumContent">
 
+                        </div>
                     </div>
-                    <hr>
-                    <div id="youtubePlaylistVideos" style="margin-top: 8px">
-
-                    </div>
+                    <!--<div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                    </div>-->
                 </div>
-                <!--<div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>-->
             </div>
         </div>
-    </div>
 
-    <!--Show all photoalbums Modal -->
-    <div class="modal fade bd-example-modal-lg" id="allPhotoalbumsModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Import YouTube Videos</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div id="allPhotoAlbums">
-
-                    </div>
-                </div>
-                <!--<div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>-->
-            </div>
-        </div>
-    </div>
-
-    <!-- Import from Facebook Modal -->
-    <div class="modal fade bd-example-modal-lg" id="importFromFacebookModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Import from Facebook</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="continue_with"
-                         data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="true"
-                         data-onlogin="fbCheckLoginState" data-scope="user_videos,user_posts,user_photos"></div>
-
-                    <div id="importFacebookContent">
-
-                    </div>
-                </div>
-                <!--<div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>-->
-            </div>
-        </div>
-    </div>
-
-    <!-- Import from VK Modal -->
-    <div class="modal fade bd-example-modal-lg" id="importFromVKModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Import from VK</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex justify-content-center">
-
-                        <button type="button" class="btn btn-primary btn-vk-authorize"
-                                onclick="startVkAuth()">
-                            Authorize
+        <!-- Create/Edit Album Modal -->
+        <div class="modal fade bd-example-modal-lg" id="newAlbumModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create/Edit Album</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
                         </button>
+                    </div>
+                    <div id="newAlbumContent" class="modal-body">
+                        <!--<p class="float-left">Hello </p><button type="button" class="btn btn-sm btn-primary add-photo-album float-right">Add photos</button>-->
+                        <p>
+                            <input id="input-upload-photo-album" type="file" class="hide" accept="image/*" multiple>
+                            <button type="button" class="btn btn-primary upload-photos">Upload photos</button>
+                            <button type="button" class="btn btn-primary show-insta-panel">Import photos from Instagram
+                            </button>
+                            <button type="button" class="btn btn-success upload-all-insta">Upload all from Instagram
+                            </button>
+                        </p>
+                        <p>
+                        <div id="progressPanelAlbum" class="hide">
+                            <div class="clear-both"></div>
+                            <div class="progress" style="height: 20px;">
+                                <div id="postProgressAlbum" class="progress-bar progress-bar-striped" role="progressbar"
+                                     style="width: 0%"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="import-insta-panel hide">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="instaNick" placeholder="Instagram nickname">
+                            </div>
+                            <button type="button" class="btn btn-primary import-instagram">Import</button>
+                            <button type="button" class="btn btn-secondary import-instagram-cancel">Cancel</button>
+                        </div>
+                        <div class="clear-both"></div>
+                        <hr>
+                        <div id="uploaded-photos" class="preview-images">
 
-                        <div class="vk-authorized hide">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="vkTransferPhoto" value="option1"
-                                       checked>
-                                <label class="form-check-label" for="vkTransferPhoto">Transfer photo albums <br>
-                                    <a href="#" class="vk-select-photos">Select albums</a></label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="vkTransferVideo" value="option2"
-                                       checked>
-                                <label class="form-check-label" for="vkTransferVideo">Transfer video <br>
-                                    <a href="#" class="vk-select-videos">Select videos</a></label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="vkTransferUserInfo" value="option2"
-                                       checked>
-                                <label class="form-check-label" for="vkTransferUserInfo">Transfer user info</label>
-                            </div>
+                        </div>
+                    </div>
+                    <!--<div class="modal-footer">
+                        <button type="button" class="btn btn-primary send-ens-transaction">Save</button>
+                    </div>-->
+                </div>
+            </div>
+        </div>
 
-                            <p class="text-center" style="margin-top: 16px">
-                                <button type="button" class="btn btn-primary" onclick="startVkImport()">
-                                    Transfer
-                                </button>
-                            </p>
+        <!-- Create/Edit Video Album Modal -->
+        <div class="modal fade bd-example-modal-lg" id="newVideoModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create/Edit Album</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            <input id="input-upload-video-album" type="file" style="display: none;" accept="video/*"
+                                   multiple>
+                            <button type="button" class="btn btn-primary upload-videos">Upload videos</button>
+                        </p>
+                        <p>
+                        <div id="progressPanelVideoAlbum" style="display:none;">
+                            <div class="clear-both"></div>
+                            <div class="progress" style="height: 20px;">
+                                <div id="postProgressVideoAlbum" class="progress-bar progress-bar-striped"
+                                     role="progressbar"
+                                     style="width: 0%"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
                         </div>
 
-                    </div>
+                        <div class="clear-both"></div>
+                        <hr>
+                        <div id="uploaded-videos">
 
-                    <div class="import-vk-content">
-                        <span id="receiveVkPhotos"></span>
-                        <ul class="list-inline vk-list-photos hide"></ul>
-                        <ul class="list-inline vk-list-videos hide"></ul>
+                        </div>
+                    </div>
+                    <!--<div class="modal-footer">
+                        <button type="button" class="btn btn-primary send-ens-transaction">Save</button>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+
+        <!--Youtube Import Modal -->
+        <div class="modal fade bd-example-modal-lg" id="youtubeImportModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import YouTube Videos</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="d-flex justify-content-center">
+                            <button id="execute-request-button" type="button" class="btn btn-primary">Authorize with
+                                YouTube
+                            </button>
+                        </div>
+
+                        <div id="youtubeImportContent" style="margin-top: 8px">
+
+                        </div>
+                        <hr>
+                        <div id="youtubePlaylistVideos" style="margin-top: 8px">
+
+                        </div>
+                    </div>
+                    <!--<div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+
+        <!--Show all photoalbums Modal -->
+        <div class="modal fade bd-example-modal-lg" id="allPhotoalbumsModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import YouTube Videos</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="allPhotoAlbums">
+
+                        </div>
+                    </div>
+                    <!--<div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+
+        <!-- Import from Facebook Modal -->
+        <div class="modal fade bd-example-modal-lg" id="importFromFacebookModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import from Facebook</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="fb-login-button" data-max-rows="1" data-size="large"
+                             data-button-type="continue_with"
+                             data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="true"
+                             data-onlogin="fbCheckLoginState" data-scope="user_videos,user_posts,user_photos"></div>
+
+                        <div id="importFacebookContent">
+
+                        </div>
+                    </div>
+                    <!--<div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+
+        <!-- Import from VK Modal -->
+        <div class="modal fade bd-example-modal-lg" id="importFromVKModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import from VK</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-center">
+
+                            <button type="button" class="btn btn-primary btn-vk-authorize"
+                                    onclick="startVkAuth()">
+                                Authorize
+                            </button>
+
+                            <div class="vk-authorized hide">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="vkTransferPhoto" value="option1"
+                                           checked>
+                                    <label class="form-check-label" for="vkTransferPhoto">Transfer photo albums <br>
+                                        <a href="#" class="vk-select-photos">Select albums</a></label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="vkTransferVideo" value="option2"
+                                           checked>
+                                    <label class="form-check-label" for="vkTransferVideo">Transfer video <br>
+                                        <a href="#" class="vk-select-videos">Select videos</a></label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="vkTransferUserInfo"
+                                           value="option2"
+                                           checked>
+                                    <label class="form-check-label" for="vkTransferUserInfo">Transfer user info</label>
+                                </div>
+
+                                <p class="text-center" style="margin-top: 16px">
+                                    <button type="button" class="btn btn-primary" onclick="startVkImport()">
+                                        Transfer
+                                    </button>
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="import-vk-content">
+                            <span id="receiveVkPhotos"></span>
+                            <ul class="list-inline vk-list-photos hide"></ul>
+                            <ul class="list-inline vk-list-videos hide"></ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="js/scripts.js"></script>
-    <script src="js/youtube-load.js"></script>
-    <script type="text/javascript">
-        function startVkImport() {
-            vkImport.transferAll();
-        }
+        <script src="js/scripts.js"></script>
+        <script src="js/youtube-load.js"></script>
+        <script type="text/javascript">
+            function startVkImport() {
+                vkImport.transferAll();
+            }
 
-        function startVkAuth() {
-            VK.Auth.login(function (response) {
-                vkImport.vkAuthInfo(response);
-            }, 20);
-        }
-    </script>
-    <script type="text/javascript">
-        // Global variables for GoogleAuth object, auth status.
-        var GoogleAuth;
+            function startVkAuth() {
+                VK.Auth.login(function (response) {
+                    vkImport.vkAuthInfo(response);
+                }, 20);
+            }
+        </script>
+        <script type="text/javascript">
+            // Global variables for GoogleAuth object, auth status.
+            var GoogleAuth;
 
-        /**
-         * Load the API's client and auth2 modules.
-         * Call the initClient function after the modules load.
-         */
-        function handleClientLoad() {
-            gapi.load('client:auth2', initClient);
-        }
+            /**
+             * Load the API's client and auth2 modules.
+             * Call the initClient function after the modules load.
+             */
+            function handleClientLoad() {
+                gapi.load('client:auth2', initClient);
+            }
 
-        function initClient() {
-            // Initialize the gapi.client object, which app uses to make API requests.
-            // Get API key and client ID from API Console.
-            // 'scope' field specifies space-delimited list of access scopes
+            function initClient() {
+                // Initialize the gapi.client object, which app uses to make API requests.
+                // Get API key and client ID from API Console.
+                // 'scope' field specifies space-delimited list of access scopes
 
-            gapi.client.init({
-                'clientId': '840608930739-12c2gdat8sefu73ddbos0ci7i3dk0qa4.apps.googleusercontent.com',
-                'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
-                'scope': 'https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner'
-            }).then(function () {
-                GoogleAuth = gapi.auth2.getAuthInstance();
+                gapi.client.init({
+                    'clientId': '840608930739-12c2gdat8sefu73ddbos0ci7i3dk0qa4.apps.googleusercontent.com',
+                    'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
+                    'scope': 'https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner'
+                }).then(function () {
+                    GoogleAuth = gapi.auth2.getAuthInstance();
 
-                // Listen for sign-in state changes.
-                GoogleAuth.isSignedIn.listen(updateSigninStatus);
+                    // Listen for sign-in state changes.
+                    GoogleAuth.isSignedIn.listen(updateSigninStatus);
 
-                // Handle initial sign-in state. (Determine if user is already signed in.)
-                setSigninStatus();
+                    // Handle initial sign-in state. (Determine if user is already signed in.)
+                    setSigninStatus();
 
-                // Call handleAuthClick function when user clicks on "Authorize" button.
-                $('#execute-request-button').click(function () {
-                    $('#youtubeImportContent').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-                    handleAuthClick(event);
+                    // Call handleAuthClick function when user clicks on "Authorize" button.
+                    $('#execute-request-button').click(function () {
+                        $('#youtubeImportContent').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+                        handleAuthClick(event);
+                    });
                 });
-            });
-        }
-
-        function handleAuthClick(event) {
-            // Sign user in after click on auth button.
-            if (isAuthorized) {
-                defineRequest();
-            } else {
-                GoogleAuth.signIn();
             }
-        }
 
-        function setSigninStatus() {
-            var user = GoogleAuth.currentUser.get();
-            isAuthorized = user.hasGrantedScopes('https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner');
-            // Toggle button text and displayed statement based on current auth status.
-            if (isAuthorized) {
-                //defineRequest();
-            }
-        }
-
-        function updateSigninStatus(isSignedIn) {
-            setSigninStatus();
-        }
-
-        function createResource(properties) {
-            var resource = {};
-            var normalizedProps = properties;
-            for (var p in properties) {
-                var value = properties[p];
-                if (p && p.substr(-2, 2) == '[]') {
-                    var adjustedName = p.replace('[]', '');
-                    if (value) {
-                        normalizedProps[adjustedName] = value.split(',');
-                    }
-                    delete normalizedProps[p];
+            function handleAuthClick(event) {
+                // Sign user in after click on auth button.
+                if (isAuthorized) {
+                    defineRequest();
+                } else {
+                    GoogleAuth.signIn();
                 }
             }
-            for (var p in normalizedProps) {
-                // Leave properties that don't have values out of inserted resource.
-                if (normalizedProps.hasOwnProperty(p) && normalizedProps[p]) {
-                    var propArray = p.split('.');
-                    var ref = resource;
-                    for (var pa = 0; pa < propArray.length; pa++) {
-                        var key = propArray[pa];
-                        if (pa == propArray.length - 1) {
-                            ref[key] = normalizedProps[p];
-                        } else {
-                            ref = ref[key] = ref[key] || {};
+
+            function setSigninStatus() {
+                var user = GoogleAuth.currentUser.get();
+                isAuthorized = user.hasGrantedScopes('https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner');
+                // Toggle button text and displayed statement based on current auth status.
+                if (isAuthorized) {
+                    //defineRequest();
+                }
+            }
+
+            function updateSigninStatus(isSignedIn) {
+                setSigninStatus();
+            }
+
+            function createResource(properties) {
+                var resource = {};
+                var normalizedProps = properties;
+                for (var p in properties) {
+                    var value = properties[p];
+                    if (p && p.substr(-2, 2) == '[]') {
+                        var adjustedName = p.replace('[]', '');
+                        if (value) {
+                            normalizedProps[adjustedName] = value.split(',');
+                        }
+                        delete normalizedProps[p];
+                    }
+                }
+                for (var p in normalizedProps) {
+                    // Leave properties that don't have values out of inserted resource.
+                    if (normalizedProps.hasOwnProperty(p) && normalizedProps[p]) {
+                        var propArray = p.split('.');
+                        var ref = resource;
+                        for (var pa = 0; pa < propArray.length; pa++) {
+                            var key = propArray[pa];
+                            if (pa == propArray.length - 1) {
+                                ref[key] = normalizedProps[p];
+                            } else {
+                                ref = ref[key] = ref[key] || {};
+                            }
                         }
                     }
                 }
+
+                return resource;
             }
 
-            return resource;
-        }
-
-        function removeEmptyParams(params) {
-            for (var p in params) {
-                if (!params[p] || params[p] == 'undefined') {
-                    delete params[p];
+            function removeEmptyParams(params) {
+                for (var p in params) {
+                    if (!params[p] || params[p] == 'undefined') {
+                        delete params[p];
+                    }
                 }
+                return params;
             }
-            return params;
-        }
 
-        function executeRequest(request, onSuccess) {
-            request.execute(function (response) {
-                console.log(response);
-                if (onSuccess) {
-                    onSuccess(response);
+            function executeRequest(request, onSuccess) {
+                request.execute(function (response) {
+                    console.log(response);
+                    if (onSuccess) {
+                        onSuccess(response);
+                    }
+                });
+            }
+
+            function buildApiRequest(requestMethod, path, params, properties, onSuccess) {
+                params = removeEmptyParams(params);
+                var request;
+                if (properties) {
+                    var resource = createResource(properties);
+                    request = gapi.client.request({
+                        'body': resource,
+                        'method': requestMethod,
+                        'path': path,
+                        'params': params
+                    });
+                } else {
+                    request = gapi.client.request({
+                        'method': requestMethod,
+                        'path': path,
+                        'params': params
+                    });
                 }
+                executeRequest(request, onSuccess);
+            }
+
+            /***** END BOILERPLATE CODE *****/
+
+
+            function defineRequest() {
+                buildApiRequest('GET',
+                    '/youtube/v3/playlists',
+                    {
+                        'mine': 'true',
+                        'maxResults': '25',
+                        'part': 'snippet,contentDetails',
+                        'onBehalfOfContentOwner': '',
+                        'onBehalfOfContentOwnerChannel': ''
+                    }, null, function (response) {
+                        let youtubeImportContent = $('#youtubeImportContent');
+                        youtubeImportContent.html('<ul id="preview-youtube-playlists" class="list-inline">');
+                        response.items.forEach(function (v) {
+                            youtubeImportContent.append('<li class="list-inline-item"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
+                                '<p><button type="button" class="btn btn-primary receive-youtube-playlist-videos" data-id="' + v.id + '">Receive videos</button></p>' +
+                                '</li>');
+
+                        });
+                        youtubeImportContent.append('</ul>');
+                    });
+            }
+
+            $('#youtubeImportModal').on('click', '.receive-youtube-playlist-videos', function () {
+                let id = $(this).attr('data-id');
+                if (!id) {
+                    alert('Incorrect playlist id');
+
+                    return;
+                }
+
+                $('#youtubePlaylistVideos').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+                buildApiRequest('GET',
+                    '/youtube/v3/playlistItems',
+                    {
+                        'maxResults': '25',
+                        'part': 'snippet,contentDetails',
+                        'playlistId': id
+                    }, null, function (response) {
+                        let videos = $('#youtubePlaylistVideos');
+                        videos.html('<p><button type="button" class="btn btn-success btn-import-all-videos">Import all videos</button></p>' +
+                            '<ul id="preview-youtube-videos" class="list-inline">');
+                        response.items.forEach(function (v) {
+                            videos.append('<li class="list-inline-item youtube-video-import" data-id="' + v.contentDetails.videoId + '" data-cover-file="' + v.snippet.thumbnails.medium.url + '"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
+                                '</li>');
+
+                        });
+                        videos.append('</ul>');
+                    });
             });
-        }
-
-        function buildApiRequest(requestMethod, path, params, properties, onSuccess) {
-            params = removeEmptyParams(params);
-            var request;
-            if (properties) {
-                var resource = createResource(properties);
-                request = gapi.client.request({
-                    'body': resource,
-                    'method': requestMethod,
-                    'path': path,
-                    'params': params
-                });
-            } else {
-                request = gapi.client.request({
-                    'method': requestMethod,
-                    'path': path,
-                    'params': params
-                });
-            }
-            executeRequest(request, onSuccess);
-        }
-
-        /***** END BOILERPLATE CODE *****/
-
-
-        function defineRequest() {
-            buildApiRequest('GET',
-                '/youtube/v3/playlists',
-                {
-                    'mine': 'true',
-                    'maxResults': '25',
-                    'part': 'snippet,contentDetails',
-                    'onBehalfOfContentOwner': '',
-                    'onBehalfOfContentOwnerChannel': ''
-                }, null, function (response) {
-                    let youtubeImportContent = $('#youtubeImportContent');
-                    youtubeImportContent.html('<ul id="preview-youtube-playlists" class="list-inline">');
-                    response.items.forEach(function (v) {
-                        youtubeImportContent.append('<li class="list-inline-item"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
-                            '<p><button type="button" class="btn btn-primary receive-youtube-playlist-videos" data-id="' + v.id + '">Receive videos</button></p>' +
-                            '</li>');
-
-                    });
-                    youtubeImportContent.append('</ul>');
-                });
-        }
-
-        $('#youtubeImportModal').on('click', '.receive-youtube-playlist-videos', function () {
-            let id = $(this).attr('data-id');
-            if (!id) {
-                alert('Incorrect playlist id');
-
-                return;
-            }
-
-            $('#youtubePlaylistVideos').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
-            buildApiRequest('GET',
-                '/youtube/v3/playlistItems',
-                {
-                    'maxResults': '25',
-                    'part': 'snippet,contentDetails',
-                    'playlistId': id
-                }, null, function (response) {
-                    let videos = $('#youtubePlaylistVideos');
-                    videos.html('<p><button type="button" class="btn btn-success btn-import-all-videos">Import all videos</button></p>' +
-                        '<ul id="preview-youtube-videos" class="list-inline">');
-                    response.items.forEach(function (v) {
-                        videos.append('<li class="list-inline-item youtube-video-import" data-id="' + v.contentDetails.videoId + '" data-cover-file="' + v.snippet.thumbnails.medium.url + '"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
-                            '</li>');
-
-                    });
-                    videos.append('</ul>');
-                });
-        });
-    </script>
+        </script>
 
 </body>
 </html>
