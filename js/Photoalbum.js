@@ -94,6 +94,7 @@ class Photoalbum {
                 .then(function (response) {
                     let data = response.data;
                     data = data || [];
+                    data.reverse();
                     if (data.length) {
                         let html = '<ul class="list-inline preview-images">';
                         data.forEach(function (v) {

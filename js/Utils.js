@@ -52,6 +52,49 @@ class Utils {
         let urlCreator = window.URL || window.webkitURL;
         return urlCreator.createObjectURL(blob);
     }
+
+    static getVideoImage(path, secs) {
+        return new Promise((resolve, reject) => {
+            let me = this, video = document.createElement('video');
+            video.onloadedmetadata = function () {
+                if ('function' === typeof secs) {
+                    secs = secs(this.duration);
+                }
+                this.currentTime = Math.min(Math.max(0, (secs < 0 ? this.duration : 0) + secs), this.duration);
+            };
+
+            video.onseeked = function (e) {
+                let canvas = document.createElement('canvas');
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                let img = new Image();
+                img.src = canvas.toDataURL();
+                let currentTime = this.currentTime;
+                canvas.toBlob(function (blob) {
+                    resolve({
+                        me: me,
+                        img: img,
+                        blob: blob,
+                        currentTime: currentTime,
+                        e: e
+                    });
+                });
+            };
+
+            video.onerror = function (e) {
+                console.log(e);
+                reject(me, undefined, undefined, e);
+            };
+
+            if (path instanceof Blob) {
+                path = Utils.getUrlForBlob(path);
+            }
+
+            video.src = path;
+        });
+    }
 }
 
 module.exports = Utils;

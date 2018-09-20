@@ -133,6 +133,13 @@ class Post {
                     formData.append(key, file);
                 });
 
+                let onComplete = function (data) {
+                    self.main.onAfterHashChange(data, true);
+                    progressPanel.hide();
+                    setProgress(0);
+                    $('#postOrAttach').removeClass("disabled-content");
+                };
+
                 let afterUploadingFiles = function (data) {
                     console.log(data);
                     let url = data.url + lastName;
@@ -147,10 +154,7 @@ class Post {
                         .find('.content')
                         .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="' + fileType + '"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + fullUrl + '">' + url + '</a>')
                     $('#attached-content').append(postAttachmentTemplate);
-                    self.main.onAfterHashChange(data.response.data, true);
-                    progressPanel.hide();
-                    setProgress(0);
-                    $('#postOrAttach').removeClass("disabled-content");
+                    onComplete(data.response.data);
                 };
 
                 let beforeUploadingPhoto = function (file) {
@@ -178,9 +182,41 @@ class Post {
                         .attr('data-previews', JSON.stringify({'250x250': data.url + previewFile.name}));
                     attachment.append('<div class="delete-post-content" data-url="' + dataUrl + '">×</div>');
                     attachment.find('.content').html('<a target="_blank" href="' + originalUrl + '"><img class="img-preview" src="' + previewUrl + '"></a>');
-                    setProgress(0);
-                    $('#postOrAttach').removeClass("disabled-content");
-                    self.main.onAfterHashChange(data.response.data, true);
+                    onComplete(data.response.data);
+                };
+
+                let beforeUploadingVideo = function (file) {
+                    let postAttachmentTemplate = $('#postAttachment')
+                        .clone()
+                        .addClass('list-inline-item')
+                        .removeAttr('id')
+                        .attr('style', '')
+                        .attr('data-name', file.name);
+                    postAttachmentTemplate
+                        .find('.content')
+                        .html('<img data-video-name="' + file.name + '" class="img-preview" src="img/video-cover.jpg">');
+                    $('#attached-content').append(postAttachmentTemplate);
+                    Utils.getVideoImage(file, function (seconds) {
+                        return seconds / 2;
+                    })
+                        .then(function (data) {
+                            console.log(data);
+                            if (data.img) {
+                                $('img[data-video-name="' + file.name + '"]').attr('src', data.img.src).removeAttr('data-video-name');
+                            } else {
+                                self.main.alert('Can not create preview for video');
+                            }
+
+                            return data.blob;
+                        })
+                        .then(function (blob) {
+                            // todo create wide and square preview
+                            // todo upload preview to swarm
+                            /*self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
+                                .then(function (data) {
+                                    afterUploadingPhoto(file, formData.get(0), data);
+                                });*/
+                        });
                 };
 
                 if (fileType === 'photo') {
@@ -197,6 +233,14 @@ class Post {
                                 .then(function (data) {
                                     afterUploadingPhoto(file, formData.get(0), data);
                                 });
+                        });
+                } else if (fileType === 'video') {
+                    beforeUploadingVideo(lastBlob);
+                    // todo upload video with preview
+                    self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
+                        .then(function (data) {
+                            // todo add link to preview
+                            afterUploadingFiles(data);
                         });
                 } else {
                     self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
@@ -244,6 +288,7 @@ class Post {
                 let id = $(this).attr('data-id');
                 $('#userPost' + id + ' .description').toggle();
                 $('#userPost' + id + ' .edit-post-block').toggle();
+                $('#userPost' + id + ' .delete-post-content').toggle();
             })
             .on('click', '.save-post', function (e) {
                 e.preventDefault();
