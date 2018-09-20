@@ -21,8 +21,6 @@ class Main {
         });
 
         $(document).ready(function () {
-            // hash - user id
-            //console.log('hash from local storage: ' + localStorage.getItem('applicationHash'));
             let hash = window.location.hash.substring(1);
             if (hash) {
                 if (self.blogClass.isCorrectSwarmHash(hash)) {
@@ -35,8 +33,7 @@ class Main {
             }
 
             console.log('hash from window hash: ' + hash);
-            //let initHash = hash ? hash : localStorage.getItem('applicationHash');
-            let swarmHost = window.location.protocol + "//" + window.location.hostname;
+            let swarmHost = window.location.protocol + "//" + window.location.host;
             if (window.location.hostname === "mem.lt") {
                 swarmHost = "https://swarm-gateways.net";
             } else if (window.location.hostname === "tut.bike") {
@@ -46,10 +43,7 @@ class Main {
                 //swarmHost = "https://swarm-gateways.net";
             }
 
-            //swarmHost = window.location.hostname === "mem.lt" ? "https://swarm-gateways.net" : "http://127.0.0.1:8500";
             self.swarm = new SwarmApi(swarmHost, "");
-            //swarm = new SwarmApi("https://swarm-gateways.net", initHash);
-            //self.blog = new Blog(self.swarm);
             self.blog.swarm = self.swarm;
             let isValid = (hash || self.blog.uploadedSwarmHash).length > 0;
             if (isValid) {
@@ -74,7 +68,6 @@ class Main {
             self.init();
         });
     }
-
 
     updateProfile() {
         let self = this;
