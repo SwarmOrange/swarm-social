@@ -14,7 +14,8 @@ let modules = window.socialModules || {
     Settings: Settings,
     Utils: Utils,
     Post: Post,
-    Instagram: Instagram
+    Instagram: Instagram,
+    GooglePlus: GooglePlus
 };
 
 window.Blog = new modules.Blog();
@@ -35,3 +36,4 @@ window.Utils = modules.Utils;
 new modules.Utils();
 new modules.Post(myMain);
 new modules.Instagram(myMain);
+new modules.GooglePlus(myMain);

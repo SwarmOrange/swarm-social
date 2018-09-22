@@ -25,6 +25,7 @@ let Settings = require('./Settings.js');
 let Utils = require('./Utils.js');
 let Post = require('./Post.js');
 let Instagram = require('./Instagram.js');
+let GooglePlus = require('./GooglePlus.js');
 window.socialModules = {
     Main: Main,
     Blog: Blog,
@@ -41,6 +42,7 @@ window.socialModules = {
     Settings: Settings,
     Utils: Utils,
     Post: Post,
-    Instagram: Instagram
+    Instagram: Instagram,
+    GooglePlus: GooglePlus
 };
 require('./initDev.js');

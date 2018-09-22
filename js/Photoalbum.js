@@ -142,44 +142,46 @@ class Photoalbum {
             return self.main.blog.uploadPhotoToAlbum(currentPhotoalbum, self.photoalbumInfo.uploadedId + postfix, file, updateProgress);
         };
 
+        let key = '250x250';
+        let previewFileName = null;
         Utils.resizeImages(currentFile, [{width: 250, height: 250}])
             .then(function (result) {
-                let key = '250x250';
-                let imagePreview = result[key];
-                uploadPhoto(imagePreview, '_' + key)
-                    .then(function (data) {
-                        let previewFileName = data.fileName;
-                        self.main.onAfterHashChange(data.response, true);
-                        uploadPhoto(currentFile)
-                            .then(function (data) {
-                                console.log(data);
-                                self.photoalbumInfo.uploadedId++;
-                                self.main.onAfterHashChange(data.response, true);
-                                progressPanel.hide();
-                                setProgress(0);
-                                self.photoalbumInfo.uploadedInfo.push({
-                                    file: data.fileName,
-                                    description: "",
-                                    previews: {'250x250': previewFileName}
-                                });
+                return result[key];
+            })
+            .then(function (imagePreview) {
+                return uploadPhoto(imagePreview, '_' + key);
+            })
+            .then(function (data) {
+                previewFileName = data.fileName;
+                self.main.onAfterHashChange(data.response, true);
+                return uploadPhoto(currentFile);
+            })
+            .then(function (data) {
+                console.log(data);
+                self.photoalbumInfo.uploadedId++;
+                self.main.onAfterHashChange(data.response, true);
+                progressPanel.hide();
+                setProgress(0);
+                self.photoalbumInfo.uploadedInfo.push({
+                    file: data.fileName,
+                    description: "",
+                    previews: {'250x250': previewFileName}
+                });
 
-                                if (self.photoalbumInfo.files.length > 0) {
-                                    self.sendNextFile();
-                                } else {
-                                    self.main.blog.createPhotoAlbum(currentPhotoalbum, 'Uploaded', '', self.photoalbumInfo.uploadedInfo)
-                                        .then(function (response) {
-                                            console.log('album created');
-                                            console.log(response.data);
-                                            $('#newAlbumModal').modal('hide');
-                                            self.main.alert('Album created!', [
-                                                '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + currentPhotoalbum + '">Share</button>'
-                                            ]);
-                                            self.main.onAfterHashChange(response.data, true);
-
-                                        });
-                                }
-                            });
-                    });
+                if (self.photoalbumInfo.files.length > 0) {
+                    self.sendNextFile();
+                } else {
+                    self.main.blog.createPhotoAlbum(currentPhotoalbum, 'Uploaded', '', self.photoalbumInfo.uploadedInfo)
+                        .then(function (response) {
+                            console.log('album created');
+                            console.log(response.data);
+                            $('#newAlbumModal').modal('hide');
+                            self.main.alert('Album created!', [
+                                '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + currentPhotoalbum + '">Share</button>'
+                            ]);
+                            self.main.onAfterHashChange(response.data, true);
+                        });
+                }
             });
     }
 }

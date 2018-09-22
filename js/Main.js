@@ -317,43 +317,47 @@ class Main {
         let self = this;
         let photos = $('img[data-type=insta-photo]');
         if (photos.length) {
+            let previewFileName = null;
             let currentElement = $(photos[0]);
             let src = currentElement.attr('src');
+            let downloadedFile = null;
             console.log(src);
             self.swarm.axios.request({
                 url: src,
                 method: 'GET',
                 responseType: 'blob',
-            }).then(function (response) {
-                console.log('Photo downloaded');
-                currentElement.attr('data-type', '');
-                currentElement.addClass('photo-uploaded-insta');
-                console.log('album id ' + self.currentPhotoAlbum);
-                Utils.resizeImages(response.data, [{width: 250, height: 250}])
-                    .then(function (result) {
-                        let key = '250x250';
-                        let imagePreview = result[key];
+            })
+                .then(function (response) {
+                    downloadedFile = response.data;
+                    console.log('Photo downloaded');
+                    currentElement.attr('data-type', '');
+                    currentElement.addClass('photo-uploaded-insta');
+                    console.log('album id ' + self.currentPhotoAlbum);
+                    return Utils.resizeImages(response.data, [{width: 250, height: 250}]);
+                })
+                .then(function (result) {
+                    let key = '250x250';
+                    let imagePreview = result[key];
 
-                        self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId + '_' + key, imagePreview)
-                            .then(function (data) {
-                                let previewFileName = data.fileName;
-                                self.onAfterHashChange(data.response, true);
-                                self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId, response.data)
-                                    .then(function (data) {
-                                        console.log('Photo uploaded');
-                                        console.log(data);
-                                        self.currentPhotosForAlbum.push({
-                                            file: data.fileName,
-                                            description: "",
-                                            previews: {'250x250': previewFileName}
-                                        });
-                                        self.photoAlbumPhotoId++;
-                                        self.onAfterHashChange(data.response, true);
-                                        self.uploadAllInstaPhotos();
-                                    });
-                            });
+                    return self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId + '_' + key, imagePreview);
+                })
+                .then(function (data) {
+                    previewFileName = data.fileName;
+                    self.onAfterHashChange(data.response, true);
+                    return self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId, downloadedFile);
+                })
+                .then(function (data) {
+                    console.log('Photo uploaded');
+                    console.log(data);
+                    self.currentPhotosForAlbum.push({
+                        file: data.fileName,
+                        description: "",
+                        previews: {'250x250': previewFileName}
                     });
-            });
+                    self.photoAlbumPhotoId++;
+                    self.onAfterHashChange(data.response, true);
+                    self.uploadAllInstaPhotos();
+                });
         } else {
             self.blog.createPhotoAlbum(self.currentPhotoAlbum, 'Insta', '', self.currentPhotosForAlbum)
                 .then(function (response) {

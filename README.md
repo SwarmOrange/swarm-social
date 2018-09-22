@@ -19,11 +19,11 @@ After success uploading you receive SWARM hash. Replace {SWARM_HASH} with your h
 ```
 For local node:
 
-http://127.0.0.1:8500/bzz:/{SWARM_HASH}/index.html
+http://127.0.0.1:8500/bzz:/{SWARM_HASH}/
 
 For remote node:
 
-https://swarm-gateways.net/bzz:/{SWARM_HASH}/index.html
+https://swarm-gateways.net/bzz:/{SWARM_HASH}/
 ```
 
 For example if you receive hash
@@ -32,11 +32,11 @@ For example if you receive hash
 ```
 your result url will look like:
 ```
-http://127.0.0.1:8500/bzz:/07ef1099b4931a414f3601fcd1f69cd6404f5fc2b7360379f25e44d7677bf166/index.html
+http://127.0.0.1:8500/bzz:/07ef1099b4931a414f3601fcd1f69cd6404f5fc2b7360379f25e44d7677bf166/
 
 or
 
-https://swarm-gateways.net/bzz:/07ef1099b4931a414f3601fcd1f69cd6404f5fc2b7360379f25e44d7677bf166/index.html
+https://swarm-gateways.net/bzz:/07ef1099b4931a414f3601fcd1f69cd6404f5fc2b7360379f25e44d7677bf166/
 ```
 
 ## Development process

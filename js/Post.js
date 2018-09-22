@@ -185,16 +185,16 @@ class Post {
                     onComplete(data.response.data);
                 };
 
-                let beforeUploadingVideo = function (file) {
+                let beforeUploadingVideo = function (fileId, file) {
                     let postAttachmentTemplate = $('#postAttachment')
                         .clone()
                         .addClass('list-inline-item')
                         .removeAttr('id')
                         .attr('style', '')
-                        .attr('data-name', file.name);
+                        .attr('data-name', fileId);
                     postAttachmentTemplate
                         .find('.content')
-                        .html('<img data-video-name="' + file.name + '" class="img-preview" src="img/video-cover.jpg">');
+                        .html('<img data-video-name="' + fileId + '" class="img-preview" src="img/video-cover.jpg">');
                     $('#attached-content').append(postAttachmentTemplate);
                     Utils.getVideoImage(file, function (seconds) {
                         return seconds / 2;
@@ -202,7 +202,7 @@ class Post {
                         .then(function (data) {
                             console.log(data);
                             if (data.img) {
-                                $('img[data-video-name="' + file.name + '"]').attr('src', data.img.src).removeAttr('data-video-name');
+                                $('img[data-video-name="' + fileId + '"]').attr('src', data.img.src);
                             } else {
                                 self.main.alert('Can not create preview for video');
                             }
@@ -217,6 +217,17 @@ class Post {
                                     afterUploadingPhoto(file, formData.get(0), data);
                                 });*/
                         });
+                };
+
+                let afterUploadingVideo = function (fileId, data) {
+                    let url = data.url + lastName;
+                    let fullUrl = data.fullUrl + lastName;
+                    $('img[data-video-name="' + fileId + '"]').wrap('<a href="' + fullUrl + '" target="_blank"></a>');
+                    let attachment = $('.post-attachment[data-name="' + fileId + '"]');
+                    attachment
+                        .attr('data-type', fileType)
+                        .attr('data-url', url);
+                    onComplete(data.response.data);
                 };
 
                 if (fileType === 'photo') {
@@ -235,12 +246,11 @@ class Post {
                                 });
                         });
                 } else if (fileType === 'video') {
-                    beforeUploadingVideo(lastBlob);
-                    // todo upload video with preview
+                    let fileId = Math.random().toString(36).substr(2, 10);
+                    beforeUploadingVideo(fileId, lastBlob);
                     self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
                         .then(function (data) {
-                            // todo add link to preview
-                            afterUploadingFiles(data);
+                            afterUploadingVideo(fileId, data);
                         });
                 } else {
                     self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
