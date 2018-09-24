@@ -36,4 +36,4 @@ window.Utils = modules.Utils;
 new modules.Utils();
 new modules.Post(myMain);
 new modules.Instagram(myMain);
-new modules.GooglePlus(myMain);
+window.googlePlus = new modules.GooglePlus(myMain);

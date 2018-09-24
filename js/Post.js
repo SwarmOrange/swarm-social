@@ -231,15 +231,22 @@ class Post {
                 };
 
                 if (fileType === 'photo') {
-                    Utils.resizeImages(lastBlob, [{width: 250, height: 250}])
+                    Utils.resizeImages(lastBlob, [
+                        {width: 250, height: 250},
+                        {width: 1200, height: 800, format: "maxsize"}
+                    ])
                         .then(function (result) {
                             let key = '250x250';
+                            let keyBigPreview = '1200x800';
                             let imagePreview = result[key];
+                            let imageBigPreview = result[keyBigPreview];
                             let previewFilename = lastNameWithoutExtension + '_' + key + '.' + lastExtension;
+                            let bigPreviewFilename = lastNameWithoutExtension + '_' + keyBigPreview + '.' + lastExtension;
                             let file = new File([imagePreview], previewFilename, {type: lastValue.type});
+                            let fileBig = new File([imageBigPreview], bigPreviewFilename, {type: lastValue.type});
                             beforeUploadingPhoto(file);
-                            // todo change key for multiple
                             formData.append(1, file);
+                            formData.append(2, fileBig);
                             self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
                                 .then(function (data) {
                                     afterUploadingPhoto(file, formData.get(0), data);

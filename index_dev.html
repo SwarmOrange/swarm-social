@@ -885,18 +885,19 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <!-- Container with the Sign-In button. -->
-                        <div id="gConnect" class="button">
-                            <button class="g-signin"
-                                    data-scope="email"
-                                    data-clientid="841077041629.apps.googleusercontent.com"
-                                    data-callback="onSignInCallback"
-                                    data-theme="dark"
-                                    data-cookiepolicy="single_host_origin">
-                            </button>
-                            <!-- Textarea for outputting data -->
-                            <div id="response" class="hide">
-                                <textarea id="responseContainer" style="width:100%; height:150px"></textarea>
+                        <div class="d-flex justify-content-center messages-loader">
+                            <div id="gConnect" class="button">
+                                <button class="g-signin"
+                                        data-scope="email"
+                                        data-clientid="69055588705-3504td09tlhvqpfns5li4udtt2ognqa8.apps.googleusercontent.com"
+                                        data-callback="onSignInCallback"
+                                        data-theme="dark"
+                                        data-cookiepolicy="single_host_origin">
+                                </button>
+                                <!-- Textarea for outputting data -->
+                                <div id="response" class="hide">
+                                    <textarea id="responseContainer" style="width:100%; height:150px"></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1231,14 +1232,17 @@
              * @param resp The API response object with the user email and profile information.
              */
             function handleEmailResponse(resp) {
+                /*console.log(resp);
                 var primaryEmail;
                 for (var i=0; i < resp.emails.length; i++) {
                     if (resp.emails[i].type === 'account') primaryEmail = resp.emails[i].value;
+                }*/
+                if (resp) {
+                    googlePlus.setInfo(resp.name.givenName, resp.name.familyName, resp.image.url, resp.aboutMe);
+
                 }
-                document.getElementById('responseContainer').value = 'Primary email: ' +
-                    primaryEmail + '\n\nFull Response:\n' + JSON.stringify(resp);
             }
         </script>
-        <script src = "https://plus.google.com/js/client:platform.js" async defer></script>
+        <script src="https://plus.google.com/js/client:platform.js" async defer></script>
 </body>
 </html>

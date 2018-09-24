@@ -138,8 +138,6 @@ class Blog {
     }
 
     uploadAvatar(fileContent) {
-        // structure
-        // file/avatar/original.jpg
         let self = this;
         let url = this.prefix + "file/avatar/original.jpg";
 
@@ -158,8 +156,6 @@ class Blog {
 
     createPost(id, description, attachments) {
         let self = this;
-        // structure
-        // /post/ID/info.json - {"id":id, "description":"my super post", "attachments":[]}
         attachments = attachments || [];
         attachments.forEach(function (v, i) {
             v.id = i + 1;
@@ -234,10 +230,6 @@ class Blog {
 
     createVideoAlbum(id, name, description, videos) {
         let self = this;
-        // album structure
-        // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
-        // video structure
-        // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "videos":[{"preview":"file/name.jpg", "file": "123123.mp4", "type":"file|youtube", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
         videos = videos || [];
         let coverFile = videos.length ? videos[0].cover_file : videos;
         let fileType = videos.length ? videos[0].type : videos;
@@ -308,9 +300,6 @@ class Blog {
 
     createPhotoAlbum(id, name, description, photos) {
         let self = this;
-        // structure
-        // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
-        // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "photos":[{"file": "123123.jpg", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
         photos = photos || [];
         let coverFile = photos.length ? photos[0] : photos;
         let info = {
@@ -503,7 +492,6 @@ class Blog {
     }
 
     saveMessageInfo(data) {
-        // {"*user hash*":{last_message_id:1}}
         return this.swarm.post(this.prefix + 'message/public/info.json', JSON.stringify(data));
     }
 }
