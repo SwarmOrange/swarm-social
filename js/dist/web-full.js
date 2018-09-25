@@ -139,8 +139,6 @@ class Blog {
     }
 
     uploadAvatar(fileContent) {
-        // structure
-        // file/avatar/original.jpg
         let self = this;
         let url = this.prefix + "file/avatar/original.jpg";
 
@@ -159,8 +157,6 @@ class Blog {
 
     createPost(id, description, attachments) {
         let self = this;
-        // structure
-        // /post/ID/info.json - {"id":id, "description":"my super post", "attachments":[]}
         attachments = attachments || [];
         attachments.forEach(function (v, i) {
             v.id = i + 1;
@@ -235,10 +231,6 @@ class Blog {
 
     createVideoAlbum(id, name, description, videos) {
         let self = this;
-        // album structure
-        // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
-        // video structure
-        // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "videos":[{"preview":"file/name.jpg", "file": "123123.mp4", "type":"file|youtube", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
         videos = videos || [];
         let coverFile = videos.length ? videos[0].cover_file : videos;
         let fileType = videos.length ? videos[0].type : videos;
@@ -300,18 +292,16 @@ class Blog {
         return this.swarm.get(this.prefix + 'videoalbum/' + id + '/info.json');
     }
 
-    uploadVideoToAlbum(photoAlbumId, photoId, fileContent, contentType, onProgress) {
-        let fileName = this.prefix + "videoalbum/" + photoAlbumId + "/" + photoId + ".mp4";
-        return this.sendRawFile(fileName, fileContent, contentType, null, null, onProgress).then(function (response) {
-            return {fileName: fileName, response: response.data};
-        });
+    uploadFileToVideoalbum(albumId, file, onProgress) {
+        let fileName = this.prefix + "videoalbum/" + albumId + "/" + file.name;
+        return this.sendRawFile(fileName, file, file.type, null, null, onProgress)
+            .then(function (response) {
+                return {fileName: fileName, response: response.data};
+            });
     }
 
     createPhotoAlbum(id, name, description, photos) {
         let self = this;
-        // structure
-        // /photoalbum/info.json - [{"id": id, "name": "Album name 1", "description": "Description 1", "cover_file": "file1.jpg"}, {"id": id, "name":"Album name 2", "description": "Description 2", "cover_file": "file2.jpg"}]
-        // /photoalbum/ID/info.json - {"id": id, "name": "Album name 1", "description": "My super album", "cover": "/file/name.jpg", "photos":[{"file": "123123.jpg", "description": "My description"}, {"file": "77777.jpg", "description": "My 777 description"}]}
         photos = photos || [];
         let coverFile = photos.length ? photos[0] : photos;
         let info = {
@@ -504,7 +494,6 @@ class Blog {
     }
 
     saveMessageInfo(data) {
-        // {"*user hash*":{last_message_id:1}}
         return this.swarm.post(this.prefix + 'message/public/info.json', JSON.stringify(data));
     }
 }
@@ -638,6 +627,56 @@ class FacebookImport {
 
 module.exports = FacebookImport;
 },{}],4:[function(require,module,exports){
+class GooglePlus {
+    constructor(main) {
+        this.main = main;
+        this.info = {};
+        this.init();
+    }
+
+    init() {
+        let self = this;
+        $('.btn-profile-import-google-plus').click(function (e) {
+            e.preventDefault();
+            $('#googlePlusImportModal').modal('show');
+        });
+
+        $('.btn-save-google-plus-info').click(function (e) {
+            e.preventDefault();
+            self.main.blog.myProfile.first_name = self.info.first_name;
+            self.main.blog.myProfile.last_name = self.info.last_name;
+            self.main.blog.myProfile.about = self.info.about;
+            self.main.swarm.axios.request({
+                url: self.info.photo,
+                method: 'GET',
+                responseType: 'blob',
+            })
+                .then(function (response) {
+                    return self.main.blog.uploadAvatar(response.data);
+                })
+                .then(function (response) {
+                    self.main.onAfterHashChange(response.data);
+                    return self.main.blog.saveProfile(self.main.blog.myProfile);
+                })
+                .then(function (response) {
+                    self.main.onAfterHashChange(response.data);
+                });
+
+        });
+    }
+
+    setInfo(firstName, lastName, avatarUrl, about) {
+        this.info = {
+            first_name: firstName,
+            last_name: lastName,
+            photo: avatarUrl,
+            about: about
+        };
+    }
+}
+
+module.exports = GooglePlus;
+},{}],5:[function(require,module,exports){
 class ImportButtons {
     constructor(main) {
         this.init();
@@ -728,7 +767,7 @@ class ImportButtons {
 }
 
 module.exports = ImportButtons;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 class Instagram {
     constructor(main) {
         this.main = main;
@@ -785,7 +824,7 @@ class Instagram {
 }
 
 module.exports = Instagram;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 class Main {
 
     constructor(blogClass, blog) {
@@ -1105,43 +1144,47 @@ class Main {
         let self = this;
         let photos = $('img[data-type=insta-photo]');
         if (photos.length) {
+            let previewFileName = null;
             let currentElement = $(photos[0]);
             let src = currentElement.attr('src');
+            let downloadedFile = null;
             console.log(src);
             self.swarm.axios.request({
                 url: src,
                 method: 'GET',
                 responseType: 'blob',
-            }).then(function (response) {
-                console.log('Photo downloaded');
-                currentElement.attr('data-type', '');
-                currentElement.addClass('photo-uploaded-insta');
-                console.log('album id ' + self.currentPhotoAlbum);
-                Utils.resizeImages(response.data, [{width: 250, height: 250}])
-                    .then(function (result) {
-                        let key = '250x250';
-                        let imagePreview = result[key];
+            })
+                .then(function (response) {
+                    downloadedFile = response.data;
+                    console.log('Photo downloaded');
+                    currentElement.attr('data-type', '');
+                    currentElement.addClass('photo-uploaded-insta');
+                    console.log('album id ' + self.currentPhotoAlbum);
+                    return Utils.resizeImages(response.data, [{width: 250, height: 250}]);
+                })
+                .then(function (result) {
+                    let key = '250x250';
+                    let imagePreview = result[key];
 
-                        self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId + '_' + key, imagePreview)
-                            .then(function (data) {
-                                let previewFileName = data.fileName;
-                                self.onAfterHashChange(data.response, true);
-                                self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId, response.data)
-                                    .then(function (data) {
-                                        console.log('Photo uploaded');
-                                        console.log(data);
-                                        self.currentPhotosForAlbum.push({
-                                            file: data.fileName,
-                                            description: "",
-                                            previews: {'250x250': previewFileName}
-                                        });
-                                        self.photoAlbumPhotoId++;
-                                        self.onAfterHashChange(data.response, true);
-                                        self.uploadAllInstaPhotos();
-                                    });
-                            });
+                    return self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId + '_' + key, imagePreview);
+                })
+                .then(function (data) {
+                    previewFileName = data.fileName;
+                    self.onAfterHashChange(data.response, true);
+                    return self.blog.uploadPhotoToAlbum(self.currentPhotoAlbum, self.photoAlbumPhotoId, downloadedFile);
+                })
+                .then(function (data) {
+                    console.log('Photo uploaded');
+                    console.log(data);
+                    self.currentPhotosForAlbum.push({
+                        file: data.fileName,
+                        description: "",
+                        previews: {'250x250': previewFileName}
                     });
-            });
+                    self.photoAlbumPhotoId++;
+                    self.onAfterHashChange(data.response, true);
+                    self.uploadAllInstaPhotos();
+                });
         } else {
             self.blog.createPhotoAlbum(self.currentPhotoAlbum, 'Insta', '', self.currentPhotosForAlbum)
                 .then(function (response) {
@@ -1419,7 +1462,7 @@ class Main {
 }
 
 module.exports = Main;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 class Messages {
     constructor(main) {
         this.main = main;
@@ -1528,7 +1571,7 @@ class Messages {
 }
 
 module.exports = Messages;
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 class News {
     constructor(main) {
         this.main = main;
@@ -1616,7 +1659,7 @@ class News {
 }
 
 module.exports = News;
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 class Photoalbum {
     constructor(main) {
         this.main = main;
@@ -1713,6 +1756,7 @@ class Photoalbum {
                 .then(function (response) {
                     let data = response.data;
                     data = data || [];
+                    data.reverse();
                     if (data.length) {
                         let html = '<ul class="list-inline preview-images">';
                         data.forEach(function (v) {
@@ -1760,50 +1804,52 @@ class Photoalbum {
             return self.main.blog.uploadPhotoToAlbum(currentPhotoalbum, self.photoalbumInfo.uploadedId + postfix, file, updateProgress);
         };
 
+        let key = '250x250';
+        let previewFileName = null;
         Utils.resizeImages(currentFile, [{width: 250, height: 250}])
             .then(function (result) {
-                let key = '250x250';
-                let imagePreview = result[key];
-                uploadPhoto(imagePreview, '_' + key)
-                    .then(function (data) {
-                        let previewFileName = data.fileName;
-                        self.main.onAfterHashChange(data.response, true);
-                        uploadPhoto(currentFile)
-                            .then(function (data) {
-                                console.log(data);
-                                self.photoalbumInfo.uploadedId++;
-                                self.main.onAfterHashChange(data.response, true);
-                                progressPanel.hide();
-                                setProgress(0);
-                                self.photoalbumInfo.uploadedInfo.push({
-                                    file: data.fileName,
-                                    description: "",
-                                    previews: {'250x250': previewFileName}
-                                });
+                return result[key];
+            })
+            .then(function (imagePreview) {
+                return uploadPhoto(imagePreview, '_' + key);
+            })
+            .then(function (data) {
+                previewFileName = data.fileName;
+                self.main.onAfterHashChange(data.response, true);
+                return uploadPhoto(currentFile);
+            })
+            .then(function (data) {
+                console.log(data);
+                self.photoalbumInfo.uploadedId++;
+                self.main.onAfterHashChange(data.response, true);
+                progressPanel.hide();
+                setProgress(0);
+                self.photoalbumInfo.uploadedInfo.push({
+                    file: data.fileName,
+                    description: "",
+                    previews: {'250x250': previewFileName}
+                });
 
-                                if (self.photoalbumInfo.files.length > 0) {
-                                    self.sendNextFile();
-                                } else {
-                                    self.main.blog.createPhotoAlbum(currentPhotoalbum, 'Uploaded', '', self.photoalbumInfo.uploadedInfo)
-                                        .then(function (response) {
-                                            console.log('album created');
-                                            console.log(response.data);
-                                            $('#newAlbumModal').modal('hide');
-                                            self.main.alert('Album created!', [
-                                                '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + currentPhotoalbum + '">Share</button>'
-                                            ]);
-                                            self.main.onAfterHashChange(response.data, true);
-
-                                        });
-                                }
-                            });
-                    });
+                if (self.photoalbumInfo.files.length > 0) {
+                    self.sendNextFile();
+                } else {
+                    self.main.blog.createPhotoAlbum(currentPhotoalbum, 'Uploaded', '', self.photoalbumInfo.uploadedInfo)
+                        .then(function (response) {
+                            console.log('album created');
+                            console.log(response.data);
+                            $('#newAlbumModal').modal('hide');
+                            self.main.alert('Album created!', [
+                                '<button type="button" class="btn btn-success btn-share-item" data-type="photoalbum" data-message="Just created new photoalbum!" data-id="' + currentPhotoalbum + '">Share</button>'
+                            ]);
+                            self.main.onAfterHashChange(response.data, true);
+                        });
+                }
             });
     }
 }
 
 module.exports = Photoalbum;
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 class Post {
     constructor(main) {
         this.init();
@@ -1939,6 +1985,13 @@ class Post {
                     formData.append(key, file);
                 });
 
+                let onComplete = function (data) {
+                    self.main.onAfterHashChange(data, true);
+                    progressPanel.hide();
+                    setProgress(0);
+                    $('#postOrAttach').removeClass("disabled-content");
+                };
+
                 let afterUploadingFiles = function (data) {
                     console.log(data);
                     let url = data.url + lastName;
@@ -1953,10 +2006,7 @@ class Post {
                         .find('.content')
                         .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="' + fileType + '"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + fullUrl + '">' + url + '</a>')
                     $('#attached-content').append(postAttachmentTemplate);
-                    self.main.onAfterHashChange(data.response.data, true);
-                    progressPanel.hide();
-                    setProgress(0);
-                    $('#postOrAttach').removeClass("disabled-content");
+                    onComplete(data.response.data);
                 };
 
                 let beforeUploadingPhoto = function (file) {
@@ -1984,25 +2034,82 @@ class Post {
                         .attr('data-previews', JSON.stringify({'250x250': data.url + previewFile.name}));
                     attachment.append('<div class="delete-post-content" data-url="' + dataUrl + '">×</div>');
                     attachment.find('.content').html('<a target="_blank" href="' + originalUrl + '"><img class="img-preview" src="' + previewUrl + '"></a>');
-                    setProgress(0);
-                    $('#postOrAttach').removeClass("disabled-content");
-                    self.main.onAfterHashChange(data.response.data, true);
+                    onComplete(data.response.data);
+                };
+
+                let beforeUploadingVideo = function (fileId, file) {
+                    let postAttachmentTemplate = $('#postAttachment')
+                        .clone()
+                        .addClass('list-inline-item')
+                        .removeAttr('id')
+                        .attr('style', '')
+                        .attr('data-name', fileId);
+                    postAttachmentTemplate
+                        .find('.content')
+                        .html('<img data-video-name="' + fileId + '" class="img-preview" src="img/video-cover.jpg">');
+                    $('#attached-content').append(postAttachmentTemplate);
+                    Utils.getVideoImage(file, function (seconds) {
+                        return seconds / 2;
+                    })
+                        .then(function (data) {
+                            console.log(data);
+                            if (data.img) {
+                                $('img[data-video-name="' + fileId + '"]').attr('src', data.img.src);
+                            } else {
+                                self.main.alert('Can not create preview for video');
+                            }
+
+                            return data.blob;
+                        })
+                        .then(function (blob) {
+                            // todo create wide and square preview
+                            // todo upload preview to swarm
+                            /*self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
+                                .then(function (data) {
+                                    afterUploadingPhoto(file, formData.get(0), data);
+                                });*/
+                        });
+                };
+
+                let afterUploadingVideo = function (fileId, data) {
+                    let url = data.url + lastName;
+                    let fullUrl = data.fullUrl + lastName;
+                    $('img[data-video-name="' + fileId + '"]').wrap('<a href="' + fullUrl + '" target="_blank"></a>');
+                    let attachment = $('.post-attachment[data-name="' + fileId + '"]');
+                    attachment
+                        .attr('data-type', fileType)
+                        .attr('data-url', url);
+                    onComplete(data.response.data);
                 };
 
                 if (fileType === 'photo') {
-                    Utils.resizeImages(lastBlob, [{width: 250, height: 250}])
+                    Utils.resizeImages(lastBlob, [
+                        {width: 250, height: 250},
+                        {width: 1200, height: 800, format: "maxsize"}
+                    ])
                         .then(function (result) {
                             let key = '250x250';
+                            let keyBigPreview = '1200x800';
                             let imagePreview = result[key];
+                            let imageBigPreview = result[keyBigPreview];
                             let previewFilename = lastNameWithoutExtension + '_' + key + '.' + lastExtension;
+                            let bigPreviewFilename = lastNameWithoutExtension + '_' + keyBigPreview + '.' + lastExtension;
                             let file = new File([imagePreview], previewFilename, {type: lastValue.type});
+                            let fileBig = new File([imageBigPreview], bigPreviewFilename, {type: lastValue.type});
                             beforeUploadingPhoto(file);
-                            // todo change key for multiple
                             formData.append(1, file);
+                            formData.append(2, fileBig);
                             self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
                                 .then(function (data) {
                                     afterUploadingPhoto(file, formData.get(0), data);
                                 });
+                        });
+                } else if (fileType === 'video') {
+                    let fileId = Math.random().toString(36).substr(2, 10);
+                    beforeUploadingVideo(fileId, lastBlob);
+                    self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
+                        .then(function (data) {
+                            afterUploadingVideo(fileId, data);
                         });
                 } else {
                     self.blog.uploadFilesForPost(currentPostId, formData, updateProgress)
@@ -2050,6 +2157,7 @@ class Post {
                 let id = $(this).attr('data-id');
                 $('#userPost' + id + ' .description').toggle();
                 $('#userPost' + id + ' .edit-post-block').toggle();
+                $('#userPost' + id + ' .delete-post-content').toggle();
             })
             .on('click', '.save-post', function (e) {
                 e.preventDefault();
@@ -2065,7 +2173,7 @@ class Post {
 }
 
 module.exports = Post;
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 class Settings {
     constructor(main) {
         this.main = main;
@@ -2281,7 +2389,7 @@ class Settings {
 }
 
 module.exports = Settings;
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 class StartNow {
     constructor() {
         this.init();
@@ -2322,7 +2430,7 @@ class StartNow {
 }
 
 module.exports = StartNow;
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 class SwarmApi {
     constructor(apiUrl, applicationHash) {
         this.isWeb = typeof window !== undefined;
@@ -2331,8 +2439,6 @@ class SwarmApi {
         // todo check is generates correct url when web and empty url
         this.apiUrl = apiUrl || (this.isWeb ? location.protocol + "//" + location.host : "https://swarm-gateways.net");
         this.c_hashLength = 64;
-        //this.c_host = location.protocol + "//" + location.host;
-        //this.resetPageHash();
     }
 
     request(method, fileName, userHash, swarmProtocol, data, fileType, responseType, onUploadProgress) {
@@ -2381,110 +2487,10 @@ class SwarmApi {
             return n !== ""
         }).join("/");
     }
-
-    getFile(filename, onSuccess) {
-        $.ajax({
-                url: this.c_host + '/bzz:/' + this.pageManifestHash + filename,
-                success: function (data, textStatus, jqXHR) {
-                    onSuccess(data);
-                },
-                dataType: 'text'
-            }
-        );
-    }
-
-    putFile(filename, filedata, onSuccess) {
-        var self = this;
-        $.ajax(this.c_host + '/bzz:/' + this.pageManifestHash + filename,
-            {
-                type: 'post',
-                data: JSON.stringify(filedata),
-                dataType: 'text',
-                contentType: 'application/text',
-                success: function (data, textStatus, jqXHR) {
-                    self.updateHash(data);
-                    onSuccess(data);
-                }
-            });
-    }
-
-    putImage(filename, filedata, onSuccess) {
-        var self = this;
-        $.ajax(this.c_host + '/bzz:/' + this.pageManifestHash + filename,
-            {
-                type: 'post',
-                data: filedata,
-                contentType: 'image/jpg',
-                processData: false,
-                success: function (data, textStatus, jqXHR) {
-                    self.updateHash(data);
-                    onSuccess(data);
-                }
-            });
-    }
-
-    reloadPage() {
-        window.location.href = this.c_host + '/bzz:/' + this.pageManifestHash + "/index.html";
-    }
-
-    getFileList(url, callback) {
-        $.ajax({
-                url: this.c_host + '/bzz-list:/' + this.pageManifestHash + url,
-                success: function (data, textStatus, jqXHR) {
-                    callback(data);
-                },
-                dataType: 'text'
-            }
-        );
-    }
-
-    resetPageHash() {
-        var url = document.URL; //'https://open.swarm-gateways.net/bzz:/e692a33726cda6c8cb71575316c7960f2f26d26a96f9097fb6e51f5bd7915d2d/posts/info.txt';
-        var pageHash = url.substr(url.indexOf("bzz:/") + 5, this.c_hashLength);
-        if (this.checkHash(pageHash))
-            this.updateHash(pageHash);
-        return;
-        // Try Get A Hash from MRU
-        var self = this;
-        var oReq = new XMLHttpRequest();
-        oReq.open("GET", this.c_host + '/bzz-resource:/' + pageHash, true);
-        oReq.responseType = "arraybuffer";
-        oReq.onload = function (oEvent) {
-            var arrayBuffer = oReq.response;
-            var str = "";
-            var byteArray = new Uint8Array(arrayBuffer);
-            for (var i = 2; i < byteArray.length; i++) {
-                if (byteArray[i] < 16)
-                    str += "0";
-                str += parseInt(byteArray[i] & 0xff).toString(16);
-            }
-            self.updateHash(str);
-        };
-        oReq.send();
-    }
-
-    checkHash(hash) {
-        if (hash.length == this.c_hashLength) {
-            return true;
-        } else {
-
-            //alert("getPageHash() Error: " + hash);
-            return false;
-        }
-    }
-
-    updateHash(hash) {
-        if (this.checkHash(hash)) {
-            this.pageManifestHash = hash;
-            document.getElementById("id_pageHash").innerHTML = 'Page Hash: ' + this.pageManifestHash;
-        }
-        //else
-        //alert("Error updating page hash! " + hash);
-    }
 }
 
 module.exports = SwarmApi;
-},{"axios":20}],14:[function(require,module,exports){
+},{"axios":21}],15:[function(require,module,exports){
 class Utils {
     constructor() {
     }
@@ -2493,41 +2499,61 @@ class Utils {
         return new Promise((resolve, reject) => {
             let result = {};
             let img = new Image();
+            let resultsCount = 0;
             img.onload = function () {
                 resultSizes.forEach(function (v) {
                     let canvas = document.createElement("canvas");
                     let ctx = canvas.getContext("2d");
                     canvas.width = v.width;
                     canvas.height = v.height;
-                    if (v.width !== v.height) {
-                        throw  "Method support only square preview";
-                    }
-
                     let sourceWidth = img.width;
                     let sourceHeight = img.height;
                     let sourceXOffset = 0;
                     let sourceYOffset = 0;
-                    if (img.width > img.height) {
-                        // landscape
-                        sourceWidth = img.height;
-                        sourceHeight = img.height;
-                        //sourceXOffset = v.width / 2;
-                        sourceXOffset = (img.width - img.height) / 2;
-                    } else if (img.width < img.height) {
-                        // portrait
-                        sourceWidth = img.width;
-                        sourceHeight = img.width;
-                        //sourceYOffset = v.width / 2;
-                        sourceYOffset = (img.height - img.width) / 2;
-                    } else {
-                        // square, do nothing
+                    let dstW = v.width;
+                    let dstH = v.height;
+                    if (!v.format || v.format === "box") {
+                        if (v.width !== v.height) {
+                            throw  "Method support only square preview";
+                        }
+
+                        if (img.width > img.height) {
+                            // landscape
+                            sourceWidth = img.height;
+                            sourceHeight = img.height;
+                            sourceXOffset = (img.width - img.height) / 2;
+                        } else if (img.width < img.height) {
+                            // portrait
+                            sourceWidth = img.width;
+                            sourceHeight = img.width;
+                            sourceYOffset = (img.height - img.width) / 2;
+                        } else {
+                            // square, do nothing
+                        }
+                    } else if (v.format === "maxsize") {
+                        if (img.width > img.height) {
+                            if (img.width > v.width) {
+                                canvas.height = img.height * v.width / img.width;
+                                dstH = canvas.height;
+                                canvas.width = v.width;
+                            }
+                        } else {
+                            if (img.height > v.height) {
+                                canvas.width = img.width * v.height / img.height;
+                                dstW = canvas.width;
+                                canvas.height = v.height;
+                            }
+                        }
                     }
 
-                    ctx.drawImage(img, sourceXOffset, sourceYOffset, sourceWidth, sourceHeight, 0, 0, v.width, v.height);
-                    const mimeType = 'image/jpg';
+                    ctx.drawImage(img, sourceXOffset, sourceYOffset, sourceWidth, sourceHeight, 0, 0, dstW, dstH);
+                    const mimeType = 'image/jpeg';
                     canvas.toBlob((blob) => {
+                        resultsCount++;
                         result[v.width + 'x' + v.height] = blob;
-                        resolve(result);
+                        if (resultsCount >= resultSizes.length) {
+                            resolve(result);
+                        }
                     }, mimeType);
                 });
             };
@@ -2539,10 +2565,55 @@ class Utils {
         let urlCreator = window.URL || window.webkitURL;
         return urlCreator.createObjectURL(blob);
     }
+
+    static getVideoImage(file, secs) {
+        return new Promise((resolve, reject) => {
+            let me = this, video = document.createElement('video');
+            video.onloadedmetadata = function () {
+                if ('function' === typeof secs) {
+                    secs = secs(this.duration);
+                }
+                this.currentTime = Math.min(Math.max(0, (secs < 0 ? this.duration : 0) + secs), this.duration);
+            };
+
+            video.onseeked = function (e) {
+                let canvas = document.createElement('canvas');
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                let img = new Image();
+                img.src = canvas.toDataURL();
+                let currentTime = this.currentTime;
+                canvas.toBlob(function (blob) {
+                    resolve({
+                        me: me,
+                        img: img,
+                        blob: blob,
+                        currentTime: currentTime,
+                        e: e
+                    });
+                });
+            };
+
+            video.onerror = function (e) {
+                console.log(e);
+                reject(me, undefined, undefined, e);
+            };
+
+            if (file instanceof Blob) {
+                file = Utils.getUrlForBlob(file);
+            } else if (file instanceof File) {
+                file = value.slice(0, file.size, file.type);
+            }
+
+            video.src = file;
+        });
+    }
 }
 
 module.exports = Utils;
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 class VKImport {
     constructor(main) {
         this.vkSettings = {
@@ -2968,7 +3039,7 @@ class VKImport {
 }
 
 module.exports = VKImport;
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 class Videoplaylist {
     constructor(main) {
         this.main = main;
@@ -3012,21 +3083,22 @@ class Videoplaylist {
             }
 
             viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
-            self.main.blog.getVideoAlbumInfo(albumId).then(function (response) {
-                let data = response.data;
-                console.log(data);
-                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
-                data.videos.forEach(function (v) {
-                    if (v.type === "youtube") {
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
-                    } else if (v.type === "vk") {
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
-                    } else {
-                        viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
-                    }
+            self.main.blog.getVideoAlbumInfo(albumId)
+                .then(function (response) {
+                    let data = response.data;
+                    console.log(data);
+                    viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
+                    data.videos.forEach(function (v) {
+                        if (v.type === "youtube") {
+                            viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                        } else if (v.type === "vk") {
+                            viewAlbumContent.append('<li class="list-inline-item"><a href="' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                        } else {
+                            viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
+                        }
+                    });
+                    viewAlbumContent.append('</ul>');
                 });
-                viewAlbumContent.append('</ul>');
-            });
         });
 
         $('#input-upload-video-album').on('change', function () {
@@ -3048,6 +3120,7 @@ class Videoplaylist {
                 .then(function (response) {
                     let data = response.data;
                     data = data || [];
+                    data.reverse();
                     if (data.length) {
                         let html = '<ul class="list-inline preview-images">';
                         data.forEach(function (v) {
@@ -3073,21 +3146,33 @@ class Videoplaylist {
             return;
         }
 
+        let newAlbumId = self.main.blog.myProfile.last_videoalbum_id + 1;
         let currentFile = self.videoInfo.files.shift();
-        let contentType = currentFile.type;
         let progressPanel = $('#progressPanelVideoAlbum');
         let postProgress = $('#postProgressVideoAlbum');
         progressPanel.show();
         let setProgress = function (val) {
             postProgress.css('width', val + '%').attr('aria-valuenow', val);
         };
-        let reader = new FileReader();
-        reader.onload = function (e) {
-            self.main.blog.uploadVideoToAlbum(self.main.blog.myProfile.last_photoalbum_id + 1, self.videoInfo.uploadedId, e.target.result, contentType, function (progress) {
-                let onePercent = progress.total / 100;
-                let currentPercent = progress.loaded / onePercent;
-                setProgress(currentPercent);
-            }).then(function (data) {
+        let updateProgress = function (progress) {
+            let onePercent = progress.total / 100;
+            let currentPercent = progress.loaded / onePercent;
+            setProgress(currentPercent);
+        };
+
+        let file = new File([currentFile], self.videoInfo.uploadedId + '.mp4', {type: currentFile.type});
+        Utils.getVideoImage(file, function (time) {
+            return time / 2;
+        })
+            .then(function (data) {
+                let previewFile = new File([data.blob], self.videoInfo.uploadedId + '_raw_preview.jpg', {type: 'image/jpeg'});
+                return self.main.blog.uploadFileToVideoalbum(newAlbumId, previewFile, updateProgress);
+            })
+            .then(function (data) {
+                self.main.onAfterHashChange(data.response, true);
+                return self.main.blog.uploadFileToVideoalbum(newAlbumId, file, updateProgress)
+            })
+            .then(function (data) {
                 console.log(data);
                 self.main.onAfterHashChange(data.response, true);
                 progressPanel.hide();
@@ -3104,10 +3189,13 @@ class Videoplaylist {
                 if (self.videoInfo.files.length > 0) {
                     self.sendNextVideoFile();
                 } else {
-                    let newAlbumId = self.main.blog.myProfile.last_videoalbum_id + 1;
-                    self.main.blog.createVideoAlbum(newAlbumId, 'Uploaded', '', self.videoInfo.uploadedInfo).then(function (preResponse) {
-                        let info = preResponse.info;
-                        preResponse.response.then(function (response) {
+                    let info = null;
+                    self.main.blog.createVideoAlbum(newAlbumId, 'Uploaded', '', self.videoInfo.uploadedInfo)
+                        .then(function (preResponse) {
+                            info = preResponse.info;
+                            return preResponse.response;
+                        })
+                        .then(function (response) {
                             console.log('album created');
                             console.log(response);
                             self.main.onAfterHashChange(response.data);
@@ -3116,18 +3204,15 @@ class Videoplaylist {
                                 '<button type="button" class="btn btn-success btn-share-item" data-type="videoalbum" data-info=\'' + JSON.stringify(info) + '\' data-message="Just created new video playlist!" data-id="' + newAlbumId + '">Share</button>'
                             ]);
                         });
-
-                    });
                 }
             });
-        };
+        ;
 
-        reader.readAsArrayBuffer(currentFile);
     }
 }
 
 module.exports = Videoplaylist;
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 class Wallet {
     constructor(main) {
         this.main = main;
@@ -3161,7 +3246,7 @@ class Wallet {
 }
 
 module.exports = Wallet;
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 let modules = window.socialModules || {
     Main: Main,
     Blog: Blog,
@@ -3178,7 +3263,8 @@ let modules = window.socialModules || {
     Settings: Settings,
     Utils: Utils,
     Post: Post,
-    Instagram: Instagram
+    Instagram: Instagram,
+    GooglePlus: GooglePlus
 };
 
 window.Blog = new modules.Blog();
@@ -3199,8 +3285,9 @@ window.Utils = modules.Utils;
 new modules.Utils();
 new modules.Post(myMain);
 new modules.Instagram(myMain);
+window.googlePlus = new modules.GooglePlus(myMain);
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /* All scripts for production */
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -3228,6 +3315,7 @@ let Settings = require('./Settings.js');
 let Utils = require('./Utils.js');
 let Post = require('./Post.js');
 let Instagram = require('./Instagram.js');
+let GooglePlus = require('./GooglePlus.js');
 window.socialModules = {
     Main: Main,
     Blog: Blog,
@@ -3244,12 +3332,13 @@ window.socialModules = {
     Settings: Settings,
     Utils: Utils,
     Post: Post,
-    Instagram: Instagram
+    Instagram: Instagram,
+    GooglePlus: GooglePlus
 };
 require('./initDev.js');
-},{"./Blog.js":1,"./EnsUtility.js":2,"./FacebookImport.js":3,"./ImportButtons.js":4,"./Instagram.js":5,"./Main":6,"./Messages.js":7,"./News.js":8,"./Photoalbum.js":9,"./Post.js":10,"./Settings.js":11,"./StartNow.js":12,"./SwarmApi":13,"./Utils.js":14,"./VKImport.js":15,"./Videoplaylist.js":16,"./Wallet.js":17,"./initDev.js":18,"bootstrap":47,"cropperjs":69,"ekko-lightbox":104,"ethereum-ens":106,"file-saver":107,"jquery":112,"jszip":123}],20:[function(require,module,exports){
+},{"./Blog.js":1,"./EnsUtility.js":2,"./FacebookImport.js":3,"./GooglePlus.js":4,"./ImportButtons.js":5,"./Instagram.js":6,"./Main":7,"./Messages.js":8,"./News.js":9,"./Photoalbum.js":10,"./Post.js":11,"./Settings.js":12,"./StartNow.js":13,"./SwarmApi":14,"./Utils.js":15,"./VKImport.js":16,"./Videoplaylist.js":17,"./Wallet.js":18,"./initDev.js":19,"bootstrap":48,"cropperjs":70,"ekko-lightbox":105,"ethereum-ens":107,"file-saver":108,"jquery":113,"jszip":124}],21:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":22}],21:[function(require,module,exports){
+},{"./lib/axios":23}],22:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3433,7 +3522,7 @@ module.exports = function xhrAdapter(config) {
 };
 
 }).call(this,require('_process'))
-},{"../core/createError":28,"./../core/settle":31,"./../helpers/btoa":35,"./../helpers/buildURL":36,"./../helpers/cookies":38,"./../helpers/isURLSameOrigin":40,"./../helpers/parseHeaders":42,"./../utils":44,"_process":233}],22:[function(require,module,exports){
+},{"../core/createError":29,"./../core/settle":32,"./../helpers/btoa":36,"./../helpers/buildURL":37,"./../helpers/cookies":39,"./../helpers/isURLSameOrigin":41,"./../helpers/parseHeaders":43,"./../utils":45,"_process":234}],23:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -3487,7 +3576,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":23,"./cancel/CancelToken":24,"./cancel/isCancel":25,"./core/Axios":26,"./defaults":33,"./helpers/bind":34,"./helpers/spread":43,"./utils":44}],23:[function(require,module,exports){
+},{"./cancel/Cancel":24,"./cancel/CancelToken":25,"./cancel/isCancel":26,"./core/Axios":27,"./defaults":34,"./helpers/bind":35,"./helpers/spread":44,"./utils":45}],24:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3508,7 +3597,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -3567,14 +3656,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":23}],25:[function(require,module,exports){
+},{"./Cancel":24}],26:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 var defaults = require('./../defaults');
@@ -3655,7 +3744,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"./../defaults":33,"./../utils":44,"./InterceptorManager":27,"./dispatchRequest":29}],27:[function(require,module,exports){
+},{"./../defaults":34,"./../utils":45,"./InterceptorManager":28,"./dispatchRequest":30}],28:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3709,7 +3798,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":44}],28:[function(require,module,exports){
+},{"./../utils":45}],29:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -3729,7 +3818,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":30}],29:[function(require,module,exports){
+},{"./enhanceError":31}],30:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3817,7 +3906,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":25,"../defaults":33,"./../helpers/combineURLs":37,"./../helpers/isAbsoluteURL":39,"./../utils":44,"./transformData":32}],30:[function(require,module,exports){
+},{"../cancel/isCancel":26,"../defaults":34,"./../helpers/combineURLs":38,"./../helpers/isAbsoluteURL":40,"./../utils":45,"./transformData":33}],31:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3840,7 +3929,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -3868,7 +3957,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":28}],32:[function(require,module,exports){
+},{"./createError":29}],33:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3890,7 +3979,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":44}],33:[function(require,module,exports){
+},{"./../utils":45}],34:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3990,7 +4079,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this,require('_process'))
-},{"./adapters/http":21,"./adapters/xhr":21,"./helpers/normalizeHeaderName":41,"./utils":44,"_process":233}],34:[function(require,module,exports){
+},{"./adapters/http":22,"./adapters/xhr":22,"./helpers/normalizeHeaderName":42,"./utils":45,"_process":234}],35:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -4003,7 +4092,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 // btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
@@ -4041,7 +4130,7 @@ function btoa(input) {
 
 module.exports = btoa;
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4109,7 +4198,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":44}],37:[function(require,module,exports){
+},{"./../utils":45}],38:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4125,7 +4214,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4180,7 +4269,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":44}],39:[function(require,module,exports){
+},{"./../utils":45}],40:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4196,7 +4285,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4266,7 +4355,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":44}],41:[function(require,module,exports){
+},{"./../utils":45}],42:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -4280,7 +4369,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":44}],42:[function(require,module,exports){
+},{"../utils":45}],43:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4335,7 +4424,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":44}],43:[function(require,module,exports){
+},{"./../utils":45}],44:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4364,7 +4453,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -4669,7 +4758,7 @@ module.exports = {
   trim: trim
 };
 
-},{"./helpers/bind":34,"is-buffer":111}],45:[function(require,module,exports){
+},{"./helpers/bind":35,"is-buffer":112}],46:[function(require,module,exports){
 /*! bignumber.js v4.1.0 https://github.com/MikeMcl/bignumber.js/LICENCE */
 
 ;(function (globalObj) {
@@ -7405,7 +7494,7 @@ module.exports = {
     }
 })(this);
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 (function (process,global,setImmediate){
 /* @preserve
  * The MIT License (MIT)
@@ -13031,7 +13120,7 @@ module.exports = ret;
 },{"./es5":13}]},{},[4])(4)
 });                    ;if (typeof window !== 'undefined' && window !== null) {                               window.P = window.Promise;                                                     } else if (typeof self !== 'undefined' && self !== null) {                             self.P = self.Promise;                                                         }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":233,"timers":251}],47:[function(require,module,exports){
+},{"_process":234,"timers":252}],48:[function(require,module,exports){
 /*!
   * Bootstrap v4.1.3 (https://getbootstrap.com/)
   * Copyright 2011-2018 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
@@ -16977,30 +17066,30 @@ module.exports = ret;
 })));
 
 
-},{"jquery":112,"popper.js":166}],48:[function(require,module,exports){
+},{"jquery":113,"popper.js":167}],49:[function(require,module,exports){
 require('../modules/web.immediate');
 module.exports = require('../modules/_core').setImmediate;
-},{"../modules/_core":52,"../modules/web.immediate":68}],49:[function(require,module,exports){
+},{"../modules/_core":53,"../modules/web.immediate":69}],50:[function(require,module,exports){
 module.exports = function(it){
   if(typeof it != 'function')throw TypeError(it + ' is not a function!');
   return it;
 };
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 var isObject = require('./_is-object');
 module.exports = function(it){
   if(!isObject(it))throw TypeError(it + ' is not an object!');
   return it;
 };
-},{"./_is-object":63}],51:[function(require,module,exports){
+},{"./_is-object":64}],52:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = function(it){
   return toString.call(it).slice(8, -1);
 };
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 var core = module.exports = {version: '2.3.0'};
 if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 // optional / simple context binding
 var aFunction = require('./_a-function');
 module.exports = function(fn, that, length){
@@ -17021,12 +17110,12 @@ module.exports = function(fn, that, length){
     return fn.apply(that, arguments);
   };
 };
-},{"./_a-function":49}],54:[function(require,module,exports){
+},{"./_a-function":50}],55:[function(require,module,exports){
 // Thank's IE8 for his funny defineProperty
 module.exports = !require('./_fails')(function(){
   return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./_fails":57}],55:[function(require,module,exports){
+},{"./_fails":58}],56:[function(require,module,exports){
 var isObject = require('./_is-object')
   , document = require('./_global').document
   // in old IE typeof document.createElement is 'object'
@@ -17034,7 +17123,7 @@ var isObject = require('./_is-object')
 module.exports = function(it){
   return is ? document.createElement(it) : {};
 };
-},{"./_global":58,"./_is-object":63}],56:[function(require,module,exports){
+},{"./_global":59,"./_is-object":64}],57:[function(require,module,exports){
 var global    = require('./_global')
   , core      = require('./_core')
   , ctx       = require('./_ctx')
@@ -17096,7 +17185,7 @@ $export.W = 32;  // wrap
 $export.U = 64;  // safe
 $export.R = 128; // real proto method for `library` 
 module.exports = $export;
-},{"./_core":52,"./_ctx":53,"./_global":58,"./_hide":59}],57:[function(require,module,exports){
+},{"./_core":53,"./_ctx":54,"./_global":59,"./_hide":60}],58:[function(require,module,exports){
 module.exports = function(exec){
   try {
     return !!exec();
@@ -17104,12 +17193,12 @@ module.exports = function(exec){
     return true;
   }
 };
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 var global = module.exports = typeof window != 'undefined' && window.Math == Math
   ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
 if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 var dP         = require('./_object-dp')
   , createDesc = require('./_property-desc');
 module.exports = require('./_descriptors') ? function(object, key, value){
@@ -17118,13 +17207,13 @@ module.exports = require('./_descriptors') ? function(object, key, value){
   object[key] = value;
   return object;
 };
-},{"./_descriptors":54,"./_object-dp":64,"./_property-desc":65}],60:[function(require,module,exports){
+},{"./_descriptors":55,"./_object-dp":65,"./_property-desc":66}],61:[function(require,module,exports){
 module.exports = require('./_global').document && document.documentElement;
-},{"./_global":58}],61:[function(require,module,exports){
+},{"./_global":59}],62:[function(require,module,exports){
 module.exports = !require('./_descriptors') && !require('./_fails')(function(){
   return Object.defineProperty(require('./_dom-create')('div'), 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./_descriptors":54,"./_dom-create":55,"./_fails":57}],62:[function(require,module,exports){
+},{"./_descriptors":55,"./_dom-create":56,"./_fails":58}],63:[function(require,module,exports){
 // fast apply, http://jsperf.lnkit.com/fast-apply/5
 module.exports = function(fn, args, that){
   var un = that === undefined;
@@ -17141,11 +17230,11 @@ module.exports = function(fn, args, that){
                       : fn.call(that, args[0], args[1], args[2], args[3]);
   } return              fn.apply(that, args);
 };
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 module.exports = function(it){
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 var anObject       = require('./_an-object')
   , IE8_DOM_DEFINE = require('./_ie8-dom-define')
   , toPrimitive    = require('./_to-primitive')
@@ -17162,7 +17251,7 @@ exports.f = require('./_descriptors') ? Object.defineProperty : function defineP
   if('value' in Attributes)O[P] = Attributes.value;
   return O;
 };
-},{"./_an-object":50,"./_descriptors":54,"./_ie8-dom-define":61,"./_to-primitive":67}],65:[function(require,module,exports){
+},{"./_an-object":51,"./_descriptors":55,"./_ie8-dom-define":62,"./_to-primitive":68}],66:[function(require,module,exports){
 module.exports = function(bitmap, value){
   return {
     enumerable  : !(bitmap & 1),
@@ -17171,7 +17260,7 @@ module.exports = function(bitmap, value){
     value       : value
   };
 };
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 var ctx                = require('./_ctx')
   , invoke             = require('./_invoke')
   , html               = require('./_html')
@@ -17247,7 +17336,7 @@ module.exports = {
   set:   setTask,
   clear: clearTask
 };
-},{"./_cof":51,"./_ctx":53,"./_dom-create":55,"./_global":58,"./_html":60,"./_invoke":62}],67:[function(require,module,exports){
+},{"./_cof":52,"./_ctx":54,"./_dom-create":56,"./_global":59,"./_html":61,"./_invoke":63}],68:[function(require,module,exports){
 // 7.1.1 ToPrimitive(input [, PreferredType])
 var isObject = require('./_is-object');
 // instead of the ES6 spec version, we didn't implement @@toPrimitive case
@@ -17260,14 +17349,14 @@ module.exports = function(it, S){
   if(!S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it)))return val;
   throw TypeError("Can't convert object to primitive value");
 };
-},{"./_is-object":63}],68:[function(require,module,exports){
+},{"./_is-object":64}],69:[function(require,module,exports){
 var $export = require('./_export')
   , $task   = require('./_task');
 $export($export.G + $export.B, {
   setImmediate:   $task.set,
   clearImmediate: $task.clear
 });
-},{"./_export":56,"./_task":66}],69:[function(require,module,exports){
+},{"./_export":57,"./_task":67}],70:[function(require,module,exports){
 /*!
  * Cropper.js v1.4.1
  * https://fengyuanchen.github.io/cropperjs
@@ -20987,7 +21076,7 @@ assign(Cropper.prototype, render, preview, events, handlers, change, methods);
 
 module.exports = Cropper;
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -21220,7 +21309,7 @@ module.exports = Cropper;
 	return CryptoJS.AES;
 
 }));
-},{"./cipher-core":71,"./core":72,"./enc-base64":73,"./evpkdf":75,"./md5":80}],71:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73,"./enc-base64":74,"./evpkdf":76,"./md5":81}],72:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22096,7 +22185,7 @@ module.exports = Cropper;
 
 
 }));
-},{"./core":72}],72:[function(require,module,exports){
+},{"./core":73}],73:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22857,7 +22946,7 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{}],73:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22993,7 +23082,7 @@ module.exports = Cropper;
 	return CryptoJS.enc.Base64;
 
 }));
-},{"./core":72}],74:[function(require,module,exports){
+},{"./core":73}],75:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23143,7 +23232,7 @@ module.exports = Cropper;
 	return CryptoJS.enc.Utf16;
 
 }));
-},{"./core":72}],75:[function(require,module,exports){
+},{"./core":73}],76:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23276,7 +23365,7 @@ module.exports = Cropper;
 	return CryptoJS.EvpKDF;
 
 }));
-},{"./core":72,"./hmac":77,"./sha1":96}],76:[function(require,module,exports){
+},{"./core":73,"./hmac":78,"./sha1":97}],77:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23343,7 +23432,7 @@ module.exports = Cropper;
 	return CryptoJS.format.Hex;
 
 }));
-},{"./cipher-core":71,"./core":72}],77:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],78:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23487,7 +23576,7 @@ module.exports = Cropper;
 
 
 }));
-},{"./core":72}],78:[function(require,module,exports){
+},{"./core":73}],79:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23506,7 +23595,7 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{"./aes":70,"./cipher-core":71,"./core":72,"./enc-base64":73,"./enc-utf16":74,"./evpkdf":75,"./format-hex":76,"./hmac":77,"./lib-typedarrays":79,"./md5":80,"./mode-cfb":81,"./mode-ctr":83,"./mode-ctr-gladman":82,"./mode-ecb":84,"./mode-ofb":85,"./pad-ansix923":86,"./pad-iso10126":87,"./pad-iso97971":88,"./pad-nopadding":89,"./pad-zeropadding":90,"./pbkdf2":91,"./rabbit":93,"./rabbit-legacy":92,"./rc4":94,"./ripemd160":95,"./sha1":96,"./sha224":97,"./sha256":98,"./sha3":99,"./sha384":100,"./sha512":101,"./tripledes":102,"./x64-core":103}],79:[function(require,module,exports){
+},{"./aes":71,"./cipher-core":72,"./core":73,"./enc-base64":74,"./enc-utf16":75,"./evpkdf":76,"./format-hex":77,"./hmac":78,"./lib-typedarrays":80,"./md5":81,"./mode-cfb":82,"./mode-ctr":84,"./mode-ctr-gladman":83,"./mode-ecb":85,"./mode-ofb":86,"./pad-ansix923":87,"./pad-iso10126":88,"./pad-iso97971":89,"./pad-nopadding":90,"./pad-zeropadding":91,"./pbkdf2":92,"./rabbit":94,"./rabbit-legacy":93,"./rc4":95,"./ripemd160":96,"./sha1":97,"./sha224":98,"./sha256":99,"./sha3":100,"./sha384":101,"./sha512":102,"./tripledes":103,"./x64-core":104}],80:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23583,7 +23672,7 @@ module.exports = Cropper;
 	return CryptoJS.lib.WordArray;
 
 }));
-},{"./core":72}],80:[function(require,module,exports){
+},{"./core":73}],81:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23852,7 +23941,7 @@ module.exports = Cropper;
 	return CryptoJS.MD5;
 
 }));
-},{"./core":72}],81:[function(require,module,exports){
+},{"./core":73}],82:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23931,7 +24020,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CFB;
 
 }));
-},{"./cipher-core":71,"./core":72}],82:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],83:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24048,7 +24137,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CTRGladman;
 
 }));
-},{"./cipher-core":71,"./core":72}],83:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],84:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24107,7 +24196,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CTR;
 
 }));
-},{"./cipher-core":71,"./core":72}],84:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],85:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24148,7 +24237,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.ECB;
 
 }));
-},{"./cipher-core":71,"./core":72}],85:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],86:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24203,7 +24292,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.OFB;
 
 }));
-},{"./cipher-core":71,"./core":72}],86:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],87:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24253,7 +24342,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Ansix923;
 
 }));
-},{"./cipher-core":71,"./core":72}],87:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],88:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24298,7 +24387,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Iso10126;
 
 }));
-},{"./cipher-core":71,"./core":72}],88:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],89:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24339,7 +24428,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Iso97971;
 
 }));
-},{"./cipher-core":71,"./core":72}],89:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],90:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24370,7 +24459,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.NoPadding;
 
 }));
-},{"./cipher-core":71,"./core":72}],90:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],91:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24416,7 +24505,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.ZeroPadding;
 
 }));
-},{"./cipher-core":71,"./core":72}],91:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73}],92:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24562,7 +24651,7 @@ module.exports = Cropper;
 	return CryptoJS.PBKDF2;
 
 }));
-},{"./core":72,"./hmac":77,"./sha1":96}],92:[function(require,module,exports){
+},{"./core":73,"./hmac":78,"./sha1":97}],93:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24753,7 +24842,7 @@ module.exports = Cropper;
 	return CryptoJS.RabbitLegacy;
 
 }));
-},{"./cipher-core":71,"./core":72,"./enc-base64":73,"./evpkdf":75,"./md5":80}],93:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73,"./enc-base64":74,"./evpkdf":76,"./md5":81}],94:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24946,7 +25035,7 @@ module.exports = Cropper;
 	return CryptoJS.Rabbit;
 
 }));
-},{"./cipher-core":71,"./core":72,"./enc-base64":73,"./evpkdf":75,"./md5":80}],94:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73,"./enc-base64":74,"./evpkdf":76,"./md5":81}],95:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25086,7 +25175,7 @@ module.exports = Cropper;
 	return CryptoJS.RC4;
 
 }));
-},{"./cipher-core":71,"./core":72,"./enc-base64":73,"./evpkdf":75,"./md5":80}],95:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73,"./enc-base64":74,"./evpkdf":76,"./md5":81}],96:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25354,7 +25443,7 @@ module.exports = Cropper;
 	return CryptoJS.RIPEMD160;
 
 }));
-},{"./core":72}],96:[function(require,module,exports){
+},{"./core":73}],97:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25505,7 +25594,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA1;
 
 }));
-},{"./core":72}],97:[function(require,module,exports){
+},{"./core":73}],98:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25586,7 +25675,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA224;
 
 }));
-},{"./core":72,"./sha256":98}],98:[function(require,module,exports){
+},{"./core":73,"./sha256":99}],99:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25786,7 +25875,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA256;
 
 }));
-},{"./core":72}],99:[function(require,module,exports){
+},{"./core":73}],100:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -26110,7 +26199,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA3;
 
 }));
-},{"./core":72,"./x64-core":103}],100:[function(require,module,exports){
+},{"./core":73,"./x64-core":104}],101:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -26194,7 +26283,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA384;
 
 }));
-},{"./core":72,"./sha512":101,"./x64-core":103}],101:[function(require,module,exports){
+},{"./core":73,"./sha512":102,"./x64-core":104}],102:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -26518,7 +26607,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA512;
 
 }));
-},{"./core":72,"./x64-core":103}],102:[function(require,module,exports){
+},{"./core":73,"./x64-core":104}],103:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -27289,7 +27378,7 @@ module.exports = Cropper;
 	return CryptoJS.TripleDES;
 
 }));
-},{"./cipher-core":71,"./core":72,"./enc-base64":73,"./evpkdf":75,"./md5":80}],103:[function(require,module,exports){
+},{"./cipher-core":72,"./core":73,"./enc-base64":74,"./evpkdf":76,"./md5":81}],104:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -27594,10 +27683,10 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{"./core":72}],104:[function(require,module,exports){
+},{"./core":73}],105:[function(require,module,exports){
 +function(a){"use strict";function b(a,b){if(!(a instanceof b))throw new TypeError("Cannot call a class as a function")}var c=function(){function a(a,b){for(var c=0;c<b.length;c++){var d=b[c];d.enumerable=d.enumerable||!1,d.configurable=!0,"value"in d&&(d.writable=!0),Object.defineProperty(a,d.key,d)}}return function(b,c,d){return c&&a(b.prototype,c),d&&a(b,d),b}}();(function(a){var d="ekkoLightbox",e=a.fn[d],f={title:"",footer:"",maxWidth:9999,maxHeight:9999,showArrows:!0,wrapping:!0,type:null,alwaysShowClose:!1,loadingMessage:'<div class="ekko-lightbox-loader"><div><div></div><div></div></div></div>',leftArrow:"<span>&#10094;</span>",rightArrow:"<span>&#10095;</span>",strings:{close:"Close",fail:"Failed to load image:",type:"Could not detect remote target type. Force the type using data-type"},doc:document,onShow:function(){},onShown:function(){},onHide:function(){},onHidden:function(){},onNavigate:function(){},onContentLoaded:function(){}},g=function(){function d(c,e){var g=this;b(this,d),this._config=a.extend({},f,e),this._$modalArrows=null,this._galleryIndex=0,this._galleryName=null,this._padding=null,this._border=null,this._titleIsShown=!1,this._footerIsShown=!1,this._wantedWidth=0,this._wantedHeight=0,this._touchstartX=0,this._touchendX=0,this._modalId="ekkoLightbox-"+Math.floor(1e3*Math.random()+1),this._$element=c instanceof jQuery?c:a(c),this._isBootstrap3=3==a.fn.modal.Constructor.VERSION[0];var h='<h4 class="modal-title">'+(this._config.title||"&nbsp;")+"</h4>",i='<button type="button" class="close" data-dismiss="modal" aria-label="'+this._config.strings.close+'"><span aria-hidden="true">&times;</span></button>',j='<div class="modal-header'+(this._config.title||this._config.alwaysShowClose?"":" hide")+'">'+(this._isBootstrap3?i+h:h+i)+"</div>",k='<div class="modal-footer'+(this._config.footer?"":" hide")+'">'+(this._config.footer||"&nbsp;")+"</div>",l='<div class="modal-body"><div class="ekko-lightbox-container"><div class="ekko-lightbox-item fade in show"></div><div class="ekko-lightbox-item fade"></div></div></div>',m='<div class="modal-dialog" role="document"><div class="modal-content">'+j+l+k+"</div></div>";a(this._config.doc.body).append('<div id="'+this._modalId+'" class="ekko-lightbox modal fade" tabindex="-1" tabindex="-1" role="dialog" aria-hidden="true">'+m+"</div>"),this._$modal=a("#"+this._modalId,this._config.doc),this._$modalDialog=this._$modal.find(".modal-dialog").first(),this._$modalContent=this._$modal.find(".modal-content").first(),this._$modalBody=this._$modal.find(".modal-body").first(),this._$modalHeader=this._$modal.find(".modal-header").first(),this._$modalFooter=this._$modal.find(".modal-footer").first(),this._$lightboxContainer=this._$modalBody.find(".ekko-lightbox-container").first(),this._$lightboxBodyOne=this._$lightboxContainer.find("> div:first-child").first(),this._$lightboxBodyTwo=this._$lightboxContainer.find("> div:last-child").first(),this._border=this._calculateBorders(),this._padding=this._calculatePadding(),this._galleryName=this._$element.data("gallery"),this._galleryName&&(this._$galleryItems=a(document.body).find('*[data-gallery="'+this._galleryName+'"]'),this._galleryIndex=this._$galleryItems.index(this._$element),a(document).on("keydown.ekkoLightbox",this._navigationalBinder.bind(this)),this._config.showArrows&&this._$galleryItems.length>1&&(this._$lightboxContainer.append('<div class="ekko-lightbox-nav-overlay"><a href="#">'+this._config.leftArrow+'</a><a href="#">'+this._config.rightArrow+"</a></div>"),this._$modalArrows=this._$lightboxContainer.find("div.ekko-lightbox-nav-overlay").first(),this._$lightboxContainer.on("click","a:first-child",function(a){return a.preventDefault(),g.navigateLeft()}),this._$lightboxContainer.on("click","a:last-child",function(a){return a.preventDefault(),g.navigateRight()}),this.updateNavigation())),this._$modal.on("show.bs.modal",this._config.onShow.bind(this)).on("shown.bs.modal",function(){return g._toggleLoading(!0),g._handle(),g._config.onShown.call(g)}).on("hide.bs.modal",this._config.onHide.bind(this)).on("hidden.bs.modal",function(){return g._galleryName&&(a(document).off("keydown.ekkoLightbox"),a(window).off("resize.ekkoLightbox")),g._$modal.remove(),g._config.onHidden.call(g)}).modal(this._config),a(window).on("resize.ekkoLightbox",function(){g._resize(g._wantedWidth,g._wantedHeight)}),this._$lightboxContainer.on("touchstart",function(){g._touchstartX=event.changedTouches[0].screenX}).on("touchend",function(){g._touchendX=event.changedTouches[0].screenX,g._swipeGesure()})}return c(d,null,[{key:"Default",get:function(){return f}}]),c(d,[{key:"element",value:function(){return this._$element}},{key:"modal",value:function(){return this._$modal}},{key:"navigateTo",value:function(b){return b<0||b>this._$galleryItems.length-1?this:(this._galleryIndex=b,this.updateNavigation(),this._$element=a(this._$galleryItems.get(this._galleryIndex)),void this._handle())}},{key:"navigateLeft",value:function(){if(this._$galleryItems&&1!==this._$galleryItems.length){if(0===this._galleryIndex){if(!this._config.wrapping)return;this._galleryIndex=this._$galleryItems.length-1}else this._galleryIndex--;return this._config.onNavigate.call(this,"left",this._galleryIndex),this.navigateTo(this._galleryIndex)}}},{key:"navigateRight",value:function(){if(this._$galleryItems&&1!==this._$galleryItems.length){if(this._galleryIndex===this._$galleryItems.length-1){if(!this._config.wrapping)return;this._galleryIndex=0}else this._galleryIndex++;return this._config.onNavigate.call(this,"right",this._galleryIndex),this.navigateTo(this._galleryIndex)}}},{key:"updateNavigation",value:function(){if(!this._config.wrapping){var a=this._$lightboxContainer.find("div.ekko-lightbox-nav-overlay");0===this._galleryIndex?a.find("a:first-child").addClass("disabled"):a.find("a:first-child").removeClass("disabled"),this._galleryIndex===this._$galleryItems.length-1?a.find("a:last-child").addClass("disabled"):a.find("a:last-child").removeClass("disabled")}}},{key:"close",value:function(){return this._$modal.modal("hide")}},{key:"_navigationalBinder",value:function(a){return a=a||window.event,39===a.keyCode?this.navigateRight():37===a.keyCode?this.navigateLeft():void 0}},{key:"_detectRemoteType",value:function(a,b){return b=b||!1,!b&&this._isImage(a)&&(b="image"),!b&&this._getYoutubeId(a)&&(b="youtube"),!b&&this._getVimeoId(a)&&(b="vimeo"),!b&&this._getInstagramId(a)&&(b="instagram"),(!b||["image","youtube","vimeo","instagram","video","url"].indexOf(b)<0)&&(b="url"),b}},{key:"_isImage",value:function(a){return a&&a.match(/(^data:image\/.*,)|(\.(jp(e|g|eg)|gif|png|bmp|webp|svg)((\?|#).*)?$)/i)}},{key:"_containerToUse",value:function(){var a=this,b=this._$lightboxBodyTwo,c=this._$lightboxBodyOne;return this._$lightboxBodyTwo.hasClass("in")&&(b=this._$lightboxBodyOne,c=this._$lightboxBodyTwo),c.removeClass("in show"),setTimeout(function(){a._$lightboxBodyTwo.hasClass("in")||a._$lightboxBodyTwo.empty(),a._$lightboxBodyOne.hasClass("in")||a._$lightboxBodyOne.empty()},500),b.addClass("in show"),b}},{key:"_handle",value:function(){var a=this._containerToUse();this._updateTitleAndFooter();var b=this._$element.attr("data-remote")||this._$element.attr("href"),c=this._detectRemoteType(b,this._$element.attr("data-type")||!1);if(["image","youtube","vimeo","instagram","video","url"].indexOf(c)<0)return this._error(this._config.strings.type);switch(c){case"image":this._preloadImage(b,a),this._preloadImageByIndex(this._galleryIndex,3);break;case"youtube":this._showYoutubeVideo(b,a);break;case"vimeo":this._showVimeoVideo(this._getVimeoId(b),a);break;case"instagram":this._showInstagramVideo(this._getInstagramId(b),a);break;case"video":this._showHtml5Video(b,a);break;default:this._loadRemoteContent(b,a)}return this}},{key:"_getYoutubeId",value:function(a){if(!a)return!1;var b=a.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);return!(!b||11!==b[2].length)&&b[2]}},{key:"_getVimeoId",value:function(a){return!!(a&&a.indexOf("vimeo")>0)&&a}},{key:"_getInstagramId",value:function(a){return!!(a&&a.indexOf("instagram")>0)&&a}},{key:"_toggleLoading",value:function(b){return b=b||!1,b?(this._$modalDialog.css("display","none"),this._$modal.removeClass("in show"),a(".modal-backdrop").append(this._config.loadingMessage)):(this._$modalDialog.css("display","block"),this._$modal.addClass("in show"),a(".modal-backdrop").find(".ekko-lightbox-loader").remove()),this}},{key:"_calculateBorders",value:function(){return{top:this._totalCssByAttribute("border-top-width"),right:this._totalCssByAttribute("border-right-width"),bottom:this._totalCssByAttribute("border-bottom-width"),left:this._totalCssByAttribute("border-left-width")}}},{key:"_calculatePadding",value:function(){return{top:this._totalCssByAttribute("padding-top"),right:this._totalCssByAttribute("padding-right"),bottom:this._totalCssByAttribute("padding-bottom"),left:this._totalCssByAttribute("padding-left")}}},{key:"_totalCssByAttribute",value:function(a){return parseInt(this._$modalDialog.css(a),10)+parseInt(this._$modalContent.css(a),10)+parseInt(this._$modalBody.css(a),10)}},{key:"_updateTitleAndFooter",value:function(){var a=this._$element.data("title")||"",b=this._$element.data("footer")||"";return this._titleIsShown=!1,a||this._config.alwaysShowClose?(this._titleIsShown=!0,this._$modalHeader.css("display","").find(".modal-title").html(a||"&nbsp;")):this._$modalHeader.css("display","none"),this._footerIsShown=!1,b?(this._footerIsShown=!0,this._$modalFooter.css("display","").html(b)):this._$modalFooter.css("display","none"),this}},{key:"_showYoutubeVideo",value:function(a,b){var c=this._getYoutubeId(a),d=a.indexOf("&")>0?a.substr(a.indexOf("&")):"",e=this._$element.data("width")||560,f=this._$element.data("height")||e/(560/315);return this._showVideoIframe("//www.youtube.com/embed/"+c+"?badge=0&autoplay=1&html5=1"+d,e,f,b)}},{key:"_showVimeoVideo",value:function(a,b){var c=this._$element.data("width")||500,d=this._$element.data("height")||c/(560/315);return this._showVideoIframe(a+"?autoplay=1",c,d,b)}},{key:"_showInstagramVideo",value:function(a,b){var c=this._$element.data("width")||612,d=c+80;return a="/"!==a.substr(-1)?a+"/":a,b.html('<iframe width="'+c+'" height="'+d+'" src="'+a+'embed/" frameborder="0" allowfullscreen></iframe>'),this._resize(c,d),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_showVideoIframe",value:function(a,b,c,d){return c=c||b,d.html('<div class="embed-responsive embed-responsive-16by9"><iframe width="'+b+'" height="'+c+'" src="'+a+'" frameborder="0" allowfullscreen class="embed-responsive-item"></iframe></div>'),this._resize(b,c),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_showHtml5Video",value:function(a,b){var c=this._$element.data("width")||560,d=this._$element.data("height")||c/(560/315);return b.html('<div class="embed-responsive embed-responsive-16by9"><video width="'+c+'" height="'+d+'" src="'+a+'" preload="auto" autoplay controls class="embed-responsive-item"></video></div>'),this._resize(c,d),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_loadRemoteContent",value:function(b,c){var d=this,e=this._$element.data("width")||560,f=this._$element.data("height")||560,g=this._$element.data("disableExternalCheck")||!1;return this._toggleLoading(!1),g||this._isExternal(b)?(c.html('<iframe src="'+b+'" frameborder="0" allowfullscreen></iframe>'),this._config.onContentLoaded.call(this)):c.load(b,a.proxy(function(){return d._$element.trigger("loaded.bs.modal")})),this._$modalArrows&&this._$modalArrows.css("display","none"),this._resize(e,f),this}},{key:"_isExternal",value:function(a){var b=a.match(/^([^:\/?#]+:)?(?:\/\/([^\/?#]*))?([^?#]+)?(\?[^#]*)?(#.*)?/);return"string"==typeof b[1]&&b[1].length>0&&b[1].toLowerCase()!==location.protocol||"string"==typeof b[2]&&b[2].length>0&&b[2].replace(new RegExp(":("+{"http:":80,"https:":443}[location.protocol]+")?$"),"")!==location.host}},{key:"_error",value:function(a){return console.error(a),this._containerToUse().html(a),this._resize(300,300),this}},{key:"_preloadImageByIndex",value:function(b,c){if(this._$galleryItems){var d=a(this._$galleryItems.get(b),!1);if("undefined"!=typeof d){var e=d.attr("data-remote")||d.attr("href");return("image"===d.attr("data-type")||this._isImage(e))&&this._preloadImage(e,!1),c>0?this._preloadImageByIndex(b+1,c-1):void 0}}}},{key:"_preloadImage",value:function(b,c){var d=this;c=c||!1;var e=new Image;return c&&!function(){var f=setTimeout(function(){c.append(d._config.loadingMessage)},200);e.onload=function(){f&&clearTimeout(f),f=null;var b=a("<img />");return b.attr("src",e.src),b.addClass("img-fluid"),b.css("width","100%"),c.html(b),d._$modalArrows&&d._$modalArrows.css("display",""),d._resize(e.width,e.height),d._toggleLoading(!1),d._config.onContentLoaded.call(d)},e.onerror=function(){return d._toggleLoading(!1),d._error(d._config.strings.fail+("  "+b))}}(),e.src=b,e}},{key:"_swipeGesure",value:function(){return this._touchendX<this._touchstartX?this.navigateRight():this._touchendX>this._touchstartX?this.navigateLeft():void 0}},{key:"_resize",value:function(b,c){c=c||b,this._wantedWidth=b,this._wantedHeight=c;var d=b/c,e=this._padding.left+this._padding.right+this._border.left+this._border.right,f=this._config.doc.body.clientWidth>575?20:0,g=this._config.doc.body.clientWidth>575?0:20,h=Math.min(b+e,this._config.doc.body.clientWidth-f,this._config.maxWidth);b+e>h?(c=(h-e-g)/d,b=h):b+=e;var i=0,j=0;this._footerIsShown&&(j=this._$modalFooter.outerHeight(!0)||55),this._titleIsShown&&(i=this._$modalHeader.outerHeight(!0)||67);var k=this._padding.top+this._padding.bottom+this._border.bottom+this._border.top,l=parseFloat(this._$modalDialog.css("margin-top"))+parseFloat(this._$modalDialog.css("margin-bottom")),m=Math.min(c,a(window).height()-k-l-i-j,this._config.maxHeight-k-i-j);c>m&&(b=Math.ceil(m*d)+e),this._$lightboxContainer.css("height",m),this._$modalDialog.css("flex",1).css("maxWidth",b);var n=this._$modal.data("bs.modal");if(n)try{n._handleUpdate()}catch(o){n.handleUpdate()}return this}}],[{key:"_jQueryInterface",value:function(b){var c=this;return b=b||{},this.each(function(){var e=a(c),f=a.extend({},d.Default,e.data(),"object"==typeof b&&b);new d(c,f)})}}]),d}();return a.fn[d]=g._jQueryInterface,a.fn[d].Constructor=g,a.fn[d].noConflict=function(){return a.fn[d]=e,g._jQueryInterface},g})(jQuery)}(jQuery);
 
-},{}],105:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 (function (Buffer){
 var sha3 = require('js-sha3').keccak_256
 var uts46 = require('idna-uts46-hx')
@@ -27631,7 +27720,7 @@ exports.hash = namehash
 exports.normalize = normalize
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":225,"idna-uts46-hx":109,"js-sha3":113}],106:[function(require,module,exports){
+},{"buffer":226,"idna-uts46-hx":110,"js-sha3":114}],107:[function(require,module,exports){
 /*
     This file is part of ethereum-ens.
     ethereum-ens is free software: you can redistribute it and/or modify
@@ -28175,7 +28264,7 @@ ENS.prototype.setSubnodeOwner = function(name, addr, params) {
 
 module.exports = ENS;
 
-},{"bluebird":46,"eth-ens-namehash":105,"js-sha3":113,"pako":150,"text-encoding":167,"underscore":170,"web3":172}],107:[function(require,module,exports){
+},{"bluebird":47,"eth-ens-namehash":106,"js-sha3":114,"pako":151,"text-encoding":168,"underscore":171,"web3":173}],108:[function(require,module,exports){
 /* FileSaver.js
  * A saveAs() FileSaver implementation.
  * 1.3.2
@@ -28365,7 +28454,7 @@ if (typeof module !== "undefined" && module.exports) {
   });
 }
 
-},{}],108:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 /* This file is generated from the Unicode IDNA table, using
    the build-unicode-tables.py script. Please edit that
    script instead of this file. */
@@ -29124,7 +29213,7 @@ return {
 };
 }));
 
-},{}],109:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 (function(root, factory) {
   /* istanbul ignore next */
   if (typeof define === 'function' && define.amd) {
@@ -29258,7 +29347,7 @@ return {
   };
 }));
 
-},{"./idna-map":108,"punycode":234}],110:[function(require,module,exports){
+},{"./idna-map":109,"punycode":235}],111:[function(require,module,exports){
 (function (global){
 'use strict';
 var Mutation = global.MutationObserver || global.WebKitMutationObserver;
@@ -29331,7 +29420,7 @@ function immediate(task) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],111:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -29354,7 +29443,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],112:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.3.1
  * https://jquery.com/
@@ -39720,7 +39809,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],113:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 (function (process,global){
 /**
  * [js-sha3]{@link https://github.com/emn178/js-sha3}
@@ -40199,7 +40288,7 @@ return jQuery;
 })();
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":233}],114:[function(require,module,exports){
+},{"_process":234}],115:[function(require,module,exports){
 'use strict';
 var utils = require('./utils');
 var support = require('./support');
@@ -40307,7 +40396,7 @@ exports.decode = function(input) {
     return output;
 };
 
-},{"./support":143,"./utils":145}],115:[function(require,module,exports){
+},{"./support":144,"./utils":146}],116:[function(require,module,exports){
 'use strict';
 
 var external = require("./external");
@@ -40384,7 +40473,7 @@ CompressedObject.createWorkerFrom = function (uncompressedWorker, compression, c
 
 module.exports = CompressedObject;
 
-},{"./external":119,"./stream/Crc32Probe":138,"./stream/DataLengthProbe":139,"./stream/DataWorker":140}],116:[function(require,module,exports){
+},{"./external":120,"./stream/Crc32Probe":139,"./stream/DataLengthProbe":140,"./stream/DataWorker":141}],117:[function(require,module,exports){
 'use strict';
 
 var GenericWorker = require("./stream/GenericWorker");
@@ -40400,7 +40489,7 @@ exports.STORE = {
 };
 exports.DEFLATE = require('./flate');
 
-},{"./flate":120,"./stream/GenericWorker":141}],117:[function(require,module,exports){
+},{"./flate":121,"./stream/GenericWorker":142}],118:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -40479,7 +40568,7 @@ module.exports = function crc32wrapper(input, crc) {
     }
 };
 
-},{"./utils":145}],118:[function(require,module,exports){
+},{"./utils":146}],119:[function(require,module,exports){
 'use strict';
 exports.base64 = false;
 exports.binary = false;
@@ -40492,7 +40581,7 @@ exports.comment = null;
 exports.unixPermissions = null;
 exports.dosPermissions = null;
 
-},{}],119:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 /* global Promise */
 'use strict';
 
@@ -40513,7 +40602,7 @@ module.exports = {
     Promise: ES6Promise
 };
 
-},{"lie":149}],120:[function(require,module,exports){
+},{"lie":150}],121:[function(require,module,exports){
 'use strict';
 var USE_TYPEDARRAY = (typeof Uint8Array !== 'undefined') && (typeof Uint16Array !== 'undefined') && (typeof Uint32Array !== 'undefined');
 
@@ -40600,7 +40689,7 @@ exports.uncompressWorker = function () {
     return new FlateWorker("Inflate", {});
 };
 
-},{"./stream/GenericWorker":141,"./utils":145,"pako":150}],121:[function(require,module,exports){
+},{"./stream/GenericWorker":142,"./utils":146,"pako":151}],122:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -41142,7 +41231,7 @@ ZipFileWorker.prototype.lock = function () {
 
 module.exports = ZipFileWorker;
 
-},{"../crc32":117,"../signature":136,"../stream/GenericWorker":141,"../utf8":144,"../utils":145}],122:[function(require,module,exports){
+},{"../crc32":118,"../signature":137,"../stream/GenericWorker":142,"../utf8":145,"../utils":146}],123:[function(require,module,exports){
 'use strict';
 
 var compressions = require('../compressions');
@@ -41201,7 +41290,7 @@ exports.generateWorker = function (zip, options, comment) {
     return zipFileWorker;
 };
 
-},{"../compressions":116,"./ZipFileWorker":121}],123:[function(require,module,exports){
+},{"../compressions":117,"./ZipFileWorker":122}],124:[function(require,module,exports){
 'use strict';
 
 /**
@@ -41255,7 +41344,7 @@ JSZip.loadAsync = function (content, options) {
 JSZip.external = require("./external");
 module.exports = JSZip;
 
-},{"./defaults":118,"./external":119,"./load":124,"./object":128,"./support":143}],124:[function(require,module,exports){
+},{"./defaults":119,"./external":120,"./load":125,"./object":129,"./support":144}],125:[function(require,module,exports){
 'use strict';
 var utils = require('./utils');
 var external = require("./external");
@@ -41339,7 +41428,7 @@ module.exports = function(data, options) {
     });
 };
 
-},{"./external":119,"./nodejsUtils":127,"./stream/Crc32Probe":138,"./utf8":144,"./utils":145,"./zipEntries":146}],125:[function(require,module,exports){
+},{"./external":120,"./nodejsUtils":128,"./stream/Crc32Probe":139,"./utf8":145,"./utils":146,"./zipEntries":147}],126:[function(require,module,exports){
 "use strict";
 
 var utils = require('../utils');
@@ -41415,7 +41504,7 @@ NodejsStreamInputAdapter.prototype.resume = function () {
 
 module.exports = NodejsStreamInputAdapter;
 
-},{"../stream/GenericWorker":141,"../utils":145}],126:[function(require,module,exports){
+},{"../stream/GenericWorker":142,"../utils":146}],127:[function(require,module,exports){
 'use strict';
 
 var Readable = require('readable-stream').Readable;
@@ -41459,7 +41548,7 @@ NodejsStreamOutputAdapter.prototype._read = function() {
 
 module.exports = NodejsStreamOutputAdapter;
 
-},{"../utils":145,"readable-stream":129}],127:[function(require,module,exports){
+},{"../utils":146,"readable-stream":130}],128:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -41515,7 +41604,7 @@ module.exports = {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":225}],128:[function(require,module,exports){
+},{"buffer":226}],129:[function(require,module,exports){
 'use strict';
 var utf8 = require('./utf8');
 var utils = require('./utils');
@@ -41906,7 +41995,7 @@ var out = {
 };
 module.exports = out;
 
-},{"./compressedObject":115,"./defaults":118,"./generate":122,"./nodejs/NodejsStreamInputAdapter":125,"./nodejsUtils":127,"./stream/GenericWorker":141,"./stream/StreamHelper":142,"./utf8":144,"./utils":145,"./zipObject":148}],129:[function(require,module,exports){
+},{"./compressedObject":116,"./defaults":119,"./generate":123,"./nodejs/NodejsStreamInputAdapter":126,"./nodejsUtils":128,"./stream/GenericWorker":142,"./stream/StreamHelper":143,"./utf8":145,"./utils":146,"./zipObject":149}],130:[function(require,module,exports){
 /*
  * This file is used by module bundlers (browserify/webpack/etc) when
  * including a stream implementation. We use "readable-stream" to get a
@@ -41917,7 +42006,7 @@ module.exports = out;
  */
 module.exports = require("stream");
 
-},{"stream":249}],130:[function(require,module,exports){
+},{"stream":250}],131:[function(require,module,exports){
 'use strict';
 var DataReader = require('./DataReader');
 var utils = require('../utils');
@@ -41976,7 +42065,7 @@ ArrayReader.prototype.readData = function(size) {
 };
 module.exports = ArrayReader;
 
-},{"../utils":145,"./DataReader":131}],131:[function(require,module,exports){
+},{"../utils":146,"./DataReader":132}],132:[function(require,module,exports){
 'use strict';
 var utils = require('../utils');
 
@@ -42094,7 +42183,7 @@ DataReader.prototype = {
 };
 module.exports = DataReader;
 
-},{"../utils":145}],132:[function(require,module,exports){
+},{"../utils":146}],133:[function(require,module,exports){
 'use strict';
 var Uint8ArrayReader = require('./Uint8ArrayReader');
 var utils = require('../utils');
@@ -42115,7 +42204,7 @@ NodeBufferReader.prototype.readData = function(size) {
 };
 module.exports = NodeBufferReader;
 
-},{"../utils":145,"./Uint8ArrayReader":134}],133:[function(require,module,exports){
+},{"../utils":146,"./Uint8ArrayReader":135}],134:[function(require,module,exports){
 'use strict';
 var DataReader = require('./DataReader');
 var utils = require('../utils');
@@ -42155,7 +42244,7 @@ StringReader.prototype.readData = function(size) {
 };
 module.exports = StringReader;
 
-},{"../utils":145,"./DataReader":131}],134:[function(require,module,exports){
+},{"../utils":146,"./DataReader":132}],135:[function(require,module,exports){
 'use strict';
 var ArrayReader = require('./ArrayReader');
 var utils = require('../utils');
@@ -42179,7 +42268,7 @@ Uint8ArrayReader.prototype.readData = function(size) {
 };
 module.exports = Uint8ArrayReader;
 
-},{"../utils":145,"./ArrayReader":130}],135:[function(require,module,exports){
+},{"../utils":146,"./ArrayReader":131}],136:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -42209,7 +42298,7 @@ module.exports = function (data) {
     return new ArrayReader(utils.transformTo("array", data));
 };
 
-},{"../support":143,"../utils":145,"./ArrayReader":130,"./NodeBufferReader":132,"./StringReader":133,"./Uint8ArrayReader":134}],136:[function(require,module,exports){
+},{"../support":144,"../utils":146,"./ArrayReader":131,"./NodeBufferReader":133,"./StringReader":134,"./Uint8ArrayReader":135}],137:[function(require,module,exports){
 'use strict';
 exports.LOCAL_FILE_HEADER = "PK\x03\x04";
 exports.CENTRAL_FILE_HEADER = "PK\x01\x02";
@@ -42218,7 +42307,7 @@ exports.ZIP64_CENTRAL_DIRECTORY_LOCATOR = "PK\x06\x07";
 exports.ZIP64_CENTRAL_DIRECTORY_END = "PK\x06\x06";
 exports.DATA_DESCRIPTOR = "PK\x07\x08";
 
-},{}],137:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 'use strict';
 
 var GenericWorker = require('./GenericWorker');
@@ -42246,7 +42335,7 @@ ConvertWorker.prototype.processChunk = function (chunk) {
 };
 module.exports = ConvertWorker;
 
-},{"../utils":145,"./GenericWorker":141}],138:[function(require,module,exports){
+},{"../utils":146,"./GenericWorker":142}],139:[function(require,module,exports){
 'use strict';
 
 var GenericWorker = require('./GenericWorker');
@@ -42272,7 +42361,7 @@ Crc32Probe.prototype.processChunk = function (chunk) {
 };
 module.exports = Crc32Probe;
 
-},{"../crc32":117,"../utils":145,"./GenericWorker":141}],139:[function(require,module,exports){
+},{"../crc32":118,"../utils":146,"./GenericWorker":142}],140:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -42303,7 +42392,7 @@ DataLengthProbe.prototype.processChunk = function (chunk) {
 module.exports = DataLengthProbe;
 
 
-},{"../utils":145,"./GenericWorker":141}],140:[function(require,module,exports){
+},{"../utils":146,"./GenericWorker":142}],141:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -42421,7 +42510,7 @@ DataWorker.prototype._tick = function() {
 
 module.exports = DataWorker;
 
-},{"../utils":145,"./GenericWorker":141}],141:[function(require,module,exports){
+},{"../utils":146,"./GenericWorker":142}],142:[function(require,module,exports){
 'use strict';
 
 /**
@@ -42686,7 +42775,7 @@ GenericWorker.prototype = {
 
 module.exports = GenericWorker;
 
-},{}],142:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -42902,7 +42991,7 @@ StreamHelper.prototype = {
 module.exports = StreamHelper;
 
 }).call(this,require("buffer").Buffer)
-},{"../base64":114,"../external":119,"../nodejs/NodejsStreamOutputAdapter":126,"../support":143,"../utils":145,"./ConvertWorker":137,"./GenericWorker":141,"buffer":225}],143:[function(require,module,exports){
+},{"../base64":115,"../external":120,"../nodejs/NodejsStreamOutputAdapter":127,"../support":144,"../utils":146,"./ConvertWorker":138,"./GenericWorker":142,"buffer":226}],144:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -42944,7 +43033,7 @@ try {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":225,"readable-stream":129}],144:[function(require,module,exports){
+},{"buffer":226,"readable-stream":130}],145:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -43221,7 +43310,7 @@ Utf8EncodeWorker.prototype.processChunk = function (chunk) {
 };
 exports.Utf8EncodeWorker = Utf8EncodeWorker;
 
-},{"./nodejsUtils":127,"./stream/GenericWorker":141,"./support":143,"./utils":145}],145:[function(require,module,exports){
+},{"./nodejsUtils":128,"./stream/GenericWorker":142,"./support":144,"./utils":146}],146:[function(require,module,exports){
 'use strict';
 
 var support = require('./support');
@@ -43699,7 +43788,7 @@ exports.prepareContent = function(name, inputData, isBinary, isOptimizedBinarySt
     });
 };
 
-},{"./base64":114,"./external":119,"./nodejsUtils":127,"./support":143,"core-js/library/fn/set-immediate":48}],146:[function(require,module,exports){
+},{"./base64":115,"./external":120,"./nodejsUtils":128,"./support":144,"core-js/library/fn/set-immediate":49}],147:[function(require,module,exports){
 'use strict';
 var readerFor = require('./reader/readerFor');
 var utils = require('./utils');
@@ -43963,7 +44052,7 @@ ZipEntries.prototype = {
 // }}} end of ZipEntries
 module.exports = ZipEntries;
 
-},{"./reader/readerFor":135,"./signature":136,"./support":143,"./utf8":144,"./utils":145,"./zipEntry":147}],147:[function(require,module,exports){
+},{"./reader/readerFor":136,"./signature":137,"./support":144,"./utf8":145,"./utils":146,"./zipEntry":148}],148:[function(require,module,exports){
 'use strict';
 var readerFor = require('./reader/readerFor');
 var utils = require('./utils');
@@ -44257,7 +44346,7 @@ ZipEntry.prototype = {
 };
 module.exports = ZipEntry;
 
-},{"./compressedObject":115,"./compressions":116,"./crc32":117,"./reader/readerFor":135,"./support":143,"./utf8":144,"./utils":145}],148:[function(require,module,exports){
+},{"./compressedObject":116,"./compressions":117,"./crc32":118,"./reader/readerFor":136,"./support":144,"./utf8":145,"./utils":146}],149:[function(require,module,exports){
 'use strict';
 
 var StreamHelper = require('./stream/StreamHelper');
@@ -44392,7 +44481,7 @@ for(var i = 0; i < removedMethods.length; i++) {
 }
 module.exports = ZipObject;
 
-},{"./compressedObject":115,"./stream/DataWorker":140,"./stream/GenericWorker":141,"./stream/StreamHelper":142,"./utf8":144}],149:[function(require,module,exports){
+},{"./compressedObject":116,"./stream/DataWorker":141,"./stream/GenericWorker":142,"./stream/StreamHelper":143,"./utf8":145}],150:[function(require,module,exports){
 'use strict';
 var immediate = require('immediate');
 
@@ -44647,7 +44736,7 @@ function race(iterable) {
   }
 }
 
-},{"immediate":110}],150:[function(require,module,exports){
+},{"immediate":111}],151:[function(require,module,exports){
 // Top level file is just a mixin of submodules & constants
 'use strict';
 
@@ -44663,7 +44752,7 @@ assign(pako, deflate, inflate, constants);
 
 module.exports = pako;
 
-},{"./lib/deflate":151,"./lib/inflate":152,"./lib/utils/common":153,"./lib/zlib/constants":156}],151:[function(require,module,exports){
+},{"./lib/deflate":152,"./lib/inflate":153,"./lib/utils/common":154,"./lib/zlib/constants":157}],152:[function(require,module,exports){
 'use strict';
 
 
@@ -45065,7 +45154,7 @@ exports.deflate = deflate;
 exports.deflateRaw = deflateRaw;
 exports.gzip = gzip;
 
-},{"./utils/common":153,"./utils/strings":154,"./zlib/deflate":158,"./zlib/messages":163,"./zlib/zstream":165}],152:[function(require,module,exports){
+},{"./utils/common":154,"./utils/strings":155,"./zlib/deflate":159,"./zlib/messages":164,"./zlib/zstream":166}],153:[function(require,module,exports){
 'use strict';
 
 
@@ -45485,7 +45574,7 @@ exports.inflate = inflate;
 exports.inflateRaw = inflateRaw;
 exports.ungzip  = inflate;
 
-},{"./utils/common":153,"./utils/strings":154,"./zlib/constants":156,"./zlib/gzheader":159,"./zlib/inflate":161,"./zlib/messages":163,"./zlib/zstream":165}],153:[function(require,module,exports){
+},{"./utils/common":154,"./utils/strings":155,"./zlib/constants":157,"./zlib/gzheader":160,"./zlib/inflate":162,"./zlib/messages":164,"./zlib/zstream":166}],154:[function(require,module,exports){
 'use strict';
 
 
@@ -45592,7 +45681,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],154:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 // String encode/decode helpers
 'use strict';
 
@@ -45779,7 +45868,7 @@ exports.utf8border = function (buf, max) {
   return (pos + _utf8len[buf[pos]] > max) ? pos : max;
 };
 
-},{"./common":153}],155:[function(require,module,exports){
+},{"./common":154}],156:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -45832,7 +45921,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],156:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -45902,7 +45991,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],157:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -45963,7 +46052,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],158:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -47839,7 +47928,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":153,"./adler32":155,"./crc32":157,"./messages":163,"./trees":164}],159:[function(require,module,exports){
+},{"../utils/common":154,"./adler32":156,"./crc32":158,"./messages":164,"./trees":165}],160:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -47899,7 +47988,7 @@ function GZheader() {
 
 module.exports = GZheader;
 
-},{}],160:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -48246,7 +48335,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],161:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -49804,7 +49893,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":153,"./adler32":155,"./crc32":157,"./inffast":160,"./inftrees":162}],162:[function(require,module,exports){
+},{"../utils/common":154,"./adler32":156,"./crc32":158,"./inffast":161,"./inftrees":163}],163:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -50149,7 +50238,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":153}],163:[function(require,module,exports){
+},{"../utils/common":154}],164:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -50183,7 +50272,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],164:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -51405,7 +51494,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":153}],165:[function(require,module,exports){
+},{"../utils/common":154}],166:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -51454,7 +51543,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],166:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 (function (global){
 /**!
  * @fileOverview Kickass library to create and place poppers near their reference elements.
@@ -53998,7 +54087,7 @@ return Popper;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],167:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 // This is free and unencumbered software released into the public domain.
 // See LICENSE.md for more information.
 
@@ -54009,7 +54098,7 @@ module.exports = {
   TextDecoder: encoding.TextDecoder,
 };
 
-},{"./lib/encoding.js":169}],168:[function(require,module,exports){
+},{"./lib/encoding.js":170}],169:[function(require,module,exports){
 (function(global) {
   'use strict';
 
@@ -54057,7 +54146,7 @@ module.exports = {
 // For strict environments where `this` inside the global scope
 // is `undefined`, take a pure object instead
 }(this || {}));
-},{}],169:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 // This is free and unencumbered software released into the public domain.
 // See LICENSE.md for more information.
 
@@ -57371,7 +57460,7 @@ module.exports = {
 // For strict environments where `this` inside the global scope
 // is `undefined`, take a pure object instead
 }(this || {}));
-},{"./encoding-indexes.js":168}],170:[function(require,module,exports){
+},{"./encoding-indexes.js":169}],171:[function(require,module,exports){
 (function (global){
 //     Underscore.js 1.9.1
 //     http://underscorejs.org
@@ -59067,7 +59156,7 @@ module.exports = {
 }());
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],171:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/utf8js v2.1.2 by @mathias */
 ;(function(root) {
@@ -59315,7 +59404,7 @@ module.exports = {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],172:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 var Web3 = require('./lib/web3');
 
 // dont override global variable
@@ -59325,7 +59414,7 @@ if (typeof window !== 'undefined' && typeof window.Web3 === 'undefined') {
 
 module.exports = Web3;
 
-},{"./lib/web3":194}],173:[function(require,module,exports){
+},{"./lib/web3":195}],174:[function(require,module,exports){
 module.exports=[
   {
     "constant": true,
@@ -59581,7 +59670,7 @@ module.exports=[
   }
 ]
 
-},{}],174:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 module.exports=[
   {
     "constant": true,
@@ -59691,7 +59780,7 @@ module.exports=[
   }
 ]
 
-},{}],175:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 module.exports=[
   {
     "constant": false,
@@ -59840,7 +59929,7 @@ module.exports=[
   }
 ]
 
-},{}],176:[function(require,module,exports){
+},{}],177:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -59868,7 +59957,7 @@ SolidityTypeAddress.prototype.isType = function (name) {
 
 module.exports = SolidityTypeAddress;
 
-},{"./formatters":181,"./type":186}],177:[function(require,module,exports){
+},{"./formatters":182,"./type":187}],178:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -59896,7 +59985,7 @@ SolidityTypeBool.prototype.isType = function (name) {
 
 module.exports = SolidityTypeBool;
 
-},{"./formatters":181,"./type":186}],178:[function(require,module,exports){
+},{"./formatters":182,"./type":187}],179:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -59927,7 +60016,7 @@ SolidityTypeBytes.prototype.isType = function (name) {
 
 module.exports = SolidityTypeBytes;
 
-},{"./formatters":181,"./type":186}],179:[function(require,module,exports){
+},{"./formatters":182,"./type":187}],180:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60192,7 +60281,7 @@ var coder = new SolidityCoder([
 
 module.exports = coder;
 
-},{"./address":176,"./bool":177,"./bytes":178,"./dynamicbytes":180,"./formatters":181,"./int":182,"./real":184,"./string":185,"./uint":187,"./ureal":188}],180:[function(require,module,exports){
+},{"./address":177,"./bool":178,"./bytes":179,"./dynamicbytes":181,"./formatters":182,"./int":183,"./real":185,"./string":186,"./uint":188,"./ureal":189}],181:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -60214,7 +60303,7 @@ SolidityTypeDynamicBytes.prototype.isDynamicType = function () {
 
 module.exports = SolidityTypeDynamicBytes;
 
-},{"./formatters":181,"./type":186}],181:[function(require,module,exports){
+},{"./formatters":182,"./type":187}],182:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60468,7 +60557,7 @@ module.exports = {
     formatOutputAddress: formatOutputAddress
 };
 
-},{"../utils/config":190,"../utils/utils":192,"./param":183,"bignumber.js":45}],182:[function(require,module,exports){
+},{"../utils/config":191,"../utils/utils":193,"./param":184,"bignumber.js":46}],183:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -60502,7 +60591,7 @@ SolidityTypeInt.prototype.isType = function (name) {
 
 module.exports = SolidityTypeInt;
 
-},{"./formatters":181,"./type":186}],183:[function(require,module,exports){
+},{"./formatters":182,"./type":187}],184:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -60656,7 +60745,7 @@ SolidityParam.encodeList = function (params) {
 module.exports = SolidityParam;
 
 
-},{"../utils/utils":192}],184:[function(require,module,exports){
+},{"../utils/utils":193}],185:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -60690,7 +60779,7 @@ SolidityTypeReal.prototype.isType = function (name) {
 
 module.exports = SolidityTypeReal;
 
-},{"./formatters":181,"./type":186}],185:[function(require,module,exports){
+},{"./formatters":182,"./type":187}],186:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -60712,7 +60801,7 @@ SolidityTypeString.prototype.isDynamicType = function () {
 
 module.exports = SolidityTypeString;
 
-},{"./formatters":181,"./type":186}],186:[function(require,module,exports){
+},{"./formatters":182,"./type":187}],187:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityParam = require('./param');
 
@@ -60969,7 +61058,7 @@ SolidityType.prototype.decode = function (bytes, offset, name) {
 
 module.exports = SolidityType;
 
-},{"./formatters":181,"./param":183}],187:[function(require,module,exports){
+},{"./formatters":182,"./param":184}],188:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -61003,7 +61092,7 @@ SolidityTypeUInt.prototype.isType = function (name) {
 
 module.exports = SolidityTypeUInt;
 
-},{"./formatters":181,"./type":186}],188:[function(require,module,exports){
+},{"./formatters":182,"./type":187}],189:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -61037,7 +61126,7 @@ SolidityTypeUReal.prototype.isType = function (name) {
 
 module.exports = SolidityTypeUReal;
 
-},{"./formatters":181,"./type":186}],189:[function(require,module,exports){
+},{"./formatters":182,"./type":187}],190:[function(require,module,exports){
 'use strict';
 
 // go env doesn't have and need XMLHttpRequest
@@ -61048,7 +61137,7 @@ if (typeof XMLHttpRequest === 'undefined') {
 }
 
 
-},{}],190:[function(require,module,exports){
+},{}],191:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61129,7 +61218,7 @@ module.exports = {
 };
 
 
-},{"bignumber.js":45}],191:[function(require,module,exports){
+},{"bignumber.js":46}],192:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61169,7 +61258,7 @@ module.exports = function (value, options) {
 };
 
 
-},{"crypto-js":78,"crypto-js/sha3":99}],192:[function(require,module,exports){
+},{"crypto-js":79,"crypto-js/sha3":100}],193:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61800,12 +61889,12 @@ module.exports = {
     isTopic: isTopic,
 };
 
-},{"./sha3.js":191,"bignumber.js":45,"utf8":171}],193:[function(require,module,exports){
+},{"./sha3.js":192,"bignumber.js":46,"utf8":172}],194:[function(require,module,exports){
 module.exports={
     "version": "0.19.1"
 }
 
-},{}],194:[function(require,module,exports){
+},{}],195:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61959,7 +62048,7 @@ Web3.prototype.createBatch = function () {
 module.exports = Web3;
 
 
-},{"./utils/sha3":191,"./utils/utils":192,"./version.json":193,"./web3/batch":196,"./web3/extend":200,"./web3/httpprovider":204,"./web3/iban":205,"./web3/ipcprovider":206,"./web3/methods/db":209,"./web3/methods/eth":210,"./web3/methods/net":211,"./web3/methods/personal":212,"./web3/methods/shh":213,"./web3/methods/swarm":214,"./web3/property":217,"./web3/requestmanager":218,"./web3/settings":219,"bignumber.js":45}],195:[function(require,module,exports){
+},{"./utils/sha3":192,"./utils/utils":193,"./version.json":194,"./web3/batch":197,"./web3/extend":201,"./web3/httpprovider":205,"./web3/iban":206,"./web3/ipcprovider":207,"./web3/methods/db":210,"./web3/methods/eth":211,"./web3/methods/net":212,"./web3/methods/personal":213,"./web3/methods/shh":214,"./web3/methods/swarm":215,"./web3/property":218,"./web3/requestmanager":219,"./web3/settings":220,"bignumber.js":46}],196:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -62049,7 +62138,7 @@ AllSolidityEvents.prototype.attachToContract = function (contract) {
 module.exports = AllSolidityEvents;
 
 
-},{"../utils/sha3":191,"../utils/utils":192,"./event":199,"./filter":201,"./formatters":202,"./methods/watches":215}],196:[function(require,module,exports){
+},{"../utils/sha3":192,"../utils/utils":193,"./event":200,"./filter":202,"./formatters":203,"./methods/watches":216}],197:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -62117,7 +62206,7 @@ Batch.prototype.execute = function () {
 module.exports = Batch;
 
 
-},{"./errors":198,"./jsonrpc":207}],197:[function(require,module,exports){
+},{"./errors":199,"./jsonrpc":208}],198:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -62429,7 +62518,7 @@ var Contract = function (eth, abi, address) {
 
 module.exports = ContractFactory;
 
-},{"../solidity/coder":179,"../utils/utils":192,"./allevents":195,"./event":199,"./function":203}],198:[function(require,module,exports){
+},{"../solidity/coder":180,"../utils/utils":193,"./allevents":196,"./event":200,"./function":204}],199:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -62474,7 +62563,7 @@ module.exports = {
     }
 };
 
-},{}],199:[function(require,module,exports){
+},{}],200:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -62684,7 +62773,7 @@ SolidityEvent.prototype.attachToContract = function (contract) {
 module.exports = SolidityEvent;
 
 
-},{"../solidity/coder":179,"../utils/sha3":191,"../utils/utils":192,"./filter":201,"./formatters":202,"./methods/watches":215}],200:[function(require,module,exports){
+},{"../solidity/coder":180,"../utils/sha3":192,"../utils/utils":193,"./filter":202,"./formatters":203,"./methods/watches":216}],201:[function(require,module,exports){
 var formatters = require('./formatters');
 var utils = require('./../utils/utils');
 var Method = require('./method');
@@ -62734,7 +62823,7 @@ var extend = function (web3) {
 module.exports = extend;
 
 
-},{"./../utils/utils":192,"./formatters":202,"./method":208,"./property":217}],201:[function(require,module,exports){
+},{"./../utils/utils":193,"./formatters":203,"./method":209,"./property":218}],202:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -62973,7 +63062,7 @@ Filter.prototype.get = function (callback) {
 module.exports = Filter;
 
 
-},{"../utils/utils":192,"./formatters":202}],202:[function(require,module,exports){
+},{"../utils/utils":193,"./formatters":203}],203:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -63278,7 +63367,7 @@ module.exports = {
 };
 
 
-},{"../utils/config":190,"../utils/utils":192,"./iban":205}],203:[function(require,module,exports){
+},{"../utils/config":191,"../utils/utils":193,"./iban":206}],204:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -63560,7 +63649,7 @@ SolidityFunction.prototype.attachToContract = function (contract) {
 
 module.exports = SolidityFunction;
 
-},{"../solidity/coder":179,"../utils/sha3":191,"../utils/utils":192,"./errors":198,"./formatters":202}],204:[function(require,module,exports){
+},{"../solidity/coder":180,"../utils/sha3":192,"../utils/utils":193,"./errors":199,"./formatters":203}],205:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -63715,7 +63804,7 @@ HttpProvider.prototype.isConnected = function() {
 
 module.exports = HttpProvider;
 
-},{"./errors":198,"xhr2":222,"xmlhttprequest":189}],205:[function(require,module,exports){
+},{"./errors":199,"xhr2":223,"xmlhttprequest":190}],206:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -63944,7 +64033,7 @@ Iban.prototype.toString = function () {
 module.exports = Iban;
 
 
-},{"bignumber.js":45}],206:[function(require,module,exports){
+},{"bignumber.js":46}],207:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64153,7 +64242,7 @@ IpcProvider.prototype.sendAsync = function (payload, callback) {
 module.exports = IpcProvider;
 
 
-},{"../utils/utils":192,"./errors":198}],207:[function(require,module,exports){
+},{"../utils/utils":193,"./errors":199}],208:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64240,7 +64329,7 @@ Jsonrpc.toBatchPayload = function (messages) {
 module.exports = Jsonrpc;
 
 
-},{}],208:[function(require,module,exports){
+},{}],209:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64406,7 +64495,7 @@ Method.prototype.request = function () {
 
 module.exports = Method;
 
-},{"../utils/utils":192,"./errors":198}],209:[function(require,module,exports){
+},{"../utils/utils":193,"./errors":199}],210:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64474,7 +64563,7 @@ var methods = function () {
 
 module.exports = DB;
 
-},{"../method":208}],210:[function(require,module,exports){
+},{"../method":209}],211:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64830,7 +64919,7 @@ Eth.prototype.isSyncing = function (callback) {
 
 module.exports = Eth;
 
-},{"../../utils/config":190,"../../utils/utils":192,"../contract":197,"../filter":201,"../formatters":202,"../iban":205,"../method":208,"../namereg":216,"../property":217,"../syncing":220,"../transfer":221,"./watches":215}],211:[function(require,module,exports){
+},{"../../utils/config":191,"../../utils/utils":193,"../contract":198,"../filter":202,"../formatters":203,"../iban":206,"../method":209,"../namereg":217,"../property":218,"../syncing":221,"../transfer":222,"./watches":216}],212:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64884,7 +64973,7 @@ var properties = function () {
 
 module.exports = Net;
 
-},{"../../utils/utils":192,"../property":217}],212:[function(require,module,exports){
+},{"../../utils/utils":193,"../property":218}],213:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65001,7 +65090,7 @@ var properties = function () {
 
 module.exports = Personal;
 
-},{"../formatters":202,"../method":208,"../property":217}],213:[function(require,module,exports){
+},{"../formatters":203,"../method":209,"../property":218}],214:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65089,7 +65178,7 @@ var methods = function () {
 module.exports = Shh;
 
 
-},{"../filter":201,"../formatters":202,"../method":208,"./watches":215}],214:[function(require,module,exports){
+},{"../filter":202,"../formatters":203,"../method":209,"./watches":216}],215:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65236,7 +65325,7 @@ var properties = function () {
 
 module.exports = Swarm;
 
-},{"../method":208,"../property":217}],215:[function(require,module,exports){
+},{"../method":209,"../property":218}],216:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65352,7 +65441,7 @@ module.exports = {
 };
 
 
-},{"../method":208}],216:[function(require,module,exports){
+},{"../method":209}],217:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65393,7 +65482,7 @@ module.exports = {
 };
 
 
-},{"../contracts/GlobalRegistrar.json":173,"../contracts/ICAPRegistrar.json":174}],217:[function(require,module,exports){
+},{"../contracts/GlobalRegistrar.json":174,"../contracts/ICAPRegistrar.json":175}],218:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65539,7 +65628,7 @@ Property.prototype.request = function () {
 module.exports = Property;
 
 
-},{"../utils/utils":192}],218:[function(require,module,exports){
+},{"../utils/utils":193}],219:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65806,7 +65895,7 @@ RequestManager.prototype.poll = function () {
 module.exports = RequestManager;
 
 
-},{"../utils/config":190,"../utils/utils":192,"./errors":198,"./jsonrpc":207}],219:[function(require,module,exports){
+},{"../utils/config":191,"../utils/utils":193,"./errors":199,"./jsonrpc":208}],220:[function(require,module,exports){
 
 
 var Settings = function () {
@@ -65817,7 +65906,7 @@ var Settings = function () {
 module.exports = Settings;
 
 
-},{}],220:[function(require,module,exports){
+},{}],221:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -65912,7 +66001,7 @@ IsSyncing.prototype.stopWatching = function () {
 module.exports = IsSyncing;
 
 
-},{"../utils/utils":192,"./formatters":202}],221:[function(require,module,exports){
+},{"../utils/utils":193,"./formatters":203}],222:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -66006,10 +66095,10 @@ var deposit = function (eth, from, to, value, client, callback) {
 module.exports = transfer;
 
 
-},{"../contracts/SmartExchange.json":175,"./iban":205}],222:[function(require,module,exports){
+},{"../contracts/SmartExchange.json":176,"./iban":206}],223:[function(require,module,exports){
 module.exports = XMLHttpRequest;
 
-},{}],223:[function(require,module,exports){
+},{}],224:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -66162,9 +66251,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],224:[function(require,module,exports){
-
 },{}],225:[function(require,module,exports){
+
+},{}],226:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -67902,7 +67991,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":223,"ieee754":228}],226:[function(require,module,exports){
+},{"base64-js":224,"ieee754":229}],227:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -68013,7 +68102,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":230}],227:[function(require,module,exports){
+},{"../../is-buffer/index.js":231}],228:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -68538,7 +68627,7 @@ function functionBindPolyfill(context) {
   };
 }
 
-},{}],228:[function(require,module,exports){
+},{}],229:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -68624,7 +68713,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],229:[function(require,module,exports){
+},{}],230:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -68649,16 +68738,16 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],230:[function(require,module,exports){
-arguments[4][111][0].apply(exports,arguments)
-},{"dup":111}],231:[function(require,module,exports){
+},{}],231:[function(require,module,exports){
+arguments[4][112][0].apply(exports,arguments)
+},{"dup":112}],232:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],232:[function(require,module,exports){
+},{}],233:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -68706,7 +68795,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 
 
 }).call(this,require('_process'))
-},{"_process":233}],233:[function(require,module,exports){
+},{"_process":234}],234:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -68892,7 +68981,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],234:[function(require,module,exports){
+},{}],235:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -69429,10 +69518,10 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],235:[function(require,module,exports){
+},{}],236:[function(require,module,exports){
 module.exports = require('./lib/_stream_duplex.js');
 
-},{"./lib/_stream_duplex.js":236}],236:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":237}],237:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -69564,7 +69653,7 @@ Duplex.prototype._destroy = function (err, cb) {
 
   pna.nextTick(cb, err);
 };
-},{"./_stream_readable":238,"./_stream_writable":240,"core-util-is":226,"inherits":229,"process-nextick-args":232}],237:[function(require,module,exports){
+},{"./_stream_readable":239,"./_stream_writable":241,"core-util-is":227,"inherits":230,"process-nextick-args":233}],238:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -69612,7 +69701,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":239,"core-util-is":226,"inherits":229}],238:[function(require,module,exports){
+},{"./_stream_transform":240,"core-util-is":227,"inherits":230}],239:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -70634,7 +70723,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":236,"./internal/streams/BufferList":241,"./internal/streams/destroy":242,"./internal/streams/stream":243,"_process":233,"core-util-is":226,"events":227,"inherits":229,"isarray":231,"process-nextick-args":232,"safe-buffer":248,"string_decoder/":250,"util":224}],239:[function(require,module,exports){
+},{"./_stream_duplex":237,"./internal/streams/BufferList":242,"./internal/streams/destroy":243,"./internal/streams/stream":244,"_process":234,"core-util-is":227,"events":228,"inherits":230,"isarray":232,"process-nextick-args":233,"safe-buffer":249,"string_decoder/":251,"util":225}],240:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -70849,7 +70938,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":236,"core-util-is":226,"inherits":229}],240:[function(require,module,exports){
+},{"./_stream_duplex":237,"core-util-is":227,"inherits":230}],241:[function(require,module,exports){
 (function (process,global,setImmediate){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -71539,7 +71628,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"./_stream_duplex":236,"./internal/streams/destroy":242,"./internal/streams/stream":243,"_process":233,"core-util-is":226,"inherits":229,"process-nextick-args":232,"safe-buffer":248,"timers":251,"util-deprecate":252}],241:[function(require,module,exports){
+},{"./_stream_duplex":237,"./internal/streams/destroy":243,"./internal/streams/stream":244,"_process":234,"core-util-is":227,"inherits":230,"process-nextick-args":233,"safe-buffer":249,"timers":252,"util-deprecate":253}],242:[function(require,module,exports){
 'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -71619,7 +71708,7 @@ if (util && util.inspect && util.inspect.custom) {
     return this.constructor.name + ' ' + obj;
   };
 }
-},{"safe-buffer":248,"util":224}],242:[function(require,module,exports){
+},{"safe-buffer":249,"util":225}],243:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -71694,13 +71783,13 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":232}],243:[function(require,module,exports){
+},{"process-nextick-args":233}],244:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":227}],244:[function(require,module,exports){
+},{"events":228}],245:[function(require,module,exports){
 module.exports = require('./readable').PassThrough
 
-},{"./readable":245}],245:[function(require,module,exports){
+},{"./readable":246}],246:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -71709,13 +71798,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":236,"./lib/_stream_passthrough.js":237,"./lib/_stream_readable.js":238,"./lib/_stream_transform.js":239,"./lib/_stream_writable.js":240}],246:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":237,"./lib/_stream_passthrough.js":238,"./lib/_stream_readable.js":239,"./lib/_stream_transform.js":240,"./lib/_stream_writable.js":241}],247:[function(require,module,exports){
 module.exports = require('./readable').Transform
 
-},{"./readable":245}],247:[function(require,module,exports){
+},{"./readable":246}],248:[function(require,module,exports){
 module.exports = require('./lib/_stream_writable.js');
 
-},{"./lib/_stream_writable.js":240}],248:[function(require,module,exports){
+},{"./lib/_stream_writable.js":241}],249:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -71779,7 +71868,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":225}],249:[function(require,module,exports){
+},{"buffer":226}],250:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -71908,7 +71997,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":227,"inherits":229,"readable-stream/duplex.js":235,"readable-stream/passthrough.js":244,"readable-stream/readable.js":245,"readable-stream/transform.js":246,"readable-stream/writable.js":247}],250:[function(require,module,exports){
+},{"events":228,"inherits":230,"readable-stream/duplex.js":236,"readable-stream/passthrough.js":245,"readable-stream/readable.js":246,"readable-stream/transform.js":247,"readable-stream/writable.js":248}],251:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -72205,7 +72294,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":248}],251:[function(require,module,exports){
+},{"safe-buffer":249}],252:[function(require,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -72284,7 +72373,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":233,"timers":251}],252:[function(require,module,exports){
+},{"process/browser.js":234,"timers":252}],253:[function(require,module,exports){
 (function (global){
 
 /**
@@ -72355,4 +72444,4 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[19]);
+},{}]},{},[20]);

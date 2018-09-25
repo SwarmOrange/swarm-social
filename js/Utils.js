@@ -73,7 +73,7 @@ class Utils {
         return urlCreator.createObjectURL(blob);
     }
 
-    static getVideoImage(path, secs) {
+    static getVideoImage(file, secs) {
         return new Promise((resolve, reject) => {
             let me = this, video = document.createElement('video');
             video.onloadedmetadata = function () {
@@ -108,11 +108,13 @@ class Utils {
                 reject(me, undefined, undefined, e);
             };
 
-            if (path instanceof Blob) {
-                path = Utils.getUrlForBlob(path);
+            if (file instanceof Blob) {
+                file = Utils.getUrlForBlob(file);
+            } else if (file instanceof File) {
+                file = value.slice(0, file.size, file.type);
             }
 
-            video.src = path;
+            video.src = file;
         });
     }
 }

@@ -41,21 +41,22 @@ class Videoplaylist {
             }
 
             viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
-            self.main.blog.getVideoAlbumInfo(albumId).then(function (response) {
-                let data = response.data;
-                console.log(data);
-                viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
-                data.videos.forEach(function (v) {
-                    if (v.type === "youtube") {
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
-                    } else if (v.type === "vk") {
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
-                    } else {
-                        viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
-                    }
+            self.main.blog.getVideoAlbumInfo(albumId)
+                .then(function (response) {
+                    let data = response.data;
+                    console.log(data);
+                    viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
+                    data.videos.forEach(function (v) {
+                        if (v.type === "youtube") {
+                            viewAlbumContent.append('<li class="list-inline-item"><a href="https://youtube.com/watch?v=' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                        } else if (v.type === "vk") {
+                            viewAlbumContent.append('<li class="list-inline-item"><a href="' + v.file + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + v.cover_file + '" class="img-fluid preview-album-photo"></a></li>');
+                        } else {
+                            viewAlbumContent.append('<li class="list-inline-item"><a data-type="video" href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View video" data-footer="' + v.description + '" data-gallery="gallery-video-' + albumId + '"><img src="' + self.main.swarm.getFullUrl(v.cover_file) + '" class="img-fluid preview-album-photo"></a></li>');
+                        }
+                    });
+                    viewAlbumContent.append('</ul>');
                 });
-                viewAlbumContent.append('</ul>');
-            });
         });
 
         $('#input-upload-video-album').on('change', function () {
@@ -103,21 +104,33 @@ class Videoplaylist {
             return;
         }
 
+        let newAlbumId = self.main.blog.myProfile.last_videoalbum_id + 1;
         let currentFile = self.videoInfo.files.shift();
-        let contentType = currentFile.type;
         let progressPanel = $('#progressPanelVideoAlbum');
         let postProgress = $('#postProgressVideoAlbum');
         progressPanel.show();
         let setProgress = function (val) {
             postProgress.css('width', val + '%').attr('aria-valuenow', val);
         };
-        let reader = new FileReader();
-        reader.onload = function (e) {
-            self.main.blog.uploadVideoToAlbum(self.main.blog.myProfile.last_photoalbum_id + 1, self.videoInfo.uploadedId, e.target.result, contentType, function (progress) {
-                let onePercent = progress.total / 100;
-                let currentPercent = progress.loaded / onePercent;
-                setProgress(currentPercent);
-            }).then(function (data) {
+        let updateProgress = function (progress) {
+            let onePercent = progress.total / 100;
+            let currentPercent = progress.loaded / onePercent;
+            setProgress(currentPercent);
+        };
+
+        let file = new File([currentFile], self.videoInfo.uploadedId + '.mp4', {type: currentFile.type});
+        Utils.getVideoImage(file, function (time) {
+            return time / 2;
+        })
+            .then(function (data) {
+                let previewFile = new File([data.blob], self.videoInfo.uploadedId + '_raw_preview.jpg', {type: 'image/jpeg'});
+                return self.main.blog.uploadFileToVideoalbum(newAlbumId, previewFile, updateProgress);
+            })
+            .then(function (data) {
+                self.main.onAfterHashChange(data.response, true);
+                return self.main.blog.uploadFileToVideoalbum(newAlbumId, file, updateProgress)
+            })
+            .then(function (data) {
                 console.log(data);
                 self.main.onAfterHashChange(data.response, true);
                 progressPanel.hide();
@@ -134,10 +147,13 @@ class Videoplaylist {
                 if (self.videoInfo.files.length > 0) {
                     self.sendNextVideoFile();
                 } else {
-                    let newAlbumId = self.main.blog.myProfile.last_videoalbum_id + 1;
-                    self.main.blog.createVideoAlbum(newAlbumId, 'Uploaded', '', self.videoInfo.uploadedInfo).then(function (preResponse) {
-                        let info = preResponse.info;
-                        preResponse.response.then(function (response) {
+                    let info = null;
+                    self.main.blog.createVideoAlbum(newAlbumId, 'Uploaded', '', self.videoInfo.uploadedInfo)
+                        .then(function (preResponse) {
+                            info = preResponse.info;
+                            return preResponse.response;
+                        })
+                        .then(function (response) {
                             console.log('album created');
                             console.log(response);
                             self.main.onAfterHashChange(response.data);
@@ -146,13 +162,10 @@ class Videoplaylist {
                                 '<button type="button" class="btn btn-success btn-share-item" data-type="videoalbum" data-info=\'' + JSON.stringify(info) + '\' data-message="Just created new video playlist!" data-id="' + newAlbumId + '">Share</button>'
                             ]);
                         });
-
-                    });
                 }
             });
-        };
+        ;
 
-        reader.readAsArrayBuffer(currentFile);
     }
 }
 

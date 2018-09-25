@@ -291,11 +291,12 @@ class Blog {
         return this.swarm.get(this.prefix + 'videoalbum/' + id + '/info.json');
     }
 
-    uploadVideoToAlbum(photoAlbumId, photoId, fileContent, contentType, onProgress) {
-        let fileName = this.prefix + "videoalbum/" + photoAlbumId + "/" + photoId + ".mp4";
-        return this.sendRawFile(fileName, fileContent, contentType, null, null, onProgress).then(function (response) {
-            return {fileName: fileName, response: response.data};
-        });
+    uploadFileToVideoalbum(albumId, file, onProgress) {
+        let fileName = this.prefix + "videoalbum/" + albumId + "/" + file.name;
+        return this.sendRawFile(fileName, file, file.type, null, null, onProgress)
+            .then(function (response) {
+                return {fileName: fileName, response: response.data};
+            });
     }
 
     createPhotoAlbum(id, name, description, photos) {
