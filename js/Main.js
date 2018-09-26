@@ -279,9 +279,10 @@ class Main {
             if (confirm('Really delete?')) {
                 $('#viewAlbumModal').modal('hide');
 
-                self.blog.deletePhotoAlbum(id).then(function (response) {
-                    self.onAfterHashChange(response.data);
-                });
+                self.blog.deletePhotoAlbum(id)
+                    .then(function (response) {
+                        self.onAfterHashChange(response.data);
+                    });
             }
         });
 

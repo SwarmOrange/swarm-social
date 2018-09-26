@@ -41,11 +41,19 @@ class Photoalbum {
                     viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
                     data.photos.forEach(function (v) {
                         let imgSrc = self.main.swarm.getFullUrl(v.file);
+                        let fullImage = self.main.swarm.getFullUrl(v.file);
+                        let image1200x800 = fullImage;
                         if ('previews' in v) {
-                            imgSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
+                            if ('250x250' in v.previews) {
+                                imgSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
+                            }
+
+                            if ('1200x800' in v.previews) {
+                                image1200x800 = self.main.swarm.getFullUrl(v.previews['1200x800']);
+                            }
                         }
 
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + imgSrc + '" class="img-fluid preview-album-photo"></a></li>');
+                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + image1200x800 + '" data-toggle="lightbox" data-title="View photo" data-footer="<a target=_blank href=\'' + fullImage + '\'>Open full image</a><br>' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + imgSrc + '" class="img-fluid preview-album-photo"></a></li>');
                     });
                     viewAlbumContent.append('</ul>');
                 });
@@ -143,13 +151,24 @@ class Photoalbum {
         };
 
         let key = '250x250';
+        let keyBigPreview = '1200x800';
         let previewFileName = null;
-        Utils.resizeImages(currentFile, [{width: 250, height: 250}])
-            .then(function (result) {
-                return result[key];
+        let bigPreviewFileName = null;
+        let allPreviews = null;
+        Utils.resizeImages(currentFile, [
+            {width: 250, height: 250, format: 'box'},
+            {width: 1200, height: 800, format: "maxsize"}
+        ])
+            .then(function (previews) {
+                allPreviews = previews;
+                let image1200 = allPreviews[keyBigPreview];
+                return uploadPhoto(image1200, '_' + keyBigPreview);
             })
-            .then(function (imagePreview) {
-                return uploadPhoto(imagePreview, '_' + key);
+            .then(function (data) {
+                self.main.onAfterHashChange(data.response, true);
+                bigPreviewFileName = data.fileName;
+                let image250 = allPreviews[key];
+                return uploadPhoto(image250, '_' + key);
             })
             .then(function (data) {
                 previewFileName = data.fileName;
@@ -165,7 +184,10 @@ class Photoalbum {
                 self.photoalbumInfo.uploadedInfo.push({
                     file: data.fileName,
                     description: "",
-                    previews: {'250x250': previewFileName}
+                    previews: {
+                        '250x250': previewFileName,
+                        '1200x800': bigPreviewFileName
+                    }
                 });
 
                 if (self.photoalbumInfo.files.length > 0) {

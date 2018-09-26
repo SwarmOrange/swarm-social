@@ -118,6 +118,7 @@ class Videoplaylist {
             setProgress(currentPercent);
         };
 
+        let coverFullFilename = null;
         let file = new File([currentFile], self.videoInfo.uploadedId + '.mp4', {type: currentFile.type});
         Utils.getVideoImage(file, function (time) {
             return time / 2;
@@ -127,6 +128,7 @@ class Videoplaylist {
                 return self.main.blog.uploadFileToVideoalbum(newAlbumId, previewFile, updateProgress);
             })
             .then(function (data) {
+                coverFullFilename = data.fileName;
                 self.main.onAfterHashChange(data.response, true);
                 return self.main.blog.uploadFileToVideoalbum(newAlbumId, file, updateProgress)
             })
@@ -139,7 +141,7 @@ class Videoplaylist {
                     id: self.videoInfo.uploadedId,
                     name: "",
                     description: "",
-                    cover_file: "img/video-cover.jpg",
+                    cover_file: coverFullFilename ? coverFullFilename : "img/video-cover.jpg",
                     file: data.fileName,
                     type: "video",
                 });

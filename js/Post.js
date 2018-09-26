@@ -232,7 +232,7 @@ class Post {
 
                 if (fileType === 'photo') {
                     Utils.resizeImages(lastBlob, [
-                        {width: 250, height: 250},
+                        {width: 250, height: 250, format: "box"},
                         {width: 1200, height: 800, format: "maxsize"}
                     ])
                         .then(function (result) {

@@ -374,11 +374,14 @@ class Blog {
 
     deletePhotoAlbum(id) {
         let self = this;
-        // todo delete all photos. Can we delete files from passed list?
-        // todo delete from photoalbum/info.json
-        return this.swarm.delete(this.prefix + 'photoalbum/' + id + '/1.jpg').then(function (response) {
-            self.swarm.applicationHash = response.data;
-            return self.getPhotoAlbumsInfo().then(function (response) {
+        return this.swarm.delete(this.prefix + 'photoalbum/' + id + '/')
+            .then(function (response) {
+                self.swarm.applicationHash = response.data;
+            })
+            .then(function () {
+                return self.getPhotoAlbumsInfo();
+            })
+            .then(function (response) {
                 let data = response.data;
                 let newAlbums = [];
                 if (data && Array.isArray(data) && data.length) {
@@ -391,7 +394,6 @@ class Blog {
 
                 return self.saveAlbumsInfo(newAlbums);
             });
-        });
     }
 
     createMru(ownerAddress) {
