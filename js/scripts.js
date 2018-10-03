@@ -2,8 +2,7 @@ window.module = {};
 window.module.exports = {};
 
 let host = location.host;
-//let host = 'tut.com';
-if (host === 'localhost') {
+if (host === 'localhost' || host === 'localhost:8500') {
     document.write('<script src="js/dist/web-modules.js"></script>' +
         '<script src="node_modules/free-core/js/Blog.js"></script>' +
         '<script src="js/Photoalbum.js"></script>' +

@@ -9,11 +9,21 @@ class EnsUtility {
         this.ens = null;
         this.main = main;
 
+        this.contractAbi = null;
+        this.contract = null;
+        this.initAbi();
         this.init();
     }
 
     init() {
         let self = this;
+        this.contract = self.getUsersContract('0x717d30089a61876e085bdea87e8d4ae48fd267f6');
+        if (this.contract) {
+            //$('.save-blockchain').removeAttr('disabled');
+        } else {
+            $('.save-blockchain').attr('disabled', 'disabled');
+        }
+
         if (typeof web3 !== 'undefined') {
             window.web3 = new Web3(web3.currentProvider);
             console.log('current provider');
@@ -36,8 +46,12 @@ class EnsUtility {
 
             var networkId = result;
             console.log('Network id: ' + networkId);
-            self.currentNetworkTitle = self.networkName[networkId];
+            /*if (networkId != 4) {
+                alert('Please, change network to Rinkeby and reload page');
+                return;
+            }*/
 
+            self.currentNetworkTitle = self.networkName[networkId];
             web3.eth.getAccounts(function (error, result) {
                 if (error) {
                     console.error(error);
@@ -68,6 +82,79 @@ class EnsUtility {
             }
             self.saveDomainHash();
         });
+
+        $('.save-blockchain').click(function (e) {
+            e.preventDefault();
+            $('.save-blockchain').attr('disabled', 'disabled');
+            self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, function (error, result) {
+                //console.log(error);
+                //console.log(result);
+                window.location.hash = '';
+            });
+        });
+    }
+
+    initAbi() {
+        this.contractAbi = [
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "hash",
+                        "type": "string"
+                    }
+                ],
+                "name": "setHash",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "User",
+                        "type": "address"
+                    }
+                ],
+                "name": "getHash",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "UsersInfo",
+                "outputs": [
+                    {
+                        "name": "SwarmHash",
+                        "type": "string"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
     }
 
     isCorrectDomain(domain) {
@@ -108,6 +195,14 @@ class EnsUtility {
         }).catch(function (e) {
             self.main.alert('Domain name not found, resolver not set or it does not belong to you');
         });
+    }
+
+    getUsersContract(contractAddress) {
+        if (window.web3) {
+            return window.web3.eth.contract(this.contractAbi).at(contractAddress);
+        } else {
+            return null;
+        }
     }
 }
 

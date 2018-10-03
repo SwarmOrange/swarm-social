@@ -23,50 +23,106 @@ class Main {
         $(document).ready(function () {
             let hash = window.location.hash.substring(1);
             if (hash) {
-                if (self.blogClass.isCorrectSwarmHash(hash)) {
-
+                if (window.web3 && window.web3.isAddress(hash)) {
+                    ensUtility.contract.getHash.call(hash, function (error, result) {
+                        console.log([error, result]);
+                        if (error) {
+                            self.alert('Can not receive user');
+                        } else if (result) {
+                            self.initByHash(result);
+                        } else {
+                            self.alert('User not found. Enter correct Ethereum wallet');
+                        }
+                    });
+                } else if (self.blogClass.isCorrectSwarmHash(hash)) {
+                    self.initByHash(hash);
                 } else {
                     self.alert('Incorrect hash after # in url. Fix it and reload page.');
 
                     return;
                 }
-            }
-
-            console.log('hash from window hash: ' + hash);
-            let swarmHost = window.location.protocol + "//" + window.location.host;
-            if (window.location.hostname === "mem.lt") {
-                swarmHost = "https://swarm-gateways.net";
-            } else if (window.location.hostname === "tut.bike") {
-                swarmHost = "http://beefree.me";
-            } else if (window.location.hostname === "localhost") {
-                swarmHost = "http://127.0.0.1:8500";
-                //swarmHost = "https://swarm-gateways.net";
-            }
-
-            self.swarm = new SwarmApi(swarmHost, "");
-            self.blog.swarm = self.swarm;
-            let isValid = (hash || self.blog.uploadedSwarmHash).length > 0;
-            if (isValid) {
-                $('#userRegistration').hide();
-                $('#userInfo').show();
             } else {
-                //alert('You can\'t access this site. Add #SWARM_HASH to url and update page.');
-                //return;
-                $('#userRegistration').show();
-                //$('#importData').show();
-                $('#userInfo').hide();
-            }
+                // todo check with not only metamask but official client
+                if (web3.currentProvider.isMetaMask) {
+                    console.log('yes, metamask');
+                    web3.version.getNetwork(function (error, result) {
+                        let networkId = result;
+                        console.log('Network id: ' + networkId);
+                        if (networkId != 4) {
+                            alert('Please, change network to Rinkeby and reload page');
+                            return;
+                        }
 
-            let initHash = hash ? hash : self.blog.uploadedSwarmHash;
-            console.log('selected hash: ' + initHash);
-            self.swarm.applicationHash = initHash;
-            console.log(self.swarm.applicationHash);
-            if (self.swarm.applicationHash) {
-                self.updateProfile();
-            }
+                        web3.eth.getAccounts(function (error, result) {
+                            if (error) {
+                                console.error(error);
+                            }
 
-            self.init();
+                            console.log(result);
+                            if (result.length === 0) {
+                                alert('Please, select main Ethereum account, unlock MetaMask and reload this page.');
+                            } else {
+                                web3.eth.defaultAccount = result[0];
+                                ensUtility.contract.getHash.call(web3.eth.defaultAccount, function (error, result) {
+                                    console.log([error, result]);
+                                    if (error) {
+                                        self.alert('Error when receive user info');
+                                    } else if (result) {
+                                        self.initByHash(result);
+                                    } else {
+                                        // user not found, load default page
+                                        //self.initByHash();
+                                        self.alert('User with current wallet not found');
+                                    }
+                                });
+                            }
+                        });
+                    });
+                } else {
+                    console.log('not metamask');
+                    self.initByHash();
+                }
+            }
         });
+    }
+
+
+    initByHash(hash) {
+        let self = this;
+        console.log('hash from window hash: ' + hash);
+        let swarmHost = window.location.protocol + "//" + window.location.host;
+        if (window.location.hostname === "mem.lt") {
+            swarmHost = "https://swarm-gateways.net";
+        } else if (window.location.hostname === "tut.bike") {
+            swarmHost = "http://beefree.me";
+        } else if (window.location.hostname === "localhost") {
+            swarmHost = "http://127.0.0.1:8500";
+            //swarmHost = "https://swarm-gateways.net";
+        }
+
+        self.swarm = new SwarmApi(swarmHost, "");
+        self.blog.swarm = self.swarm;
+        let isValid = (hash || self.blog.uploadedSwarmHash).length > 0;
+        if (isValid) {
+            $('#userRegistration').hide();
+            $('#userInfo').show();
+        } else {
+            //alert('You can\'t access this site. Add #SWARM_HASH to url and update page.');
+            //return;
+            $('#userRegistration').show();
+            //$('#importData').show();
+            $('#userInfo').hide();
+        }
+
+        let initHash = hash ? hash : self.blog.uploadedSwarmHash;
+        console.log('selected hash: ' + initHash);
+        self.swarm.applicationHash = initHash;
+        console.log(self.swarm.applicationHash);
+        if (self.swarm.applicationHash) {
+            self.updateProfile();
+        }
+
+        self.init();
     }
 
     updateProfile() {
@@ -95,6 +151,7 @@ class Main {
         this.swarm.applicationHash = newHash;
         localStorage.setItem('applicationHash', newHash);
         window.location.hash = newHash;
+        $('.save-blockchain').removeAttr('disabled');
         if (notUpdateProfile) {
             return null;
         } else {
@@ -114,9 +171,10 @@ class Main {
                 type: itemType,
                 url: itemId,
                 info: itemInfo
-            }]).then(function (response) {
-                self.onAfterHashChange(response.data);
-            });
+            }])
+                .then(function (response) {
+                    self.onAfterHashChange(response.data);
+                });
         });
 
         $('.go-user-hash').click(function (e) {
@@ -614,6 +672,14 @@ class Main {
     }
 
     alert(message, buttons) {
+        console.log(message);
+        if (typeof message === 'string') {
+
+        } else {
+            console.log('Not string, skip');
+            return;
+        }
+
         let messageModal = $('#messageModal');
         $('#messageBody').html(message);
         messageModal.modal('show');

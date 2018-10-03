@@ -9,6 +9,12 @@ class GooglePlus {
         let self = this;
         $('.btn-profile-import-google-plus').click(function (e) {
             e.preventDefault();
+            let s = document.createElement("script");
+            s.type = "text/javascript";
+            s.src = "https://plus.google.com/js/client:platform.js";
+            s.async = true;
+            s.defer = true;
+            $('head').append(s);
             $('#googlePlusImportModal').modal('show');
         });
 
@@ -32,7 +38,6 @@ class GooglePlus {
                 .then(function (response) {
                     self.main.onAfterHashChange(response.data);
                 });
-
         });
     }
 

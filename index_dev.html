@@ -14,6 +14,41 @@
     <link href="css/style.css" rel="stylesheet">
 
     <script src="https://vk.com/js/api/openapi.js?159" type="text/javascript"></script>
+
+    <script>
+        /** Google Plus **/
+        /**
+         * Handler for the signin callback triggered after the user selects an account.
+         */
+        function onSignInCallback(resp) {
+            gapi.client.load('plus', 'v1', apiClientLoaded);
+        }
+
+        /**
+         * Sets up an API call after the Google API client loads.
+         */
+        function apiClientLoaded() {
+            gapi.client.plus.people.get({userId: 'me'}).execute(handleEmailResponse);
+        }
+
+        /**
+         * Response callback for when the API client receives a response.
+         *
+         * @param resp The API response object with the user email and profile information.
+         */
+        function handleEmailResponse(resp) {
+            /*console.log(resp);
+            var primaryEmail;
+            for (var i=0; i < resp.emails.length; i++) {
+                if (resp.emails[i].type === 'account') primaryEmail = resp.emails[i].value;
+            }*/
+            if (resp) {
+                googlePlus.setInfo(resp.name.givenName, resp.name.familyName, resp.image.url, resp.aboutMe);
+
+            }
+        }
+    </script>
+    <!--<script src="https://plus.google.com/js/client:platform.js" async defer></script>-->
 </head>
 <body>
 
@@ -92,7 +127,30 @@
     <button class="btn btn-success mb-2 btn-create-empty"><img src="img/empty.png" alt="" style="width: 30px"> Create
         empty page
     </button>
+</div>
 
+<!-- Alert Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="messageBody" class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                <div class="additional-buttons">
+
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="userInfo" class="container" style="margin-top: 30px; display: none">
@@ -224,6 +282,9 @@
                                         <button type="submit" class="btn btn-primary mb-2 save-ens"
                                                 style="display: none">
                                             Save ENS
+                                        </button>
+                                        <button type="submit" class="btn btn-primary mb-2 save-blockchain" disabled>
+                                            Save page to Blockchain
                                         </button>
                                     </p>
                                 </div>
@@ -614,30 +675,6 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary send-ens-transaction">Send transaction</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Alert Modal -->
-        <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Message</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div id="messageBody" class="modal-body">
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                        <div class="additional-buttons">
-
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1210,39 +1247,6 @@
                         videos.append('</ul>');
                     });
             });
-
-            /** Google Plus **/
-            /**
-             * Handler for the signin callback triggered after the user selects an account.
-             */
-            function onSignInCallback(resp) {
-                gapi.client.load('plus', 'v1', apiClientLoaded);
-            }
-
-            /**
-             * Sets up an API call after the Google API client loads.
-             */
-            function apiClientLoaded() {
-                gapi.client.plus.people.get({userId: 'me'}).execute(handleEmailResponse);
-            }
-
-            /**
-             * Response callback for when the API client receives a response.
-             *
-             * @param resp The API response object with the user email and profile information.
-             */
-            function handleEmailResponse(resp) {
-                /*console.log(resp);
-                var primaryEmail;
-                for (var i=0; i < resp.emails.length; i++) {
-                    if (resp.emails[i].type === 'account') primaryEmail = resp.emails[i].value;
-                }*/
-                if (resp) {
-                    googlePlus.setInfo(resp.name.givenName, resp.name.familyName, resp.image.url, resp.aboutMe);
-
-                }
-            }
         </script>
-        <script src="https://plus.google.com/js/client:platform.js" async defer></script>
 </body>
 </html>
