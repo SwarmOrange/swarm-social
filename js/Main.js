@@ -71,8 +71,8 @@ class Main {
                                         self.initByHash(result);
                                     } else {
                                         // user not found, load default page
-                                        //self.initByHash();
-                                        self.alert('User with current wallet not found');
+                                        self.initByHash();
+                                        //self.alert('User with current wallet not found');
                                     }
                                 });
                             }
