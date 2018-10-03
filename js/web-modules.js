@@ -1,7 +1,7 @@
 /* Modules for development */
 window.$ = require('jquery');
 window.jQuery = require('jquery');
-window.SwarmApi = require('./SwarmApi');
+window.SwarmApi = require('../node_modules/free-core/js/SwarmApi');
 window.EthereumENS = require('ethereum-ens');
 window.Cropper = require('cropperjs');
 require('bootstrap');

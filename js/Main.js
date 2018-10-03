@@ -221,14 +221,6 @@ class Main {
             }
         });
 
-        $('.create-profile').click(function (e) {
-            e.preventDefault();
-
-            //localStorage.setItem('applicationHash', '');
-            // todo how to create empty hash with one file?
-            //blog.saveProfile({});
-        });
-
         $('.load-more').click(function (e) {
             e.preventDefault();
             self.loadPosts();

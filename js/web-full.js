@@ -1,7 +1,7 @@
 /* All scripts for production */
 window.$ = require('jquery');
 window.jQuery = require('jquery');
-window.SwarmApi = require('./SwarmApi');
+window.SwarmApi = require('../node_modules/free-core/js/SwarmApi.js');
 window.EthereumENS = require('ethereum-ens');
 window.Cropper = require('cropperjs');
 require('bootstrap');
@@ -10,7 +10,7 @@ window.JSZip = require('jszip');
 window.saveAs = require('file-saver');
 
 let Main = require('./Main');
-let Blog = require('./Blog.js');
+let Blog = require('../node_modules/free-core/js/Blog.js');
 let Photoalbum = require('./Photoalbum.js');
 let VKImport = require('./VKImport.js');
 let Videoplaylist = require('./Videoplaylist.js');

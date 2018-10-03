@@ -1,505 +1,4 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-class Blog {
-    constructor(swarm) {
-        this.last_photoalbum_id = 0;
-        this.last_videoalbum_id = 0;
-        this.prefix = "social/";
-        this.mruName = "SWARM Social";
-        this.swarm = swarm;
-        this.version = 1;
-        this.myProfile = {};
-        let elements = window.location.href.split('/').filter(word => word.length === 64 || word.length === 128 || (word.length >= 11 && word.endsWith('.eth')));
-        this.uploadedToSwarm = elements.length > 0;
-        if (this.uploadedToSwarm) {
-            this.uploadedSwarmHash = elements[0];
-        } else {
-            this.uploadedSwarmHash = '';
-        }
-    }
-
-    getDefaultProfile() {
-        return {
-            "first_name": "SWARM",
-            "last_name": "User",
-            "birth_date": "24/07/2018",
-            "location": {
-                "coordinates": {},
-                "name": "Belarus, Minsk"
-            },
-            "photo": {
-                "original": "social/file/avatar/original.jpg"
-            },
-            "about": "My SWARM page. You can edit this information",
-            "i_follow": [],
-            "last_post_id": 0,
-            "last_photoalbum_id": 0,
-            "last_videoalbum_id": 0
-        };
-    }
-
-    deleteFile(file) {
-        return this.swarm.delete(file);
-    }
-
-    replaceUrlSwarmHash(newHash) {
-        if (this.uploadedToSwarm) {
-            window.location.hash = '';
-        }
-
-        let newElements = [];
-        window.location.href.split('/').forEach(function (v) {
-            let item = v;
-            if (Blog.isCorrectSwarmHash(v)) {
-                item = newHash;
-            }
-
-            newElements.push(item);
-        });
-        let newUrl = newElements.join('/');
-        window.history.pushState({"swarmHash": newHash}, "", newUrl);
-
-        return newUrl;
-    }
-
-    static isCorrectSwarmHash(hash) {
-        let hashLength = 64;
-        let hashLengthEncrypted = 128;
-
-        return hash && (hash.length === hashLength || hash.length === hashLengthEncrypted);
-    }
-
-    getMyProfile() {
-        return this.getProfile(this.swarm.applicationHash);
-    }
-
-    setMyProfile(data) {
-        this.myProfile = data;
-    }
-
-    saveProfile(data, userHash) {
-        data.version = this.version;
-        return this.swarm.post(this.prefix + "profile.json", JSON.stringify(data), 'application/json', userHash);
-    }
-
-    getProfile(userHash) {
-        return this.swarm.get(this.prefix + 'profile.json', userHash);
-    }
-
-    getIFollow() {
-        return this.myProfile.i_follow ? this.myProfile.i_follow.slice(0) : [];
-    }
-
-    addIFollow(swarmProfileHash) {
-        if ('i_follow' in this.myProfile) {
-            if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
-                throw "Hash already exists";
-            }
-
-            this.myProfile.i_follow.push(swarmProfileHash);
-        } else {
-            this.myProfile.i_follow = [swarmProfileHash];
-        }
-
-        return this.saveProfile(this.myProfile);
-    }
-
-    deleteIFollow(swarmProfileHash) {
-        if ('i_follow' in this.myProfile) {
-            if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
-                let index = this.myProfile.i_follow.indexOf(swarmProfileHash);
-                if (index > -1) {
-                    this.myProfile.i_follow.splice(index, 1);
-                }
-            }
-        } else {
-            this.myProfile.i_follow = [];
-        }
-
-        return this.saveProfile(this.myProfile);
-    }
-
-    sendRawFile(fileName, data, fileType, userHash, swarmProtocol, onProgress) {
-        return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol, onProgress);
-    }
-
-    uploadFilesForPost(id, filesFormData, onUploadProgress) {
-        let contentType = 'multipart/form-data';
-        let self = this;
-        let url = this.prefix + "post/" + id + "/file/";
-
-        return this.sendRawFile(url, filesFormData, contentType, null, null, onUploadProgress)
-            .then(function (response) {
-                    return {
-                        response: response,
-                        url: url,
-                        fullUrl: self.swarm.getFullUrl(url, response.data)
-                    };
-                }
-            );
-    }
-
-    uploadAvatar(fileContent) {
-        let self = this;
-        let url = this.prefix + "file/avatar/original.jpg";
-
-        return this.sendRawFile(url, fileContent, 'image/jpeg')
-            .then(function (response) {
-                console.log('avatar uploaded');
-                console.log(response.data);
-                self.swarm.applicationHash = response.data;
-                self.myProfile.photo = {
-                    original: url
-                };
-
-                return self.saveProfile(self.myProfile);
-            });
-    }
-
-    createPost(id, description, attachments) {
-        let self = this;
-        attachments = attachments || [];
-        attachments.forEach(function (v, i) {
-            v.id = i + 1;
-        });
-        let info = {
-            id: id,
-            description: description,
-            attachments: attachments
-        };
-
-        return this.sendRawFile(this.prefix + "post/" + id + "/info.json", JSON.stringify(info), 'application/json')
-            .then(function (response) {
-                console.log('one');
-                console.log(response.data);
-                self.myProfile.last_post_id = id;
-                self.swarm.applicationHash = response.data;
-
-                return self.saveProfile(self.myProfile);
-            });
-    }
-
-    getPost(id, userHash) {
-        return this.swarm.get(this.prefix + 'post/' + id + '/info.json', userHash);
-    }
-
-    deletePost(id) {
-        let self = this;
-        let urlPath = this.prefix + 'post/' + id + '/';
-        return this.deleteFile(urlPath + 'info.json').then(function (response) {
-            self.swarm.applicationHash = response.data;
-            return self.deleteFile(urlPath);
-        });
-    }
-
-    deletePostAttachment(postId, attachmentId) {
-        let self = this;
-        return self.getPost(postId).then(function (response) {
-            let data = response.data;
-            let newAttachments = [];
-            let toDelete = null;
-            data.attachments.forEach(function (v) {
-                if (v.id != attachmentId) {
-                    newAttachments.push(v);
-                } else {
-                    toDelete = v;
-                }
-            });
-
-            if (toDelete) {
-                return self.editPost(postId, data.description, newAttachments)
-                    .then(function (response) {
-                        self.swarm.applicationHash = response.data;
-
-                        return self.deleteFile(toDelete.url);
-                    });
-            } else {
-                throw "Attachment not found";
-            }
-        });
-    }
-
-    editPost(id, description, attachments) {
-        let self = this;
-        attachments = attachments || [];
-        return this.getPost(id).then(function (response) {
-            let data = response.data;
-            data.description = description;
-            data.attachments = attachments;
-            return self.swarm.post(self.prefix + "post/" + id + "/info.json", JSON.stringify(data), 'application/json');
-        });
-    }
-
-    createVideoAlbum(id, name, description, videos) {
-        let self = this;
-        videos = videos || [];
-        let coverFile = videos.length ? videos[0].cover_file : videos;
-        let fileType = videos.length ? videos[0].type : videos;
-        let info = {
-            id: id,
-            type: fileType,
-            name: name,
-            description: description,
-            cover_file: coverFile,
-            videos: videos
-        };
-
-        let finalSave = function (data) {
-            return self.sendRawFile(self.prefix + "videoalbum/info.json", JSON.stringify(data), 'application/json')
-                .then(function (response) {
-                    console.log(response.data);
-                    self.swarm.applicationHash = response.data;
-                    self.myProfile.last_videoalbum_id = id;
-
-                    return {response: self.saveProfile(self.myProfile), info: info};
-                });
-        };
-
-        return this.sendRawFile(this.prefix + "videoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json')
-            .then(function (response) {
-                console.log('Video album info.json');
-                console.log(response.data);
-                self.swarm.applicationHash = response.data;
-                let newInfo = {
-                    id: id,
-                    type: fileType,
-                    name: name,
-                    description: description,
-                    cover_file: coverFile
-                };
-
-                return self.getVideoAlbumsInfo()
-                    .then(function (response) {
-                        let data = response.data;
-                        data = Array.isArray(data) ? data : [];
-
-                        data.push(newInfo);
-                        console.log('album info');
-                        console.log(data);
-
-                        return finalSave(data);
-                    })
-                    .catch(function () {
-                        return finalSave([newInfo]);
-                    });
-            });
-    }
-
-    getVideoAlbumsInfo() {
-        return this.swarm.get(this.prefix + 'videoalbum/info.json');
-    }
-
-    getVideoAlbumInfo(id) {
-        return this.swarm.get(this.prefix + 'videoalbum/' + id + '/info.json');
-    }
-
-    uploadFileToVideoalbum(albumId, file, onProgress) {
-        let fileName = this.prefix + "videoalbum/" + albumId + "/" + file.name;
-        return this.sendRawFile(fileName, file, file.type, null, null, onProgress)
-            .then(function (response) {
-                return {fileName: fileName, response: response.data};
-            });
-    }
-
-    createPhotoAlbum(id, name, description, photos) {
-        let self = this;
-        photos = photos || [];
-        let coverFile = photos.length ? photos[0] : photos;
-        let info = {
-            id: id,
-            name: name,
-            description: description,
-            cover_file: coverFile,
-            photos: photos
-        };
-
-        let navigateAndSaveProfile = function (response) {
-            self.swarm.applicationHash = response.data;
-            self.myProfile.last_photoalbum_id = id;
-
-            return self.saveProfile(self.myProfile);
-        };
-
-        return this.sendRawFile(this.prefix + "photoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json')
-            .then(function (response) {
-                console.log('Photoalbom info.json');
-                console.log(response.data);
-                self.swarm.applicationHash = response.data;
-                let newAlbumInfo = {
-                    id: id,
-                    name: name,
-                    description: description,
-                    cover_file: coverFile
-                };
-
-                return self.getPhotoAlbumsInfo().then(function (response) {
-                    let data = response.data;
-                    data = Array.isArray(data) ? data : [];
-                    data.push(newAlbumInfo);
-                    console.log('album info');
-                    console.log(data);
-                    return self.saveAlbumsInfo(data).then(function (response) {
-                        return navigateAndSaveProfile(response);
-                    });
-                }).catch(function () {
-                    return self.saveAlbumsInfo([newAlbumInfo]).then(function (response) {
-                        return navigateAndSaveProfile(response);
-                    });
-                });
-            });
-    }
-
-    uploadPhotoToAlbum(photoAlbumId, photoId, fileContent, onProgress) {
-        let path = this.prefix + "photoalbum/" + photoAlbumId + "/";
-        let fileName = path + photoId + ".jpg";
-        return this.sendRawFile(fileName, fileContent, 'image/jpeg', null, null, onProgress)
-            .then(function (response) {
-                return {
-                    path: path,
-                    fileName: fileName,
-                    response: response.data
-                };
-            });
-    }
-
-    getAlbumInfo(id) {
-        return this.swarm.get(this.prefix + 'photoalbum/' + id + '/info.json');
-    }
-
-    getPhotoAlbumsInfo() {
-        return this.swarm.get(this.prefix + 'photoalbum/info.json');
-    }
-
-    saveAlbumsInfo(data) {
-        return this.sendRawFile(this.prefix + "photoalbum/info.json", JSON.stringify(data), 'application/json');
-    }
-
-    deletePhotoAlbum(id) {
-        let self = this;
-        // todo delete all photos. Can we delete files from passed list?
-        // todo delete from photoalbum/info.json
-        return this.swarm.delete(this.prefix + 'photoalbum/' + id + '/1.jpg').then(function (response) {
-            self.swarm.applicationHash = response.data;
-            return self.getPhotoAlbumsInfo().then(function (response) {
-                let data = response.data;
-                let newAlbums = [];
-                if (data && Array.isArray(data) && data.length) {
-                    data.forEach(function (v) {
-                        if (v.id != id) {
-                            newAlbums.push(v);
-                        }
-                    });
-                }
-
-                return self.saveAlbumsInfo(newAlbums);
-            });
-        });
-    }
-
-    createMru(ownerAddress) {
-        let self = this;
-        // todo save it to profile
-        if (!ownerAddress) {
-            throw "Empty owner address";
-        }
-
-        let timestamp = +new Date();
-        let data = {
-            "name": this.mruName,
-            "frequency": 5,
-            "startTime": timestamp,
-            "ownerAddr": ownerAddress
-        };
-
-        return this.swarm.post(null, data, null, null, 'bzz-resource:').then(function (response) {
-            self.myProfile.mru = response.data;
-            return {
-                mru: response.data,
-                response: self.saveProfile(self.myProfile)
-            };
-        });
-    }
-
-    saveMru(mru, rootAddress, swarmHash) {
-        if (mru && rootAddress && swarmHash) {
-        } else {
-            throw "Empty MRU, rootAddress or SWARM hash";
-        }
-
-        let timestamp = +new Date();
-        let data = {
-            "name": this.mruName,
-            "frequency": 5,
-            "startTime": timestamp,
-            "rootAddr": rootAddress,
-            "data": "0x12a3",
-            "multiHash": false,
-            "version": 1,
-            "period": 1,
-            "signature": "0x71c54e53095466d019f9f46e34ae0b393d04a5dac7990ce65934a3944c1f39badfc8c4f3c78baaae8b2e86cd21940914c57a4dff5de45d47e35811f983991b7809"
-        };
-
-        return this.swarm.post(null, data, null, null, 'bzz-resource:');
-    }
-
-    saveMessage(receiverHash, message, isPrivate) {
-        let self = this;
-        if (isPrivate) {
-            throw('Private messages not supported');
-        }
-
-        if (!Blog.isCorrectSwarmHash(receiverHash)) {
-            throw('Incorrect receiver hash');
-        }
-
-        if (!message) {
-            throw('Empty message');
-        }
-
-
-        let sendMessage = function (messageInfo) {
-            let messageId = 1;
-            if (receiverHash in messageInfo && 'last_message_id' in messageInfo[receiverHash]) {
-                messageInfo[receiverHash].last_message_id++;
-                messageId = messageInfo[receiverHash].last_message_id;
-            } else {
-                messageInfo = messageInfo || {};
-                messageInfo[receiverHash] = {last_message_id: messageId};
-            }
-
-            let data = {
-                id: messageId,
-                receiverHash: receiverHash,
-                message: message
-            };
-
-            return self.swarm.post(self.prefix + "message/public/" + receiverHash + "/" + messageId + ".json", JSON.stringify(data), 'application/json').then(function (response) {
-                self.swarm.applicationHash = response.data;
-                return self.saveMessageInfo(messageInfo);
-            });
-        };
-
-        return self.getMessageInfo().then(function (response) {
-            return sendMessage(response.data);
-        }).catch(function () {
-            return sendMessage({});
-        });
-    }
-
-    getMessage(id, receiverHash) {
-        return this.swarm.get(this.prefix + 'message/public/' + receiverHash + '/' + id + '.json');
-    }
-
-    getMessageInfo() {
-        return this.swarm.get(this.prefix + 'message/public/info.json');
-    }
-
-    saveMessageInfo(data) {
-        return this.swarm.post(this.prefix + 'message/public/info.json', JSON.stringify(data));
-    }
-}
-
-module.exports = Blog;
-},{}],2:[function(require,module,exports){
 class EnsUtility {
     constructor(main) {
         this.networkName = {
@@ -614,7 +113,7 @@ class EnsUtility {
 }
 
 module.exports = EnsUtility;
-},{}],3:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 class FacebookImport {
     fbCheckLoginState(data) {
         console.log('fb data');
@@ -626,7 +125,7 @@ class FacebookImport {
 }
 
 module.exports = FacebookImport;
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 class GooglePlus {
     constructor(main) {
         this.main = main;
@@ -676,7 +175,7 @@ class GooglePlus {
 }
 
 module.exports = GooglePlus;
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 class ImportButtons {
     constructor(main) {
         this.init();
@@ -767,7 +266,7 @@ class ImportButtons {
 }
 
 module.exports = ImportButtons;
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 class Instagram {
     constructor(main) {
         this.main = main;
@@ -824,7 +323,7 @@ class Instagram {
 }
 
 module.exports = Instagram;
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 class Main {
 
     constructor(blogClass, blog) {
@@ -1048,14 +547,6 @@ class Main {
             }
         });
 
-        $('.create-profile').click(function (e) {
-            e.preventDefault();
-
-            //localStorage.setItem('applicationHash', '');
-            // todo how to create empty hash with one file?
-            //blog.saveProfile({});
-        });
-
         $('.load-more').click(function (e) {
             e.preventDefault();
             self.loadPosts();
@@ -1106,9 +597,10 @@ class Main {
             if (confirm('Really delete?')) {
                 $('#viewAlbumModal').modal('hide');
 
-                self.blog.deletePhotoAlbum(id).then(function (response) {
-                    self.onAfterHashChange(response.data);
-                });
+                self.blog.deletePhotoAlbum(id)
+                    .then(function (response) {
+                        self.onAfterHashChange(response.data);
+                    });
             }
         });
 
@@ -1462,7 +954,7 @@ class Main {
 }
 
 module.exports = Main;
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 class Messages {
     constructor(main) {
         this.main = main;
@@ -1538,17 +1030,21 @@ class Messages {
                 usersList.append('<button class="dropdown-item text-center messages-write-message" type="button" data-user-id="' + v + '"><img src="' + self.main.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" alt="" class="size-36"></button>');
             });
 
-            self.main.blog.getMessageInfo().then(function (response) {
-                let data = response.data;
-                Object.keys(data).forEach(function (userHash) {
-                    let info = data[userHash];
-                    let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', userHash);
+            self.main.blog.getMessageInfo()
+                .then(function (response) {
+                    let data = response.data;
+                    Object.keys(data).forEach(function (userHash) {
+                        let info = data[userHash];
+                        let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', userHash);
 
-                    messageDialogs.append('<div class="message-dialog">' +
-                        '<p><img class="size-30" src="' + avatar + '"> <a class="message-open-dialog" href="#" data-user-hash="' + userHash + '">' + userHash + '</a></p>' +
-                        '</div>');
+                        messageDialogs.append('<div class="message-dialog">' +
+                            '<p><img class="size-30" src="' + avatar + '"> <a class="message-open-dialog" href="#" data-user-hash="' + userHash + '">' + userHash + '</a></p>' +
+                            '</div>');
+                    });
+                })
+                .catch(function (e) {
+                    console.log(e);
                 });
-            });
         });
     }
 
@@ -1571,7 +1067,7 @@ class Messages {
 }
 
 module.exports = Messages;
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 class News {
     constructor(main) {
         this.main = main;
@@ -1586,11 +1082,11 @@ class News {
             newsUsers.html('');
             newsContent.html('');
             let users = self.main.blog.getIFollow();
+            users.reverse();
             if (users.length) {
                 self.showLoadingBar(true);
                 users.forEach(function (v) {
                     newsUsers.append('<li class="list-group i-follow-news-li">' +
-                        //'<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
                         '<a onclick="return false;" href="' + self.main.swarm.getFullUrl('', v) + '" class="load-profile-------" data-profile-id="' + v + '"><img src="' + self.main.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 80px"></a>' +
                         '</li>');
                 });
@@ -1623,43 +1119,54 @@ class News {
         let self = this;
         let newsContent = $('.news-content');
         let currentUser = users.shift();
-        return this.main.blog.getProfile(currentUser).then(function (response) {
-            let lastPostId = response.data.last_post_id;
-            let minPostId = Math.max(1, lastPostId - maxPostsFromUser);
-            console.log('Received profile: ' + currentUser + ', ' + lastPostId + ', ' + minPostId);
-            let userId = 'userNews' + currentUser;
-            let getUserPost = function (userId, postId) {
-                let userHolderName = '#userNews' + userId;
-                let userSection = $(userHolderName);
-                return self.main.blog.getPost(postId, userId).then(function (response) {
-                    let post = response.data;
-                    //userSection.append('<p>' + post.id + ': ' + post.description + '</p>');
-                    userSection.append('<div id="newsPost' + post.id + '"></div>');
-                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName);
-                    console.log('Received post: ' + userId + ', ' + postId);
+        return this.main.blog.getProfile(currentUser)
+            .then(function (response) {
+                let lastPostId = response.data.last_post_id;
+                if (!lastPostId || lastPostId <= 0) {
+                    return self.compileNews(users, maxPostsFromUser);
+                }
 
-                    postId++;
-                    if (postId <= lastPostId) {
-                        return getUserPost(userId, postId);
-                    } else {
-                        return self.compileNews(users, maxPostsFromUser);
-                    }
-                });
-            };
+                let minPostId = Math.max(1, lastPostId - maxPostsFromUser);
+                console.log('Received profile: ' + currentUser + ', ' + lastPostId + ', ' + minPostId);
+                let userId = 'userNews' + currentUser;
+                let getUserPost = function (userId, postId) {
+                    let userHolderName = '#userNews' + userId;
+                    let userSection = $(userHolderName);
+                    console.log([postId, userId]);
+                    return self.main.blog.getPost(postId, userId)
+                        .then(function (response) {
+                            let post = response.data;
+                            userSection.append('<div id="newsPost' + post.id + '"></div>');
+                            self.main.addPostByData(post, '#newsPost' + userId, userHolderName);
+                            console.log('Received post: ' + userId + ', ' + postId);
 
-            if (lastPostId > 0) {
-                newsContent.append('<div id="' + userId + '"></div>');
+                            postId++;
+                            if (postId <= lastPostId) {
+                                return getUserPost(userId, postId);
+                            } else {
+                                return self.compileNews(users, maxPostsFromUser);
+                            }
+                        })
+                        .catch(function (e) {
+                            console.log(e);
+                            postId++;
+                            return getUserPost(userId, postId);
+                        });
+                };
 
-                return getUserPost(currentUser, minPostId)
-            } else {
-                return self.compileNews(users, maxPostsFromUser);
-            }
-        });
+                if (lastPostId > 0) {
+                    newsContent.append('<div id="' + userId + '"></div>');
+
+                    return getUserPost(currentUser, minPostId)
+                } else {
+                    return self.compileNews(users, maxPostsFromUser);
+                }
+            });
     }
 }
 
 module.exports = News;
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 class Photoalbum {
     constructor(main) {
         this.main = main;
@@ -1703,11 +1210,19 @@ class Photoalbum {
                     viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
                     data.photos.forEach(function (v) {
                         let imgSrc = self.main.swarm.getFullUrl(v.file);
+                        let fullImage = self.main.swarm.getFullUrl(v.file);
+                        let image1200x800 = fullImage;
                         if ('previews' in v) {
-                            imgSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
+                            if ('250x250' in v.previews) {
+                                imgSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
+                            }
+
+                            if ('1200x800' in v.previews) {
+                                image1200x800 = self.main.swarm.getFullUrl(v.previews['1200x800']);
+                            }
                         }
 
-                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + self.main.swarm.getFullUrl(v.file) + '" data-toggle="lightbox" data-title="View photo" data-footer="' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + imgSrc + '" class="img-fluid preview-album-photo"></a></li>');
+                        viewAlbumContent.append('<li class="list-inline-item"><a href="' + image1200x800 + '" data-toggle="lightbox" data-title="View photo" data-footer="<a target=_blank href=\'' + fullImage + '\'>Open full image</a><br>' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + imgSrc + '" class="img-fluid preview-album-photo"></a></li>');
                     });
                     viewAlbumContent.append('</ul>');
                 });
@@ -1805,13 +1320,24 @@ class Photoalbum {
         };
 
         let key = '250x250';
+        let keyBigPreview = '1200x800';
         let previewFileName = null;
-        Utils.resizeImages(currentFile, [{width: 250, height: 250}])
-            .then(function (result) {
-                return result[key];
+        let bigPreviewFileName = null;
+        let allPreviews = null;
+        Utils.resizeImages(currentFile, [
+            {width: 250, height: 250, format: 'box'},
+            {width: 1200, height: 800, format: "maxsize"}
+        ])
+            .then(function (previews) {
+                allPreviews = previews;
+                let image1200 = allPreviews[keyBigPreview];
+                return uploadPhoto(image1200, '_' + keyBigPreview);
             })
-            .then(function (imagePreview) {
-                return uploadPhoto(imagePreview, '_' + key);
+            .then(function (data) {
+                self.main.onAfterHashChange(data.response, true);
+                bigPreviewFileName = data.fileName;
+                let image250 = allPreviews[key];
+                return uploadPhoto(image250, '_' + key);
             })
             .then(function (data) {
                 previewFileName = data.fileName;
@@ -1827,7 +1353,10 @@ class Photoalbum {
                 self.photoalbumInfo.uploadedInfo.push({
                     file: data.fileName,
                     description: "",
-                    previews: {'250x250': previewFileName}
+                    previews: {
+                        '250x250': previewFileName,
+                        '1200x800': bigPreviewFileName
+                    }
                 });
 
                 if (self.photoalbumInfo.files.length > 0) {
@@ -1849,7 +1378,7 @@ class Photoalbum {
 }
 
 module.exports = Photoalbum;
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 class Post {
     constructor(main) {
         this.init();
@@ -2084,7 +1613,7 @@ class Post {
 
                 if (fileType === 'photo') {
                     Utils.resizeImages(lastBlob, [
-                        {width: 250, height: 250},
+                        {width: 250, height: 250, format: "box"},
                         {width: 1200, height: 800, format: "maxsize"}
                     ])
                         .then(function (result) {
@@ -2173,7 +1702,7 @@ class Post {
 }
 
 module.exports = Post;
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 class Settings {
     constructor(main) {
         this.main = main;
@@ -2389,7 +1918,7 @@ class Settings {
 }
 
 module.exports = Settings;
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 class StartNow {
     constructor() {
         this.init();
@@ -2430,67 +1959,7 @@ class StartNow {
 }
 
 module.exports = StartNow;
-},{}],14:[function(require,module,exports){
-class SwarmApi {
-    constructor(apiUrl, applicationHash) {
-        this.isWeb = typeof window !== undefined;
-        this.axios = require('axios');
-        this.applicationHash = applicationHash;
-        // todo check is generates correct url when web and empty url
-        this.apiUrl = apiUrl || (this.isWeb ? location.protocol + "//" + location.host : "https://swarm-gateways.net");
-        this.c_hashLength = 64;
-    }
-
-    request(method, fileName, userHash, swarmProtocol, data, fileType, responseType, onUploadProgress) {
-        swarmProtocol = swarmProtocol || "bzz:";
-        if (typeof userHash == null) {
-            userHash = "";
-        } else {
-            userHash = userHash || this.applicationHash;
-        }
-
-        data = data || {};
-        fileType = fileType || "application/text";
-        //responseType = responseType || "json";
-        let headers = {'Content-type': fileType};
-        let url = [this.apiUrl, swarmProtocol, userHash, fileName].filter(function (n) {
-            return n !== ""
-        }).join("/");
-        console.log(url);
-
-        return this.axios({
-            url: url,
-            method: method,
-            data: data,
-            headers: headers,
-            onUploadProgress: onUploadProgress
-            //responseType: responseType
-        });
-    }
-
-    delete(file, userHash, swarmProtocol) {
-        return this.request("delete", file, userHash, swarmProtocol)
-    }
-
-    get(file, userHash, swarmProtocol) {
-        return this.request("get", file, userHash, swarmProtocol)
-    }
-
-    post(fileName, data, fileType, userHash, swarmProtocol, onUploadProgress) {
-        return this.request("post", fileName, userHash, swarmProtocol, data, fileType, null, onUploadProgress);
-    }
-
-    getFullUrl(urlPart, userHash, swarmProtocol) {
-        userHash = userHash || this.applicationHash;
-        swarmProtocol = swarmProtocol || "bzz:";
-        return [this.apiUrl, swarmProtocol, userHash, urlPart].filter(function (n) {
-            return n !== ""
-        }).join("/");
-    }
-}
-
-module.exports = SwarmApi;
-},{"axios":21}],15:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 class Utils {
     constructor() {
     }
@@ -2613,7 +2082,7 @@ class Utils {
 }
 
 module.exports = Utils;
-},{}],16:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 class VKImport {
     constructor(main) {
         this.vkSettings = {
@@ -3039,7 +2508,7 @@ class VKImport {
 }
 
 module.exports = VKImport;
-},{}],17:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 class Videoplaylist {
     constructor(main) {
         this.main = main;
@@ -3160,6 +2629,7 @@ class Videoplaylist {
             setProgress(currentPercent);
         };
 
+        let coverFullFilename = null;
         let file = new File([currentFile], self.videoInfo.uploadedId + '.mp4', {type: currentFile.type});
         Utils.getVideoImage(file, function (time) {
             return time / 2;
@@ -3169,6 +2639,7 @@ class Videoplaylist {
                 return self.main.blog.uploadFileToVideoalbum(newAlbumId, previewFile, updateProgress);
             })
             .then(function (data) {
+                coverFullFilename = data.fileName;
                 self.main.onAfterHashChange(data.response, true);
                 return self.main.blog.uploadFileToVideoalbum(newAlbumId, file, updateProgress)
             })
@@ -3181,7 +2652,7 @@ class Videoplaylist {
                     id: self.videoInfo.uploadedId,
                     name: "",
                     description: "",
-                    cover_file: "img/video-cover.jpg",
+                    cover_file: coverFullFilename ? coverFullFilename : "img/video-cover.jpg",
                     file: data.fileName,
                     type: "video",
                 });
@@ -3212,7 +2683,7 @@ class Videoplaylist {
 }
 
 module.exports = Videoplaylist;
-},{}],18:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 class Wallet {
     constructor(main) {
         this.main = main;
@@ -3246,7 +2717,7 @@ class Wallet {
 }
 
 module.exports = Wallet;
-},{}],19:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 let modules = window.socialModules || {
     Main: Main,
     Blog: Blog,
@@ -3287,11 +2758,11 @@ new modules.Post(myMain);
 new modules.Instagram(myMain);
 window.googlePlus = new modules.GooglePlus(myMain);
 
-},{}],20:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /* All scripts for production */
 window.$ = require('jquery');
 window.jQuery = require('jquery');
-window.SwarmApi = require('./SwarmApi');
+window.SwarmApi = require('../node_modules/free-core/js/SwarmApi.js');
 window.EthereumENS = require('ethereum-ens');
 window.Cropper = require('cropperjs');
 require('bootstrap');
@@ -3300,7 +2771,7 @@ window.JSZip = require('jszip');
 window.saveAs = require('file-saver');
 
 let Main = require('./Main');
-let Blog = require('./Blog.js');
+let Blog = require('../node_modules/free-core/js/Blog.js');
 let Photoalbum = require('./Photoalbum.js');
 let VKImport = require('./VKImport.js');
 let Videoplaylist = require('./Videoplaylist.js');
@@ -3336,9 +2807,9 @@ window.socialModules = {
     GooglePlus: GooglePlus
 };
 require('./initDev.js');
-},{"./Blog.js":1,"./EnsUtility.js":2,"./FacebookImport.js":3,"./GooglePlus.js":4,"./ImportButtons.js":5,"./Instagram.js":6,"./Main":7,"./Messages.js":8,"./News.js":9,"./Photoalbum.js":10,"./Post.js":11,"./Settings.js":12,"./StartNow.js":13,"./SwarmApi":14,"./Utils.js":15,"./VKImport.js":16,"./Videoplaylist.js":17,"./Wallet.js":18,"./initDev.js":19,"bootstrap":48,"cropperjs":70,"ekko-lightbox":105,"ethereum-ens":107,"file-saver":108,"jquery":113,"jszip":124}],21:[function(require,module,exports){
+},{"../node_modules/free-core/js/Blog.js":107,"../node_modules/free-core/js/SwarmApi.js":108,"./EnsUtility.js":1,"./FacebookImport.js":2,"./GooglePlus.js":3,"./ImportButtons.js":4,"./Instagram.js":5,"./Main":6,"./Messages.js":7,"./News.js":8,"./Photoalbum.js":9,"./Post.js":10,"./Settings.js":11,"./StartNow.js":12,"./Utils.js":13,"./VKImport.js":14,"./Videoplaylist.js":15,"./Wallet.js":16,"./initDev.js":17,"bootstrap":46,"cropperjs":68,"ekko-lightbox":103,"ethereum-ens":105,"file-saver":106,"jquery":113,"jszip":124}],19:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":23}],22:[function(require,module,exports){
+},{"./lib/axios":21}],20:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3522,7 +2993,7 @@ module.exports = function xhrAdapter(config) {
 };
 
 }).call(this,require('_process'))
-},{"../core/createError":29,"./../core/settle":32,"./../helpers/btoa":36,"./../helpers/buildURL":37,"./../helpers/cookies":39,"./../helpers/isURLSameOrigin":41,"./../helpers/parseHeaders":43,"./../utils":45,"_process":234}],23:[function(require,module,exports){
+},{"../core/createError":27,"./../core/settle":30,"./../helpers/btoa":34,"./../helpers/buildURL":35,"./../helpers/cookies":37,"./../helpers/isURLSameOrigin":39,"./../helpers/parseHeaders":41,"./../utils":43,"_process":234}],21:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -3576,7 +3047,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":24,"./cancel/CancelToken":25,"./cancel/isCancel":26,"./core/Axios":27,"./defaults":34,"./helpers/bind":35,"./helpers/spread":44,"./utils":45}],24:[function(require,module,exports){
+},{"./cancel/Cancel":22,"./cancel/CancelToken":23,"./cancel/isCancel":24,"./core/Axios":25,"./defaults":32,"./helpers/bind":33,"./helpers/spread":42,"./utils":43}],22:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3597,7 +3068,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],25:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -3656,14 +3127,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":24}],26:[function(require,module,exports){
+},{"./Cancel":22}],24:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],27:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 var defaults = require('./../defaults');
@@ -3744,7 +3215,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"./../defaults":34,"./../utils":45,"./InterceptorManager":28,"./dispatchRequest":30}],28:[function(require,module,exports){
+},{"./../defaults":32,"./../utils":43,"./InterceptorManager":26,"./dispatchRequest":28}],26:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3798,7 +3269,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":45}],29:[function(require,module,exports){
+},{"./../utils":43}],27:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -3818,7 +3289,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":31}],30:[function(require,module,exports){
+},{"./enhanceError":29}],28:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3906,7 +3377,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":26,"../defaults":34,"./../helpers/combineURLs":38,"./../helpers/isAbsoluteURL":40,"./../utils":45,"./transformData":33}],31:[function(require,module,exports){
+},{"../cancel/isCancel":24,"../defaults":32,"./../helpers/combineURLs":36,"./../helpers/isAbsoluteURL":38,"./../utils":43,"./transformData":31}],29:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3929,7 +3400,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],32:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -3957,7 +3428,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":29}],33:[function(require,module,exports){
+},{"./createError":27}],31:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -3979,7 +3450,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":45}],34:[function(require,module,exports){
+},{"./../utils":43}],32:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -4079,7 +3550,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this,require('_process'))
-},{"./adapters/http":22,"./adapters/xhr":22,"./helpers/normalizeHeaderName":42,"./utils":45,"_process":234}],35:[function(require,module,exports){
+},{"./adapters/http":20,"./adapters/xhr":20,"./helpers/normalizeHeaderName":40,"./utils":43,"_process":234}],33:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -4092,7 +3563,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],36:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 // btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
@@ -4130,7 +3601,7 @@ function btoa(input) {
 
 module.exports = btoa;
 
-},{}],37:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4198,7 +3669,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":45}],38:[function(require,module,exports){
+},{"./../utils":43}],36:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4214,7 +3685,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],39:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4269,7 +3740,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":45}],40:[function(require,module,exports){
+},{"./../utils":43}],38:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4285,7 +3756,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],41:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4355,7 +3826,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":45}],42:[function(require,module,exports){
+},{"./../utils":43}],40:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -4369,7 +3840,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":45}],43:[function(require,module,exports){
+},{"../utils":43}],41:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -4424,7 +3895,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":45}],44:[function(require,module,exports){
+},{"./../utils":43}],42:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4453,7 +3924,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],45:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -4758,7 +4229,7 @@ module.exports = {
   trim: trim
 };
 
-},{"./helpers/bind":35,"is-buffer":112}],46:[function(require,module,exports){
+},{"./helpers/bind":33,"is-buffer":112}],44:[function(require,module,exports){
 /*! bignumber.js v4.1.0 https://github.com/MikeMcl/bignumber.js/LICENCE */
 
 ;(function (globalObj) {
@@ -7494,7 +6965,7 @@ module.exports = {
     }
 })(this);
 
-},{}],47:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 (function (process,global,setImmediate){
 /* @preserve
  * The MIT License (MIT)
@@ -13120,7 +12591,7 @@ module.exports = ret;
 },{"./es5":13}]},{},[4])(4)
 });                    ;if (typeof window !== 'undefined' && window !== null) {                               window.P = window.Promise;                                                     } else if (typeof self !== 'undefined' && self !== null) {                             self.P = self.Promise;                                                         }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":234,"timers":252}],48:[function(require,module,exports){
+},{"_process":234,"timers":252}],46:[function(require,module,exports){
 /*!
   * Bootstrap v4.1.3 (https://getbootstrap.com/)
   * Copyright 2011-2018 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
@@ -17066,30 +16537,30 @@ module.exports = ret;
 })));
 
 
-},{"jquery":113,"popper.js":167}],49:[function(require,module,exports){
+},{"jquery":113,"popper.js":167}],47:[function(require,module,exports){
 require('../modules/web.immediate');
 module.exports = require('../modules/_core').setImmediate;
-},{"../modules/_core":53,"../modules/web.immediate":69}],50:[function(require,module,exports){
+},{"../modules/_core":51,"../modules/web.immediate":67}],48:[function(require,module,exports){
 module.exports = function(it){
   if(typeof it != 'function')throw TypeError(it + ' is not a function!');
   return it;
 };
-},{}],51:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 var isObject = require('./_is-object');
 module.exports = function(it){
   if(!isObject(it))throw TypeError(it + ' is not an object!');
   return it;
 };
-},{"./_is-object":64}],52:[function(require,module,exports){
+},{"./_is-object":62}],50:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = function(it){
   return toString.call(it).slice(8, -1);
 };
-},{}],53:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 var core = module.exports = {version: '2.3.0'};
 if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
-},{}],54:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 // optional / simple context binding
 var aFunction = require('./_a-function');
 module.exports = function(fn, that, length){
@@ -17110,12 +16581,12 @@ module.exports = function(fn, that, length){
     return fn.apply(that, arguments);
   };
 };
-},{"./_a-function":50}],55:[function(require,module,exports){
+},{"./_a-function":48}],53:[function(require,module,exports){
 // Thank's IE8 for his funny defineProperty
 module.exports = !require('./_fails')(function(){
   return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./_fails":58}],56:[function(require,module,exports){
+},{"./_fails":56}],54:[function(require,module,exports){
 var isObject = require('./_is-object')
   , document = require('./_global').document
   // in old IE typeof document.createElement is 'object'
@@ -17123,7 +16594,7 @@ var isObject = require('./_is-object')
 module.exports = function(it){
   return is ? document.createElement(it) : {};
 };
-},{"./_global":59,"./_is-object":64}],57:[function(require,module,exports){
+},{"./_global":57,"./_is-object":62}],55:[function(require,module,exports){
 var global    = require('./_global')
   , core      = require('./_core')
   , ctx       = require('./_ctx')
@@ -17185,7 +16656,7 @@ $export.W = 32;  // wrap
 $export.U = 64;  // safe
 $export.R = 128; // real proto method for `library` 
 module.exports = $export;
-},{"./_core":53,"./_ctx":54,"./_global":59,"./_hide":60}],58:[function(require,module,exports){
+},{"./_core":51,"./_ctx":52,"./_global":57,"./_hide":58}],56:[function(require,module,exports){
 module.exports = function(exec){
   try {
     return !!exec();
@@ -17193,12 +16664,12 @@ module.exports = function(exec){
     return true;
   }
 };
-},{}],59:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 var global = module.exports = typeof window != 'undefined' && window.Math == Math
   ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
 if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
-},{}],60:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 var dP         = require('./_object-dp')
   , createDesc = require('./_property-desc');
 module.exports = require('./_descriptors') ? function(object, key, value){
@@ -17207,13 +16678,13 @@ module.exports = require('./_descriptors') ? function(object, key, value){
   object[key] = value;
   return object;
 };
-},{"./_descriptors":55,"./_object-dp":65,"./_property-desc":66}],61:[function(require,module,exports){
+},{"./_descriptors":53,"./_object-dp":63,"./_property-desc":64}],59:[function(require,module,exports){
 module.exports = require('./_global').document && document.documentElement;
-},{"./_global":59}],62:[function(require,module,exports){
+},{"./_global":57}],60:[function(require,module,exports){
 module.exports = !require('./_descriptors') && !require('./_fails')(function(){
   return Object.defineProperty(require('./_dom-create')('div'), 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./_descriptors":55,"./_dom-create":56,"./_fails":58}],63:[function(require,module,exports){
+},{"./_descriptors":53,"./_dom-create":54,"./_fails":56}],61:[function(require,module,exports){
 // fast apply, http://jsperf.lnkit.com/fast-apply/5
 module.exports = function(fn, args, that){
   var un = that === undefined;
@@ -17230,11 +16701,11 @@ module.exports = function(fn, args, that){
                       : fn.call(that, args[0], args[1], args[2], args[3]);
   } return              fn.apply(that, args);
 };
-},{}],64:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 module.exports = function(it){
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
-},{}],65:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 var anObject       = require('./_an-object')
   , IE8_DOM_DEFINE = require('./_ie8-dom-define')
   , toPrimitive    = require('./_to-primitive')
@@ -17251,7 +16722,7 @@ exports.f = require('./_descriptors') ? Object.defineProperty : function defineP
   if('value' in Attributes)O[P] = Attributes.value;
   return O;
 };
-},{"./_an-object":51,"./_descriptors":55,"./_ie8-dom-define":62,"./_to-primitive":68}],66:[function(require,module,exports){
+},{"./_an-object":49,"./_descriptors":53,"./_ie8-dom-define":60,"./_to-primitive":66}],64:[function(require,module,exports){
 module.exports = function(bitmap, value){
   return {
     enumerable  : !(bitmap & 1),
@@ -17260,7 +16731,7 @@ module.exports = function(bitmap, value){
     value       : value
   };
 };
-},{}],67:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 var ctx                = require('./_ctx')
   , invoke             = require('./_invoke')
   , html               = require('./_html')
@@ -17336,7 +16807,7 @@ module.exports = {
   set:   setTask,
   clear: clearTask
 };
-},{"./_cof":52,"./_ctx":54,"./_dom-create":56,"./_global":59,"./_html":61,"./_invoke":63}],68:[function(require,module,exports){
+},{"./_cof":50,"./_ctx":52,"./_dom-create":54,"./_global":57,"./_html":59,"./_invoke":61}],66:[function(require,module,exports){
 // 7.1.1 ToPrimitive(input [, PreferredType])
 var isObject = require('./_is-object');
 // instead of the ES6 spec version, we didn't implement @@toPrimitive case
@@ -17349,14 +16820,14 @@ module.exports = function(it, S){
   if(!S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it)))return val;
   throw TypeError("Can't convert object to primitive value");
 };
-},{"./_is-object":64}],69:[function(require,module,exports){
+},{"./_is-object":62}],67:[function(require,module,exports){
 var $export = require('./_export')
   , $task   = require('./_task');
 $export($export.G + $export.B, {
   setImmediate:   $task.set,
   clearImmediate: $task.clear
 });
-},{"./_export":57,"./_task":67}],70:[function(require,module,exports){
+},{"./_export":55,"./_task":65}],68:[function(require,module,exports){
 /*!
  * Cropper.js v1.4.1
  * https://fengyuanchen.github.io/cropperjs
@@ -21076,7 +20547,7 @@ assign(Cropper.prototype, render, preview, events, handlers, change, methods);
 
 module.exports = Cropper;
 
-},{}],71:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -21309,7 +20780,7 @@ module.exports = Cropper;
 	return CryptoJS.AES;
 
 }));
-},{"./cipher-core":72,"./core":73,"./enc-base64":74,"./evpkdf":76,"./md5":81}],72:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71,"./enc-base64":72,"./evpkdf":74,"./md5":79}],70:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22185,7 +21656,7 @@ module.exports = Cropper;
 
 
 }));
-},{"./core":73}],73:[function(require,module,exports){
+},{"./core":71}],71:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -22946,7 +22417,7 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{}],74:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23082,7 +22553,7 @@ module.exports = Cropper;
 	return CryptoJS.enc.Base64;
 
 }));
-},{"./core":73}],75:[function(require,module,exports){
+},{"./core":71}],73:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23232,7 +22703,7 @@ module.exports = Cropper;
 	return CryptoJS.enc.Utf16;
 
 }));
-},{"./core":73}],76:[function(require,module,exports){
+},{"./core":71}],74:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23365,7 +22836,7 @@ module.exports = Cropper;
 	return CryptoJS.EvpKDF;
 
 }));
-},{"./core":73,"./hmac":78,"./sha1":97}],77:[function(require,module,exports){
+},{"./core":71,"./hmac":76,"./sha1":95}],75:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23432,7 +22903,7 @@ module.exports = Cropper;
 	return CryptoJS.format.Hex;
 
 }));
-},{"./cipher-core":72,"./core":73}],78:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],76:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23576,7 +23047,7 @@ module.exports = Cropper;
 
 
 }));
-},{"./core":73}],79:[function(require,module,exports){
+},{"./core":71}],77:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23595,7 +23066,7 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{"./aes":71,"./cipher-core":72,"./core":73,"./enc-base64":74,"./enc-utf16":75,"./evpkdf":76,"./format-hex":77,"./hmac":78,"./lib-typedarrays":80,"./md5":81,"./mode-cfb":82,"./mode-ctr":84,"./mode-ctr-gladman":83,"./mode-ecb":85,"./mode-ofb":86,"./pad-ansix923":87,"./pad-iso10126":88,"./pad-iso97971":89,"./pad-nopadding":90,"./pad-zeropadding":91,"./pbkdf2":92,"./rabbit":94,"./rabbit-legacy":93,"./rc4":95,"./ripemd160":96,"./sha1":97,"./sha224":98,"./sha256":99,"./sha3":100,"./sha384":101,"./sha512":102,"./tripledes":103,"./x64-core":104}],80:[function(require,module,exports){
+},{"./aes":69,"./cipher-core":70,"./core":71,"./enc-base64":72,"./enc-utf16":73,"./evpkdf":74,"./format-hex":75,"./hmac":76,"./lib-typedarrays":78,"./md5":79,"./mode-cfb":80,"./mode-ctr":82,"./mode-ctr-gladman":81,"./mode-ecb":83,"./mode-ofb":84,"./pad-ansix923":85,"./pad-iso10126":86,"./pad-iso97971":87,"./pad-nopadding":88,"./pad-zeropadding":89,"./pbkdf2":90,"./rabbit":92,"./rabbit-legacy":91,"./rc4":93,"./ripemd160":94,"./sha1":95,"./sha224":96,"./sha256":97,"./sha3":98,"./sha384":99,"./sha512":100,"./tripledes":101,"./x64-core":102}],78:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23672,7 +23143,7 @@ module.exports = Cropper;
 	return CryptoJS.lib.WordArray;
 
 }));
-},{"./core":73}],81:[function(require,module,exports){
+},{"./core":71}],79:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -23941,7 +23412,7 @@ module.exports = Cropper;
 	return CryptoJS.MD5;
 
 }));
-},{"./core":73}],82:[function(require,module,exports){
+},{"./core":71}],80:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24020,7 +23491,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CFB;
 
 }));
-},{"./cipher-core":72,"./core":73}],83:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],81:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24137,7 +23608,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CTRGladman;
 
 }));
-},{"./cipher-core":72,"./core":73}],84:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],82:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24196,7 +23667,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.CTR;
 
 }));
-},{"./cipher-core":72,"./core":73}],85:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],83:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24237,7 +23708,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.ECB;
 
 }));
-},{"./cipher-core":72,"./core":73}],86:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],84:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24292,7 +23763,7 @@ module.exports = Cropper;
 	return CryptoJS.mode.OFB;
 
 }));
-},{"./cipher-core":72,"./core":73}],87:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],85:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24342,7 +23813,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Ansix923;
 
 }));
-},{"./cipher-core":72,"./core":73}],88:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],86:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24387,7 +23858,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Iso10126;
 
 }));
-},{"./cipher-core":72,"./core":73}],89:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],87:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24428,7 +23899,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.Iso97971;
 
 }));
-},{"./cipher-core":72,"./core":73}],90:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],88:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24459,7 +23930,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.NoPadding;
 
 }));
-},{"./cipher-core":72,"./core":73}],91:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],89:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24505,7 +23976,7 @@ module.exports = Cropper;
 	return CryptoJS.pad.ZeroPadding;
 
 }));
-},{"./cipher-core":72,"./core":73}],92:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71}],90:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24651,7 +24122,7 @@ module.exports = Cropper;
 	return CryptoJS.PBKDF2;
 
 }));
-},{"./core":73,"./hmac":78,"./sha1":97}],93:[function(require,module,exports){
+},{"./core":71,"./hmac":76,"./sha1":95}],91:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -24842,7 +24313,7 @@ module.exports = Cropper;
 	return CryptoJS.RabbitLegacy;
 
 }));
-},{"./cipher-core":72,"./core":73,"./enc-base64":74,"./evpkdf":76,"./md5":81}],94:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71,"./enc-base64":72,"./evpkdf":74,"./md5":79}],92:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25035,7 +24506,7 @@ module.exports = Cropper;
 	return CryptoJS.Rabbit;
 
 }));
-},{"./cipher-core":72,"./core":73,"./enc-base64":74,"./evpkdf":76,"./md5":81}],95:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71,"./enc-base64":72,"./evpkdf":74,"./md5":79}],93:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25175,7 +24646,7 @@ module.exports = Cropper;
 	return CryptoJS.RC4;
 
 }));
-},{"./cipher-core":72,"./core":73,"./enc-base64":74,"./evpkdf":76,"./md5":81}],96:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71,"./enc-base64":72,"./evpkdf":74,"./md5":79}],94:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25443,7 +24914,7 @@ module.exports = Cropper;
 	return CryptoJS.RIPEMD160;
 
 }));
-},{"./core":73}],97:[function(require,module,exports){
+},{"./core":71}],95:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25594,7 +25065,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA1;
 
 }));
-},{"./core":73}],98:[function(require,module,exports){
+},{"./core":71}],96:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25675,7 +25146,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA224;
 
 }));
-},{"./core":73,"./sha256":99}],99:[function(require,module,exports){
+},{"./core":71,"./sha256":97}],97:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -25875,7 +25346,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA256;
 
 }));
-},{"./core":73}],100:[function(require,module,exports){
+},{"./core":71}],98:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -26199,7 +25670,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA3;
 
 }));
-},{"./core":73,"./x64-core":104}],101:[function(require,module,exports){
+},{"./core":71,"./x64-core":102}],99:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -26283,7 +25754,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA384;
 
 }));
-},{"./core":73,"./sha512":102,"./x64-core":104}],102:[function(require,module,exports){
+},{"./core":71,"./sha512":100,"./x64-core":102}],100:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -26607,7 +26078,7 @@ module.exports = Cropper;
 	return CryptoJS.SHA512;
 
 }));
-},{"./core":73,"./x64-core":104}],103:[function(require,module,exports){
+},{"./core":71,"./x64-core":102}],101:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -27378,7 +26849,7 @@ module.exports = Cropper;
 	return CryptoJS.TripleDES;
 
 }));
-},{"./cipher-core":72,"./core":73,"./enc-base64":74,"./evpkdf":76,"./md5":81}],104:[function(require,module,exports){
+},{"./cipher-core":70,"./core":71,"./enc-base64":72,"./evpkdf":74,"./md5":79}],102:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -27683,10 +27154,10 @@ module.exports = Cropper;
 	return CryptoJS;
 
 }));
-},{"./core":73}],105:[function(require,module,exports){
+},{"./core":71}],103:[function(require,module,exports){
 +function(a){"use strict";function b(a,b){if(!(a instanceof b))throw new TypeError("Cannot call a class as a function")}var c=function(){function a(a,b){for(var c=0;c<b.length;c++){var d=b[c];d.enumerable=d.enumerable||!1,d.configurable=!0,"value"in d&&(d.writable=!0),Object.defineProperty(a,d.key,d)}}return function(b,c,d){return c&&a(b.prototype,c),d&&a(b,d),b}}();(function(a){var d="ekkoLightbox",e=a.fn[d],f={title:"",footer:"",maxWidth:9999,maxHeight:9999,showArrows:!0,wrapping:!0,type:null,alwaysShowClose:!1,loadingMessage:'<div class="ekko-lightbox-loader"><div><div></div><div></div></div></div>',leftArrow:"<span>&#10094;</span>",rightArrow:"<span>&#10095;</span>",strings:{close:"Close",fail:"Failed to load image:",type:"Could not detect remote target type. Force the type using data-type"},doc:document,onShow:function(){},onShown:function(){},onHide:function(){},onHidden:function(){},onNavigate:function(){},onContentLoaded:function(){}},g=function(){function d(c,e){var g=this;b(this,d),this._config=a.extend({},f,e),this._$modalArrows=null,this._galleryIndex=0,this._galleryName=null,this._padding=null,this._border=null,this._titleIsShown=!1,this._footerIsShown=!1,this._wantedWidth=0,this._wantedHeight=0,this._touchstartX=0,this._touchendX=0,this._modalId="ekkoLightbox-"+Math.floor(1e3*Math.random()+1),this._$element=c instanceof jQuery?c:a(c),this._isBootstrap3=3==a.fn.modal.Constructor.VERSION[0];var h='<h4 class="modal-title">'+(this._config.title||"&nbsp;")+"</h4>",i='<button type="button" class="close" data-dismiss="modal" aria-label="'+this._config.strings.close+'"><span aria-hidden="true">&times;</span></button>',j='<div class="modal-header'+(this._config.title||this._config.alwaysShowClose?"":" hide")+'">'+(this._isBootstrap3?i+h:h+i)+"</div>",k='<div class="modal-footer'+(this._config.footer?"":" hide")+'">'+(this._config.footer||"&nbsp;")+"</div>",l='<div class="modal-body"><div class="ekko-lightbox-container"><div class="ekko-lightbox-item fade in show"></div><div class="ekko-lightbox-item fade"></div></div></div>',m='<div class="modal-dialog" role="document"><div class="modal-content">'+j+l+k+"</div></div>";a(this._config.doc.body).append('<div id="'+this._modalId+'" class="ekko-lightbox modal fade" tabindex="-1" tabindex="-1" role="dialog" aria-hidden="true">'+m+"</div>"),this._$modal=a("#"+this._modalId,this._config.doc),this._$modalDialog=this._$modal.find(".modal-dialog").first(),this._$modalContent=this._$modal.find(".modal-content").first(),this._$modalBody=this._$modal.find(".modal-body").first(),this._$modalHeader=this._$modal.find(".modal-header").first(),this._$modalFooter=this._$modal.find(".modal-footer").first(),this._$lightboxContainer=this._$modalBody.find(".ekko-lightbox-container").first(),this._$lightboxBodyOne=this._$lightboxContainer.find("> div:first-child").first(),this._$lightboxBodyTwo=this._$lightboxContainer.find("> div:last-child").first(),this._border=this._calculateBorders(),this._padding=this._calculatePadding(),this._galleryName=this._$element.data("gallery"),this._galleryName&&(this._$galleryItems=a(document.body).find('*[data-gallery="'+this._galleryName+'"]'),this._galleryIndex=this._$galleryItems.index(this._$element),a(document).on("keydown.ekkoLightbox",this._navigationalBinder.bind(this)),this._config.showArrows&&this._$galleryItems.length>1&&(this._$lightboxContainer.append('<div class="ekko-lightbox-nav-overlay"><a href="#">'+this._config.leftArrow+'</a><a href="#">'+this._config.rightArrow+"</a></div>"),this._$modalArrows=this._$lightboxContainer.find("div.ekko-lightbox-nav-overlay").first(),this._$lightboxContainer.on("click","a:first-child",function(a){return a.preventDefault(),g.navigateLeft()}),this._$lightboxContainer.on("click","a:last-child",function(a){return a.preventDefault(),g.navigateRight()}),this.updateNavigation())),this._$modal.on("show.bs.modal",this._config.onShow.bind(this)).on("shown.bs.modal",function(){return g._toggleLoading(!0),g._handle(),g._config.onShown.call(g)}).on("hide.bs.modal",this._config.onHide.bind(this)).on("hidden.bs.modal",function(){return g._galleryName&&(a(document).off("keydown.ekkoLightbox"),a(window).off("resize.ekkoLightbox")),g._$modal.remove(),g._config.onHidden.call(g)}).modal(this._config),a(window).on("resize.ekkoLightbox",function(){g._resize(g._wantedWidth,g._wantedHeight)}),this._$lightboxContainer.on("touchstart",function(){g._touchstartX=event.changedTouches[0].screenX}).on("touchend",function(){g._touchendX=event.changedTouches[0].screenX,g._swipeGesure()})}return c(d,null,[{key:"Default",get:function(){return f}}]),c(d,[{key:"element",value:function(){return this._$element}},{key:"modal",value:function(){return this._$modal}},{key:"navigateTo",value:function(b){return b<0||b>this._$galleryItems.length-1?this:(this._galleryIndex=b,this.updateNavigation(),this._$element=a(this._$galleryItems.get(this._galleryIndex)),void this._handle())}},{key:"navigateLeft",value:function(){if(this._$galleryItems&&1!==this._$galleryItems.length){if(0===this._galleryIndex){if(!this._config.wrapping)return;this._galleryIndex=this._$galleryItems.length-1}else this._galleryIndex--;return this._config.onNavigate.call(this,"left",this._galleryIndex),this.navigateTo(this._galleryIndex)}}},{key:"navigateRight",value:function(){if(this._$galleryItems&&1!==this._$galleryItems.length){if(this._galleryIndex===this._$galleryItems.length-1){if(!this._config.wrapping)return;this._galleryIndex=0}else this._galleryIndex++;return this._config.onNavigate.call(this,"right",this._galleryIndex),this.navigateTo(this._galleryIndex)}}},{key:"updateNavigation",value:function(){if(!this._config.wrapping){var a=this._$lightboxContainer.find("div.ekko-lightbox-nav-overlay");0===this._galleryIndex?a.find("a:first-child").addClass("disabled"):a.find("a:first-child").removeClass("disabled"),this._galleryIndex===this._$galleryItems.length-1?a.find("a:last-child").addClass("disabled"):a.find("a:last-child").removeClass("disabled")}}},{key:"close",value:function(){return this._$modal.modal("hide")}},{key:"_navigationalBinder",value:function(a){return a=a||window.event,39===a.keyCode?this.navigateRight():37===a.keyCode?this.navigateLeft():void 0}},{key:"_detectRemoteType",value:function(a,b){return b=b||!1,!b&&this._isImage(a)&&(b="image"),!b&&this._getYoutubeId(a)&&(b="youtube"),!b&&this._getVimeoId(a)&&(b="vimeo"),!b&&this._getInstagramId(a)&&(b="instagram"),(!b||["image","youtube","vimeo","instagram","video","url"].indexOf(b)<0)&&(b="url"),b}},{key:"_isImage",value:function(a){return a&&a.match(/(^data:image\/.*,)|(\.(jp(e|g|eg)|gif|png|bmp|webp|svg)((\?|#).*)?$)/i)}},{key:"_containerToUse",value:function(){var a=this,b=this._$lightboxBodyTwo,c=this._$lightboxBodyOne;return this._$lightboxBodyTwo.hasClass("in")&&(b=this._$lightboxBodyOne,c=this._$lightboxBodyTwo),c.removeClass("in show"),setTimeout(function(){a._$lightboxBodyTwo.hasClass("in")||a._$lightboxBodyTwo.empty(),a._$lightboxBodyOne.hasClass("in")||a._$lightboxBodyOne.empty()},500),b.addClass("in show"),b}},{key:"_handle",value:function(){var a=this._containerToUse();this._updateTitleAndFooter();var b=this._$element.attr("data-remote")||this._$element.attr("href"),c=this._detectRemoteType(b,this._$element.attr("data-type")||!1);if(["image","youtube","vimeo","instagram","video","url"].indexOf(c)<0)return this._error(this._config.strings.type);switch(c){case"image":this._preloadImage(b,a),this._preloadImageByIndex(this._galleryIndex,3);break;case"youtube":this._showYoutubeVideo(b,a);break;case"vimeo":this._showVimeoVideo(this._getVimeoId(b),a);break;case"instagram":this._showInstagramVideo(this._getInstagramId(b),a);break;case"video":this._showHtml5Video(b,a);break;default:this._loadRemoteContent(b,a)}return this}},{key:"_getYoutubeId",value:function(a){if(!a)return!1;var b=a.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);return!(!b||11!==b[2].length)&&b[2]}},{key:"_getVimeoId",value:function(a){return!!(a&&a.indexOf("vimeo")>0)&&a}},{key:"_getInstagramId",value:function(a){return!!(a&&a.indexOf("instagram")>0)&&a}},{key:"_toggleLoading",value:function(b){return b=b||!1,b?(this._$modalDialog.css("display","none"),this._$modal.removeClass("in show"),a(".modal-backdrop").append(this._config.loadingMessage)):(this._$modalDialog.css("display","block"),this._$modal.addClass("in show"),a(".modal-backdrop").find(".ekko-lightbox-loader").remove()),this}},{key:"_calculateBorders",value:function(){return{top:this._totalCssByAttribute("border-top-width"),right:this._totalCssByAttribute("border-right-width"),bottom:this._totalCssByAttribute("border-bottom-width"),left:this._totalCssByAttribute("border-left-width")}}},{key:"_calculatePadding",value:function(){return{top:this._totalCssByAttribute("padding-top"),right:this._totalCssByAttribute("padding-right"),bottom:this._totalCssByAttribute("padding-bottom"),left:this._totalCssByAttribute("padding-left")}}},{key:"_totalCssByAttribute",value:function(a){return parseInt(this._$modalDialog.css(a),10)+parseInt(this._$modalContent.css(a),10)+parseInt(this._$modalBody.css(a),10)}},{key:"_updateTitleAndFooter",value:function(){var a=this._$element.data("title")||"",b=this._$element.data("footer")||"";return this._titleIsShown=!1,a||this._config.alwaysShowClose?(this._titleIsShown=!0,this._$modalHeader.css("display","").find(".modal-title").html(a||"&nbsp;")):this._$modalHeader.css("display","none"),this._footerIsShown=!1,b?(this._footerIsShown=!0,this._$modalFooter.css("display","").html(b)):this._$modalFooter.css("display","none"),this}},{key:"_showYoutubeVideo",value:function(a,b){var c=this._getYoutubeId(a),d=a.indexOf("&")>0?a.substr(a.indexOf("&")):"",e=this._$element.data("width")||560,f=this._$element.data("height")||e/(560/315);return this._showVideoIframe("//www.youtube.com/embed/"+c+"?badge=0&autoplay=1&html5=1"+d,e,f,b)}},{key:"_showVimeoVideo",value:function(a,b){var c=this._$element.data("width")||500,d=this._$element.data("height")||c/(560/315);return this._showVideoIframe(a+"?autoplay=1",c,d,b)}},{key:"_showInstagramVideo",value:function(a,b){var c=this._$element.data("width")||612,d=c+80;return a="/"!==a.substr(-1)?a+"/":a,b.html('<iframe width="'+c+'" height="'+d+'" src="'+a+'embed/" frameborder="0" allowfullscreen></iframe>'),this._resize(c,d),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_showVideoIframe",value:function(a,b,c,d){return c=c||b,d.html('<div class="embed-responsive embed-responsive-16by9"><iframe width="'+b+'" height="'+c+'" src="'+a+'" frameborder="0" allowfullscreen class="embed-responsive-item"></iframe></div>'),this._resize(b,c),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_showHtml5Video",value:function(a,b){var c=this._$element.data("width")||560,d=this._$element.data("height")||c/(560/315);return b.html('<div class="embed-responsive embed-responsive-16by9"><video width="'+c+'" height="'+d+'" src="'+a+'" preload="auto" autoplay controls class="embed-responsive-item"></video></div>'),this._resize(c,d),this._config.onContentLoaded.call(this),this._$modalArrows&&this._$modalArrows.css("display","none"),this._toggleLoading(!1),this}},{key:"_loadRemoteContent",value:function(b,c){var d=this,e=this._$element.data("width")||560,f=this._$element.data("height")||560,g=this._$element.data("disableExternalCheck")||!1;return this._toggleLoading(!1),g||this._isExternal(b)?(c.html('<iframe src="'+b+'" frameborder="0" allowfullscreen></iframe>'),this._config.onContentLoaded.call(this)):c.load(b,a.proxy(function(){return d._$element.trigger("loaded.bs.modal")})),this._$modalArrows&&this._$modalArrows.css("display","none"),this._resize(e,f),this}},{key:"_isExternal",value:function(a){var b=a.match(/^([^:\/?#]+:)?(?:\/\/([^\/?#]*))?([^?#]+)?(\?[^#]*)?(#.*)?/);return"string"==typeof b[1]&&b[1].length>0&&b[1].toLowerCase()!==location.protocol||"string"==typeof b[2]&&b[2].length>0&&b[2].replace(new RegExp(":("+{"http:":80,"https:":443}[location.protocol]+")?$"),"")!==location.host}},{key:"_error",value:function(a){return console.error(a),this._containerToUse().html(a),this._resize(300,300),this}},{key:"_preloadImageByIndex",value:function(b,c){if(this._$galleryItems){var d=a(this._$galleryItems.get(b),!1);if("undefined"!=typeof d){var e=d.attr("data-remote")||d.attr("href");return("image"===d.attr("data-type")||this._isImage(e))&&this._preloadImage(e,!1),c>0?this._preloadImageByIndex(b+1,c-1):void 0}}}},{key:"_preloadImage",value:function(b,c){var d=this;c=c||!1;var e=new Image;return c&&!function(){var f=setTimeout(function(){c.append(d._config.loadingMessage)},200);e.onload=function(){f&&clearTimeout(f),f=null;var b=a("<img />");return b.attr("src",e.src),b.addClass("img-fluid"),b.css("width","100%"),c.html(b),d._$modalArrows&&d._$modalArrows.css("display",""),d._resize(e.width,e.height),d._toggleLoading(!1),d._config.onContentLoaded.call(d)},e.onerror=function(){return d._toggleLoading(!1),d._error(d._config.strings.fail+("  "+b))}}(),e.src=b,e}},{key:"_swipeGesure",value:function(){return this._touchendX<this._touchstartX?this.navigateRight():this._touchendX>this._touchstartX?this.navigateLeft():void 0}},{key:"_resize",value:function(b,c){c=c||b,this._wantedWidth=b,this._wantedHeight=c;var d=b/c,e=this._padding.left+this._padding.right+this._border.left+this._border.right,f=this._config.doc.body.clientWidth>575?20:0,g=this._config.doc.body.clientWidth>575?0:20,h=Math.min(b+e,this._config.doc.body.clientWidth-f,this._config.maxWidth);b+e>h?(c=(h-e-g)/d,b=h):b+=e;var i=0,j=0;this._footerIsShown&&(j=this._$modalFooter.outerHeight(!0)||55),this._titleIsShown&&(i=this._$modalHeader.outerHeight(!0)||67);var k=this._padding.top+this._padding.bottom+this._border.bottom+this._border.top,l=parseFloat(this._$modalDialog.css("margin-top"))+parseFloat(this._$modalDialog.css("margin-bottom")),m=Math.min(c,a(window).height()-k-l-i-j,this._config.maxHeight-k-i-j);c>m&&(b=Math.ceil(m*d)+e),this._$lightboxContainer.css("height",m),this._$modalDialog.css("flex",1).css("maxWidth",b);var n=this._$modal.data("bs.modal");if(n)try{n._handleUpdate()}catch(o){n.handleUpdate()}return this}}],[{key:"_jQueryInterface",value:function(b){var c=this;return b=b||{},this.each(function(){var e=a(c),f=a.extend({},d.Default,e.data(),"object"==typeof b&&b);new d(c,f)})}}]),d}();return a.fn[d]=g._jQueryInterface,a.fn[d].Constructor=g,a.fn[d].noConflict=function(){return a.fn[d]=e,g._jQueryInterface},g})(jQuery)}(jQuery);
 
-},{}],106:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 (function (Buffer){
 var sha3 = require('js-sha3').keccak_256
 var uts46 = require('idna-uts46-hx')
@@ -27720,7 +27191,7 @@ exports.hash = namehash
 exports.normalize = normalize
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":226,"idna-uts46-hx":110,"js-sha3":114}],107:[function(require,module,exports){
+},{"buffer":226,"idna-uts46-hx":110,"js-sha3":114}],105:[function(require,module,exports){
 /*
     This file is part of ethereum-ens.
     ethereum-ens is free software: you can redistribute it and/or modify
@@ -28264,7 +27735,7 @@ ENS.prototype.setSubnodeOwner = function(name, addr, params) {
 
 module.exports = ENS;
 
-},{"bluebird":47,"eth-ens-namehash":106,"js-sha3":114,"pako":151,"text-encoding":168,"underscore":171,"web3":173}],108:[function(require,module,exports){
+},{"bluebird":45,"eth-ens-namehash":104,"js-sha3":114,"pako":151,"text-encoding":168,"underscore":171,"web3":173}],106:[function(require,module,exports){
 /* FileSaver.js
  * A saveAs() FileSaver implementation.
  * 1.3.2
@@ -28454,7 +27925,570 @@ if (typeof module !== "undefined" && module.exports) {
   });
 }
 
-},{}],109:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
+class Blog {
+    constructor(swarm) {
+        this.last_photoalbum_id = 0;
+        this.last_videoalbum_id = 0;
+        this.prefix = "social/";
+        this.mruName = "SWARM Social";
+        this.swarm = swarm;
+        this.version = 1;
+        this.myProfile = {};
+        let elements = window.location.href.split('/').filter(word => word.length === 64 || word.length === 128 || (word.length >= 11 && word.endsWith('.eth')));
+        this.uploadedToSwarm = elements.length > 0;
+        if (this.uploadedToSwarm) {
+            this.uploadedSwarmHash = elements[0];
+        } else {
+            this.uploadedSwarmHash = '';
+        }
+    }
+
+    getDefaultProfile() {
+        return {
+            "first_name": "SWARM",
+            "last_name": "User",
+            "birth_date": "24/07/2018",
+            "location": {
+                "coordinates": {},
+                "name": "Belarus, Minsk"
+            },
+            "photo": {
+                "original": "social/file/avatar/original.jpg"
+            },
+            "about": "My SWARM page. You can edit this information",
+            "i_follow": [],
+            "last_post_id": 0,
+            "last_photoalbum_id": 0,
+            "last_videoalbum_id": 0
+        };
+    }
+
+    deleteFile(file) {
+        return this.swarm.delete(file);
+    }
+
+    replaceUrlSwarmHash(newHash) {
+        if (this.uploadedToSwarm) {
+            window.location.hash = '';
+        }
+
+        let newElements = [];
+        window.location.href.split('/').forEach(function (v) {
+            let item = v;
+            if (Blog.isCorrectSwarmHash(v)) {
+                item = newHash;
+            }
+
+            newElements.push(item);
+        });
+        let newUrl = newElements.join('/');
+        window.history.pushState({"swarmHash": newHash}, "", newUrl);
+
+        return newUrl;
+    }
+
+    static isCorrectSwarmHash(hash) {
+        let hashLength = 64;
+        let hashLengthEncrypted = 128;
+
+        return hash && (hash.length === hashLength || hash.length === hashLengthEncrypted);
+    }
+
+    getMyProfile() {
+        return this.getProfile(this.swarm.applicationHash);
+    }
+
+    setMyProfile(data) {
+        this.myProfile = data;
+    }
+
+    saveProfile(data, userHash) {
+        data.version = this.version;
+        return this.swarm.post(this.prefix + "profile.json", JSON.stringify(data), 'application/json', userHash);
+    }
+
+    getProfile(userHash) {
+        return this.swarm.get(this.prefix + 'profile.json', userHash);
+    }
+
+    getIFollow() {
+        return this.myProfile.i_follow ? this.myProfile.i_follow.slice(0) : [];
+    }
+
+    addIFollow(swarmProfileHash) {
+        if ('i_follow' in this.myProfile) {
+            if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
+                throw "Hash already exists";
+            }
+
+            this.myProfile.i_follow.push(swarmProfileHash);
+        } else {
+            this.myProfile.i_follow = [swarmProfileHash];
+        }
+
+        return this.saveProfile(this.myProfile);
+    }
+
+    deleteIFollow(swarmProfileHash) {
+        if ('i_follow' in this.myProfile) {
+            if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
+                let index = this.myProfile.i_follow.indexOf(swarmProfileHash);
+                if (index > -1) {
+                    this.myProfile.i_follow.splice(index, 1);
+                }
+            }
+        } else {
+            this.myProfile.i_follow = [];
+        }
+
+        return this.saveProfile(this.myProfile);
+    }
+
+    sendRawFile(fileName, data, fileType, userHash, swarmProtocol, onProgress) {
+        return this.swarm.post(fileName, data, fileType, userHash, swarmProtocol, onProgress);
+    }
+
+    uploadFilesForPost(id, filesFormData, onUploadProgress) {
+        let contentType = 'multipart/form-data';
+        let self = this;
+        let url = this.prefix + "post/" + id + "/file/";
+
+        return this.sendRawFile(url, filesFormData, contentType, null, null, onUploadProgress)
+            .then(function (response) {
+                    return {
+                        response: response,
+                        url: url,
+                        fullUrl: self.swarm.getFullUrl(url, response.data)
+                    };
+                }
+            );
+    }
+
+    uploadAvatar(fileContent) {
+        let self = this;
+        let url = this.prefix + "file/avatar/original.jpg";
+
+        return this.sendRawFile(url, fileContent, 'image/jpeg')
+            .then(function (response) {
+                console.log('avatar uploaded');
+                console.log(response.data);
+                self.swarm.applicationHash = response.data;
+                self.myProfile.photo = {
+                    original: url
+                };
+
+                return self.saveProfile(self.myProfile);
+            });
+    }
+
+    createPost(id, description, attachments) {
+        let self = this;
+        attachments = attachments || [];
+        attachments.forEach(function (v, i) {
+            v.id = i + 1;
+        });
+        let info = {
+            id: id,
+            description: description,
+            attachments: attachments
+        };
+
+        return this.sendRawFile(this.prefix + "post/" + id + "/info.json", JSON.stringify(info), 'application/json')
+            .then(function (response) {
+                console.log('one');
+                console.log(response.data);
+                self.myProfile.last_post_id = id;
+                self.swarm.applicationHash = response.data;
+
+                return self.saveProfile(self.myProfile);
+            });
+    }
+
+    getPost(id, userHash) {
+        return this.swarm.get(this.prefix + 'post/' + id + '/info.json', userHash);
+    }
+
+    deletePost(id) {
+        let self = this;
+        let urlPath = this.prefix + 'post/' + id + '/';
+        return this.deleteFile(urlPath + 'info.json').then(function (response) {
+            self.swarm.applicationHash = response.data;
+            return self.deleteFile(urlPath);
+        });
+    }
+
+    deletePostAttachment(postId, attachmentId) {
+        let self = this;
+        return self.getPost(postId).then(function (response) {
+            let data = response.data;
+            let newAttachments = [];
+            let toDelete = null;
+            data.attachments.forEach(function (v) {
+                if (v.id != attachmentId) {
+                    newAttachments.push(v);
+                } else {
+                    toDelete = v;
+                }
+            });
+
+            if (toDelete) {
+                return self.editPost(postId, data.description, newAttachments)
+                    .then(function (response) {
+                        self.swarm.applicationHash = response.data;
+
+                        return self.deleteFile(toDelete.url);
+                    });
+            } else {
+                throw "Attachment not found";
+            }
+        });
+    }
+
+    editPost(id, description, attachments) {
+        let self = this;
+        attachments = attachments || [];
+        return this.getPost(id).then(function (response) {
+            let data = response.data;
+            data.description = description;
+            data.attachments = attachments;
+            return self.swarm.post(self.prefix + "post/" + id + "/info.json", JSON.stringify(data), 'application/json');
+        });
+    }
+
+    createVideoAlbum(id, name, description, videos) {
+        let self = this;
+        videos = videos || [];
+        let coverFile = videos.length ? videos[0].cover_file : videos;
+        let fileType = videos.length ? videos[0].type : videos;
+        let info = {
+            id: id,
+            type: fileType,
+            name: name,
+            description: description,
+            cover_file: coverFile,
+            videos: videos
+        };
+
+        let finalSave = function (data) {
+            return self.sendRawFile(self.prefix + "videoalbum/info.json", JSON.stringify(data), 'application/json')
+                .then(function (response) {
+                    console.log(response.data);
+                    self.swarm.applicationHash = response.data;
+                    self.myProfile.last_videoalbum_id = id;
+
+                    return {response: self.saveProfile(self.myProfile), info: info};
+                });
+        };
+
+        return this.sendRawFile(this.prefix + "videoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json')
+            .then(function (response) {
+                console.log('Video album info.json');
+                console.log(response.data);
+                self.swarm.applicationHash = response.data;
+                let newInfo = {
+                    id: id,
+                    type: fileType,
+                    name: name,
+                    description: description,
+                    cover_file: coverFile
+                };
+
+                return self.getVideoAlbumsInfo()
+                    .then(function (response) {
+                        let data = response.data;
+                        data = Array.isArray(data) ? data : [];
+
+                        data.push(newInfo);
+                        console.log('album info');
+                        console.log(data);
+
+                        return finalSave(data);
+                    })
+                    .catch(function () {
+                        return finalSave([newInfo]);
+                    });
+            });
+    }
+
+    getVideoAlbumsInfo() {
+        return this.swarm.get(this.prefix + 'videoalbum/info.json');
+    }
+
+    getVideoAlbumInfo(id) {
+        return this.swarm.get(this.prefix + 'videoalbum/' + id + '/info.json');
+    }
+
+    uploadFileToVideoalbum(albumId, file, onProgress) {
+        let fileName = this.prefix + "videoalbum/" + albumId + "/" + file.name;
+        return this.sendRawFile(fileName, file, file.type, null, null, onProgress)
+            .then(function (response) {
+                return {fileName: fileName, response: response.data};
+            });
+    }
+
+    createPhotoAlbum(id, name, description, photos) {
+        let self = this;
+        photos = photos || [];
+        let coverFile = photos.length ? photos[0] : photos;
+        let info = {
+            id: id,
+            name: name,
+            description: description,
+            cover_file: coverFile,
+            photos: photos
+        };
+
+        let navigateAndSaveProfile = function (response) {
+            self.swarm.applicationHash = response.data;
+            self.myProfile.last_photoalbum_id = id;
+
+            return self.saveProfile(self.myProfile);
+        };
+
+        return this.sendRawFile(this.prefix + "photoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json')
+            .then(function (response) {
+                console.log('Photoalbom info.json');
+                console.log(response.data);
+                self.swarm.applicationHash = response.data;
+                let newAlbumInfo = {
+                    id: id,
+                    name: name,
+                    description: description,
+                    cover_file: coverFile
+                };
+
+                return self.getPhotoAlbumsInfo().then(function (response) {
+                    let data = response.data;
+                    data = Array.isArray(data) ? data : [];
+                    data.push(newAlbumInfo);
+                    console.log('album info');
+                    console.log(data);
+                    return self.saveAlbumsInfo(data).then(function (response) {
+                        return navigateAndSaveProfile(response);
+                    });
+                }).catch(function () {
+                    return self.saveAlbumsInfo([newAlbumInfo]).then(function (response) {
+                        return navigateAndSaveProfile(response);
+                    });
+                });
+            });
+    }
+
+    uploadPhotoToAlbum(photoAlbumId, photoId, fileContent, onProgress) {
+        let path = this.prefix + "photoalbum/" + photoAlbumId + "/";
+        let fileName = path + photoId + ".jpg";
+        return this.sendRawFile(fileName, fileContent, 'image/jpeg', null, null, onProgress)
+            .then(function (response) {
+                return {
+                    path: path,
+                    fileName: fileName,
+                    response: response.data
+                };
+            });
+    }
+
+    getAlbumInfo(id) {
+        return this.swarm.get(this.prefix + 'photoalbum/' + id + '/info.json');
+    }
+
+    getPhotoAlbumsInfo() {
+        return this.swarm.get(this.prefix + 'photoalbum/info.json');
+    }
+
+    saveAlbumsInfo(data) {
+        return this.sendRawFile(this.prefix + "photoalbum/info.json", JSON.stringify(data), 'application/json');
+    }
+
+    deletePhotoAlbum(id) {
+        let self = this;
+        return this.swarm.delete(this.prefix + 'photoalbum/' + id + '/')
+            .then(function (response) {
+                self.swarm.applicationHash = response.data;
+            })
+            .then(function () {
+                return self.getPhotoAlbumsInfo();
+            })
+            .then(function (response) {
+                let data = response.data;
+                let newAlbums = [];
+                if (data && Array.isArray(data) && data.length) {
+                    data.forEach(function (v) {
+                        if (v.id != id) {
+                            newAlbums.push(v);
+                        }
+                    });
+                }
+
+                return self.saveAlbumsInfo(newAlbums);
+            });
+    }
+
+    createMru(ownerAddress) {
+        let self = this;
+        // todo save it to profile
+        if (!ownerAddress) {
+            throw "Empty owner address";
+        }
+
+        let timestamp = +new Date();
+        let data = {
+            "name": this.mruName,
+            "frequency": 5,
+            "startTime": timestamp,
+            "ownerAddr": ownerAddress
+        };
+
+        return this.swarm.post(null, data, null, null, 'bzz-resource:').then(function (response) {
+            self.myProfile.mru = response.data;
+            return {
+                mru: response.data,
+                response: self.saveProfile(self.myProfile)
+            };
+        });
+    }
+
+    saveMru(mru, rootAddress, swarmHash) {
+        if (mru && rootAddress && swarmHash) {
+        } else {
+            throw "Empty MRU, rootAddress or SWARM hash";
+        }
+
+        let timestamp = +new Date();
+        let data = {
+            "name": this.mruName,
+            "frequency": 5,
+            "startTime": timestamp,
+            "rootAddr": rootAddress,
+            "data": "0x12a3",
+            "multiHash": false,
+            "version": 1,
+            "period": 1,
+            "signature": "0x71c54e53095466d019f9f46e34ae0b393d04a5dac7990ce65934a3944c1f39badfc8c4f3c78baaae8b2e86cd21940914c57a4dff5de45d47e35811f983991b7809"
+        };
+
+        return this.swarm.post(null, data, null, null, 'bzz-resource:');
+    }
+
+    saveMessage(receiverHash, message, isPrivate) {
+        let self = this;
+        if (isPrivate) {
+            throw('Private messages not supported');
+        }
+
+        if (!Blog.isCorrectSwarmHash(receiverHash)) {
+            throw('Incorrect receiver hash');
+        }
+
+        if (!message) {
+            throw('Empty message');
+        }
+
+
+        let sendMessage = function (messageInfo) {
+            let messageId = 1;
+            if (receiverHash in messageInfo && 'last_message_id' in messageInfo[receiverHash]) {
+                messageInfo[receiverHash].last_message_id++;
+                messageId = messageInfo[receiverHash].last_message_id;
+            } else {
+                messageInfo = messageInfo || {};
+                messageInfo[receiverHash] = {last_message_id: messageId};
+            }
+
+            let data = {
+                id: messageId,
+                receiverHash: receiverHash,
+                message: message
+            };
+
+            return self.swarm.post(self.prefix + "message/public/" + receiverHash + "/" + messageId + ".json", JSON.stringify(data), 'application/json').then(function (response) {
+                self.swarm.applicationHash = response.data;
+                return self.saveMessageInfo(messageInfo);
+            });
+        };
+
+        return self.getMessageInfo().then(function (response) {
+            return sendMessage(response.data);
+        }).catch(function () {
+            return sendMessage({});
+        });
+    }
+
+    getMessage(id, receiverHash) {
+        return this.swarm.get(this.prefix + 'message/public/' + receiverHash + '/' + id + '.json');
+    }
+
+    getMessageInfo() {
+        return this.swarm.get(this.prefix + 'message/public/info.json');
+    }
+
+    saveMessageInfo(data) {
+        return this.swarm.post(this.prefix + 'message/public/info.json', JSON.stringify(data));
+    }
+}
+
+module.exports = Blog;
+},{}],108:[function(require,module,exports){
+class SwarmApi {
+    constructor(apiUrl, applicationHash) {
+        this.isWeb = typeof window !== undefined;
+        this.axios = require('axios');
+        this.applicationHash = applicationHash;
+        // todo check is generates correct url when web and empty url
+        this.apiUrl = apiUrl || (this.isWeb ? location.protocol + "//" + location.host : "https://swarm-gateways.net");
+        this.c_hashLength = 64;
+    }
+
+    request(method, fileName, userHash, swarmProtocol, data, fileType, responseType, onUploadProgress) {
+        swarmProtocol = swarmProtocol || "bzz:";
+        if (typeof userHash == null) {
+            userHash = "";
+        } else {
+            userHash = userHash || this.applicationHash;
+        }
+
+        data = data || {};
+        fileType = fileType || "application/text";
+        //responseType = responseType || "json";
+        let headers = {'Content-type': fileType};
+        let url = [this.apiUrl, swarmProtocol, userHash, fileName].filter(function (n) {
+            return n !== ""
+        }).join("/");
+        console.log(url);
+
+        return this.axios({
+            url: url,
+            method: method,
+            data: data,
+            headers: headers,
+            onUploadProgress: onUploadProgress
+            //responseType: responseType
+        });
+    }
+
+    delete(file, userHash, swarmProtocol) {
+        return this.request("delete", file, userHash, swarmProtocol)
+    }
+
+    get(file, userHash, swarmProtocol) {
+        return this.request("get", file, userHash, swarmProtocol)
+    }
+
+    post(fileName, data, fileType, userHash, swarmProtocol, onUploadProgress) {
+        return this.request("post", fileName, userHash, swarmProtocol, data, fileType, null, onUploadProgress);
+    }
+
+    getFullUrl(urlPart, userHash, swarmProtocol) {
+        userHash = userHash || this.applicationHash;
+        swarmProtocol = swarmProtocol || "bzz:";
+        return [this.apiUrl, swarmProtocol, userHash, urlPart].filter(function (n) {
+            return n !== ""
+        }).join("/");
+    }
+}
+
+module.exports = SwarmApi;
+},{"axios":19}],109:[function(require,module,exports){
 /* This file is generated from the Unicode IDNA table, using
    the build-unicode-tables.py script. Please edit that
    script instead of this file. */
@@ -43788,7 +43822,7 @@ exports.prepareContent = function(name, inputData, isBinary, isOptimizedBinarySt
     });
 };
 
-},{"./base64":115,"./external":120,"./nodejsUtils":128,"./support":144,"core-js/library/fn/set-immediate":49}],147:[function(require,module,exports){
+},{"./base64":115,"./external":120,"./nodejsUtils":128,"./support":144,"core-js/library/fn/set-immediate":47}],147:[function(require,module,exports){
 'use strict';
 var readerFor = require('./reader/readerFor');
 var utils = require('./utils');
@@ -60557,7 +60591,7 @@ module.exports = {
     formatOutputAddress: formatOutputAddress
 };
 
-},{"../utils/config":191,"../utils/utils":193,"./param":184,"bignumber.js":46}],183:[function(require,module,exports){
+},{"../utils/config":191,"../utils/utils":193,"./param":184,"bignumber.js":44}],183:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -61218,7 +61252,7 @@ module.exports = {
 };
 
 
-},{"bignumber.js":46}],192:[function(require,module,exports){
+},{"bignumber.js":44}],192:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61258,7 +61292,7 @@ module.exports = function (value, options) {
 };
 
 
-},{"crypto-js":79,"crypto-js/sha3":100}],193:[function(require,module,exports){
+},{"crypto-js":77,"crypto-js/sha3":98}],193:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -61889,7 +61923,7 @@ module.exports = {
     isTopic: isTopic,
 };
 
-},{"./sha3.js":192,"bignumber.js":46,"utf8":172}],194:[function(require,module,exports){
+},{"./sha3.js":192,"bignumber.js":44,"utf8":172}],194:[function(require,module,exports){
 module.exports={
     "version": "0.19.1"
 }
@@ -62048,7 +62082,7 @@ Web3.prototype.createBatch = function () {
 module.exports = Web3;
 
 
-},{"./utils/sha3":192,"./utils/utils":193,"./version.json":194,"./web3/batch":197,"./web3/extend":201,"./web3/httpprovider":205,"./web3/iban":206,"./web3/ipcprovider":207,"./web3/methods/db":210,"./web3/methods/eth":211,"./web3/methods/net":212,"./web3/methods/personal":213,"./web3/methods/shh":214,"./web3/methods/swarm":215,"./web3/property":218,"./web3/requestmanager":219,"./web3/settings":220,"bignumber.js":46}],196:[function(require,module,exports){
+},{"./utils/sha3":192,"./utils/utils":193,"./version.json":194,"./web3/batch":197,"./web3/extend":201,"./web3/httpprovider":205,"./web3/iban":206,"./web3/ipcprovider":207,"./web3/methods/db":210,"./web3/methods/eth":211,"./web3/methods/net":212,"./web3/methods/personal":213,"./web3/methods/shh":214,"./web3/methods/swarm":215,"./web3/property":218,"./web3/requestmanager":219,"./web3/settings":220,"bignumber.js":44}],196:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -64033,7 +64067,7 @@ Iban.prototype.toString = function () {
 module.exports = Iban;
 
 
-},{"bignumber.js":46}],207:[function(require,module,exports){
+},{"bignumber.js":44}],207:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -72444,4 +72478,4 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[20]);
+},{}]},{},[18]);

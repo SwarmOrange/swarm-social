@@ -73,17 +73,21 @@ class Messages {
                 usersList.append('<button class="dropdown-item text-center messages-write-message" type="button" data-user-id="' + v + '"><img src="' + self.main.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" alt="" class="size-36"></button>');
             });
 
-            self.main.blog.getMessageInfo().then(function (response) {
-                let data = response.data;
-                Object.keys(data).forEach(function (userHash) {
-                    let info = data[userHash];
-                    let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', userHash);
+            self.main.blog.getMessageInfo()
+                .then(function (response) {
+                    let data = response.data;
+                    Object.keys(data).forEach(function (userHash) {
+                        let info = data[userHash];
+                        let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', userHash);
 
-                    messageDialogs.append('<div class="message-dialog">' +
-                        '<p><img class="size-30" src="' + avatar + '"> <a class="message-open-dialog" href="#" data-user-hash="' + userHash + '">' + userHash + '</a></p>' +
-                        '</div>');
+                        messageDialogs.append('<div class="message-dialog">' +
+                            '<p><img class="size-30" src="' + avatar + '"> <a class="message-open-dialog" href="#" data-user-hash="' + userHash + '">' + userHash + '</a></p>' +
+                            '</div>');
+                    });
+                })
+                .catch(function (e) {
+                    console.log(e);
                 });
-            });
         });
     }
 

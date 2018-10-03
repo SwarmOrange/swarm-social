@@ -5,7 +5,7 @@ let host = location.host;
 //let host = 'tut.com';
 if (host === 'localhost') {
     document.write('<script src="js/dist/web-modules.js"></script>' +
-        '<script src="js/Blog.js"></script>' +
+        '<script src="node_modules/free-core/js/Blog.js"></script>' +
         '<script src="js/Photoalbum.js"></script>' +
         '<script src="js/Videoplaylist.js"></script>' +
         '<script src="js/StartNow.js"></script>' +
