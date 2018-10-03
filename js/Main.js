@@ -86,7 +86,6 @@ class Main {
         });
     }
 
-
     initByHash(hash) {
         let self = this;
         console.log('hash from window hash: ' + hash);
