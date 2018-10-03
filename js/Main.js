@@ -49,7 +49,7 @@ class Main {
                         let networkId = result;
                         console.log('Network id: ' + networkId);
                         if (networkId != 4) {
-                            alert('Please, change network to Rinkeby and reload page');
+                            alert('Please, change network in Metamask to Rinkeby and reload page');
                             return;
                         }
 
@@ -66,13 +66,14 @@ class Main {
                                 ensUtility.contract.getHash.call(web3.eth.defaultAccount, function (error, result) {
                                     console.log([error, result]);
                                     if (error) {
-                                        self.alert('Error when receive user info');
+                                        console.log(error);
+                                        self.initByHash();
                                     } else if (result) {
                                         self.initByHash(result);
                                     } else {
-                                        // user not found, load default page
+                                        // user has metamask but he is not registered
                                         self.initByHash();
-                                        //self.alert('User with current wallet not found');
+                                        self.alert('Hi! Please enter information about you and click "Save page to Blockchain"');
                                     }
                                 });
                             }
