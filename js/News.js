@@ -16,9 +16,17 @@ class News {
             if (users.length) {
                 self.showLoadingBar(true);
                 users.forEach(function (v) {
+                    let userUrl = self.main.swarm.getFullUrl('', v);
+                    //let userAvatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', v);
+                    let userAvatar = 'img/swarm-avatar.jpg';
                     newsUsers.append('<li class="list-group i-follow-news-li">' +
-                        '<a onclick="return false;" href="' + self.main.swarm.getFullUrl('', v) + '" class="load-profile-------" data-profile-id="' + v + '"><img src="' + self.main.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 80px"></a>' +
+                        '<a onclick="return false;" href="' + userUrl + '" class="load-profile-------" data-profile-id="' + v + '"><img data-profile-id="' + v + '" class="user-news-avatar" src="' + userAvatar + '" style="width: 80px"></a>' +
                         '</li>');
+                    self.main.blog.getSwarmHashByWallet(v)
+                        .then(function (result) {
+                            let avatarUrl = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', result);
+                            $('.user-news-avatar[data-profile-id="' + v + '"]').attr('src', avatarUrl)
+                        });
                 });
                 self.compileNews(users, 5);
             } else {
@@ -49,49 +57,53 @@ class News {
         let self = this;
         let newsContent = $('.news-content');
         let currentUser = users.shift();
-        return this.main.blog.getProfile(currentUser)
-            .then(function (response) {
-                let lastPostId = response.data.last_post_id;
-                if (!lastPostId || lastPostId <= 0) {
-                    return self.compileNews(users, maxPostsFromUser);
-                }
+        return self.main.blog.getSwarmHashByWallet(currentUser)
+            .then(function (result) {
+                let currentUser = result;
+                return self.main.blog.getProfile(currentUser)
+                    .then(function (response) {
+                        let lastPostId = response.data.last_post_id;
+                        if (!lastPostId || lastPostId <= 0) {
+                            return self.compileNews(users, maxPostsFromUser);
+                        }
 
-                let minPostId = Math.max(1, lastPostId - maxPostsFromUser);
-                console.log('Received profile: ' + currentUser + ', ' + lastPostId + ', ' + minPostId);
-                let userId = 'userNews' + currentUser;
-                let getUserPost = function (userId, postId) {
-                    let userHolderName = '#userNews' + userId;
-                    let userSection = $(userHolderName);
-                    console.log([postId, userId]);
-                    return self.main.blog.getPost(postId, userId)
-                        .then(function (response) {
-                            let post = response.data;
-                            userSection.append('<div id="newsPost' + post.id + '"></div>');
-                            self.main.addPostByData(post, '#newsPost' + userId, userHolderName);
-                            console.log('Received post: ' + userId + ', ' + postId);
+                        let minPostId = Math.max(1, lastPostId - maxPostsFromUser);
+                        console.log('Received profile: ' + currentUser + ', ' + lastPostId + ', ' + minPostId);
+                        let userId = 'userNews' + currentUser;
+                        let getUserPost = function (userId, postId) {
+                            let userHolderName = '#userNews' + userId;
+                            let userSection = $(userHolderName);
+                            console.log([postId, userId]);
+                            return self.main.blog.getPost(postId, userId)
+                                .then(function (response) {
+                                    let post = response.data;
+                                    userSection.append('<div id="newsPost' + post.id + '"></div>');
+                                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName);
+                                    console.log('Received post: ' + userId + ', ' + postId);
 
-                            postId++;
-                            if (postId <= lastPostId) {
-                                return getUserPost(userId, postId);
-                            } else {
-                                return self.compileNews(users, maxPostsFromUser);
-                            }
-                        })
-                        .catch(function (e) {
-                            console.log(e);
-                            postId++;
-                            return getUserPost(userId, postId);
-                        });
-                };
+                                    postId++;
+                                    if (postId <= lastPostId) {
+                                        return getUserPost(userId, postId);
+                                    } else {
+                                        return self.compileNews(users, maxPostsFromUser);
+                                    }
+                                })
+                                .catch(function (e) {
+                                    console.log(e);
+                                    postId++;
+                                    return getUserPost(userId, postId);
+                                });
+                        };
 
-                if (lastPostId > 0) {
-                    newsContent.append('<div id="' + userId + '"></div>');
+                        if (lastPostId > 0) {
+                            newsContent.append('<div id="' + userId + '"></div>');
 
-                    return getUserPost(currentUser, minPostId)
-                } else {
-                    return self.compileNews(users, maxPostsFromUser);
-                }
-            });
+                            return getUserPost(currentUser, minPostId)
+                        } else {
+                            return self.compileNews(users, maxPostsFromUser);
+                        }
+                    });
+            })
     }
 }
 
