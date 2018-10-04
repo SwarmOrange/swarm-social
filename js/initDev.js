@@ -24,6 +24,7 @@ new modules.Photoalbum(myMain);
 window.vkImport = new modules.VKImport(myMain);
 new modules.Videoplaylist(myMain);
 window.ensUtility = new modules.EnsUtility(myMain);
+window.Blog.ensUtility = window.ensUtility;
 new modules.FacebookImport();
 new modules.StartNow();
 new modules.ImportButtons(myMain);

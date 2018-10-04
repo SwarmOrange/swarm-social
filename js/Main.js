@@ -289,7 +289,8 @@ class Main {
             let followerHash = $('#followerHash');
             let swarmHash = followerHash.val();
             console.log(swarmHash);
-            if (self.blogClass.isCorrectSwarmHash(swarmHash)) {
+            //if (self.blogClass.isCorrectSwarmHash(swarmHash)) {
+            if (web3.isAddress(swarmHash)) {
                 $('#addFollowerModal').modal('hide');
                 followerHash.val('');
                 try {
@@ -308,10 +309,22 @@ class Main {
             .on('click', '.load-profile', function (e) {
                 e.preventDefault();
                 let swarmProfileHash = $(this).attr('data-profile-id');
-                // todo go to profile
-                self.onAfterHashChange(swarmProfileHash).then(function (response) {
-                    //reload();
-                });
+                if (Blog.isCorrectSwarmHash(swarmProfileHash)) {
+                    self.onAfterHashChange(swarmProfileHash)
+                        .then(function (response) {
+                            //reload();
+                        });
+
+                } else if (web3.isAddress(swarmProfileHash)) {
+                    // todo show load window
+                    self.blog.getSwarmHashByWallet(swarmProfileHash)
+                        .then(function (result) {
+                            self.onAfterHashChange(result)
+                                .then(function (response) {
+                                    //reload();
+                                });
+                        });
+                }
             })
             .on('click', '.delete-i-follow', function (e) {
                 e.preventDefault();
@@ -543,9 +556,17 @@ class Main {
         let iFollowBlock = $('#iFollowUsers');
         if ('i_follow' in data && data.i_follow.length) {
             data.i_follow.forEach(function (v) {
+                //let avatarUrl = self.swarm.getFullUrl('social/file/avatar/original.jpg', v);
+                let avatarUrl = 'img/swarm-avatar.jpg';
+                let userUrl = self.swarm.getFullUrl('', v);
                 iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
                     '<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
-                    '<a onclick="return false;" href="' + self.swarm.getFullUrl('', v) + '" class="load-profile" data-profile-id="' + v + '"><img src="' + self.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 30px"></a></li>');
+                    '<a onclick="return false;" href="' + userUrl + '" class="load-profile" data-profile-id="' + v + '"><img class="follower-user-avatar" data-profile-id="' + v + '" src="' + avatarUrl + '" style="width: 30px"></a></li>');
+                self.blog.getSwarmHashByWallet(v)
+                    .then(function (result) {
+                        let avatarUrl = self.swarm.getFullUrl('social/file/avatar/original.jpg', result);
+                        $('.follower-user-avatar[data-profile-id="' + v + '"]').attr('src', avatarUrl)
+                    });
             });
         }
     }

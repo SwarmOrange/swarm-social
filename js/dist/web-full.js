@@ -205,6 +205,324 @@ class EnsUtility {
             return null;
         }
     }
+
+    registerRinkebyTestDomain(domain) {
+        function namehash(name) {
+            var node = '0x0000000000000000000000000000000000000000000000000000000000000000';
+            if (name !== '') {
+                var labels = name.split(".");
+                for (var i = labels.length - 1; i >= 0; i--) {
+                    node = web3.sha3(node + web3.sha3(labels[i]).slice(2), {encoding: 'hex'});
+                }
+            }
+            return node.toString();
+        }
+
+        var ensContract = web3.eth.contract([
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "node",
+                        "type": "bytes32"
+                    }
+                ],
+                "name": "resolver",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "node",
+                        "type": "bytes32"
+                    }
+                ],
+                "name": "owner",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "node",
+                        "type": "bytes32"
+                    },
+                    {
+                        "name": "label",
+                        "type": "bytes32"
+                    },
+                    {
+                        "name": "owner",
+                        "type": "address"
+                    }
+                ],
+                "name": "setSubnodeOwner",
+                "outputs": [],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "node",
+                        "type": "bytes32"
+                    },
+                    {
+                        "name": "ttl",
+                        "type": "uint64"
+                    }
+                ],
+                "name": "setTTL",
+                "outputs": [],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "node",
+                        "type": "bytes32"
+                    }
+                ],
+                "name": "ttl",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint64"
+                    }
+                ],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "node",
+                        "type": "bytes32"
+                    },
+                    {
+                        "name": "resolver",
+                        "type": "address"
+                    }
+                ],
+                "name": "setResolver",
+                "outputs": [],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "node",
+                        "type": "bytes32"
+                    },
+                    {
+                        "name": "owner",
+                        "type": "address"
+                    }
+                ],
+                "name": "setOwner",
+                "outputs": [],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "name": "node",
+                        "type": "bytes32"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "owner",
+                        "type": "address"
+                    }
+                ],
+                "name": "Transfer",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "name": "node",
+                        "type": "bytes32"
+                    },
+                    {
+                        "indexed": true,
+                        "name": "label",
+                        "type": "bytes32"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "owner",
+                        "type": "address"
+                    }
+                ],
+                "name": "NewOwner",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "name": "node",
+                        "type": "bytes32"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "resolver",
+                        "type": "address"
+                    }
+                ],
+                "name": "NewResolver",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "name": "node",
+                        "type": "bytes32"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "ttl",
+                        "type": "uint64"
+                    }
+                ],
+                "name": "NewTTL",
+                "type": "event"
+            }
+        ]);
+
+        var fifsRegistrarContract = web3.eth.contract([
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "ens",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "bytes32"
+                    }
+                ],
+                "name": "expiryTimes",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "subnode",
+                        "type": "bytes32"
+                    },
+                    {
+                        "name": "owner",
+                        "type": "address"
+                    }
+                ],
+                "name": "register",
+                "outputs": [],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "rootNode",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "bytes32"
+                    }
+                ],
+                "payable": false,
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "name": "ensAddr",
+                        "type": "address"
+                    },
+                    {
+                        "name": "node",
+                        "type": "bytes32"
+                    }
+                ],
+                "type": "constructor"
+            }
+        ]);
+
+        let ens = ensContract.at('0xe7410170f87102DF0055eB195163A03B7F2Bff4A');
+        let publicResolverAddress = '0xb14fdee4391732ea9d2267054ead2084684c0ad8';
+        let rootDomain = 'test';
+        ens.owner(namehash(rootDomain), function (error, result) {
+            console.log('ens owner');
+            console.log(error);
+            console.log(result);
+
+            if (result) {
+                let testRegistrar = fifsRegistrarContract.at(result);
+                testRegistrar.register(web3.sha3(domain), web3.eth.accounts[0], function (error, result) {
+                    console.log('testRegistrar.register');
+                    console.log(error);
+                    console.log(result);
+
+                    if (result) {
+                        ens.setResolver(namehash(domain + '.' + rootDomain), publicResolverAddress, function (error, result) {
+                            console.log('ens.setResolver');
+                            console.log(error);
+                            console.log(result);
+                        });
+                    }
+                });
+            }
+        });
+    }
 }
 
 module.exports = EnsUtility;
@@ -715,7 +1033,8 @@ class Main {
             let followerHash = $('#followerHash');
             let swarmHash = followerHash.val();
             console.log(swarmHash);
-            if (self.blogClass.isCorrectSwarmHash(swarmHash)) {
+            //if (self.blogClass.isCorrectSwarmHash(swarmHash)) {
+            if (web3.isAddress(swarmHash)) {
                 $('#addFollowerModal').modal('hide');
                 followerHash.val('');
                 try {
@@ -734,10 +1053,22 @@ class Main {
             .on('click', '.load-profile', function (e) {
                 e.preventDefault();
                 let swarmProfileHash = $(this).attr('data-profile-id');
-                // todo go to profile
-                self.onAfterHashChange(swarmProfileHash).then(function (response) {
-                    //reload();
-                });
+                if (Blog.isCorrectSwarmHash(swarmProfileHash)) {
+                    self.onAfterHashChange(swarmProfileHash)
+                        .then(function (response) {
+                            //reload();
+                        });
+
+                } else if (web3.isAddress(swarmProfileHash)) {
+                    // todo show load window
+                    self.blog.getSwarmHashByWallet(swarmProfileHash)
+                        .then(function (result) {
+                            self.onAfterHashChange(result)
+                                .then(function (response) {
+                                    //reload();
+                                });
+                        });
+                }
             })
             .on('click', '.delete-i-follow', function (e) {
                 e.preventDefault();
@@ -969,9 +1300,17 @@ class Main {
         let iFollowBlock = $('#iFollowUsers');
         if ('i_follow' in data && data.i_follow.length) {
             data.i_follow.forEach(function (v) {
+                //let avatarUrl = self.swarm.getFullUrl('social/file/avatar/original.jpg', v);
+                let avatarUrl = 'img/swarm-avatar.jpg';
+                let userUrl = self.swarm.getFullUrl('', v);
                 iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
                     '<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
-                    '<a onclick="return false;" href="' + self.swarm.getFullUrl('', v) + '" class="load-profile" data-profile-id="' + v + '"><img src="' + self.swarm.getFullUrl('social/file/avatar/original.jpg', v) + '" style="width: 30px"></a></li>');
+                    '<a onclick="return false;" href="' + userUrl + '" class="load-profile" data-profile-id="' + v + '"><img class="follower-user-avatar" data-profile-id="' + v + '" src="' + avatarUrl + '" style="width: 30px"></a></li>');
+                self.blog.getSwarmHashByWallet(v)
+                    .then(function (result) {
+                        let avatarUrl = self.swarm.getFullUrl('social/file/avatar/original.jpg', result);
+                        $('.follower-user-avatar[data-profile-id="' + v + '"]').attr('src', avatarUrl)
+                    });
             });
         }
     }
@@ -2910,6 +3249,7 @@ new modules.Photoalbum(myMain);
 window.vkImport = new modules.VKImport(myMain);
 new modules.Videoplaylist(myMain);
 window.ensUtility = new modules.EnsUtility(myMain);
+window.Blog.ensUtility = window.ensUtility;
 new modules.FacebookImport();
 new modules.StartNow();
 new modules.ImportButtons(myMain);
@@ -28093,7 +28433,8 @@ if (typeof module !== "undefined" && module.exports) {
 
 },{}],107:[function(require,module,exports){
 class Blog {
-    constructor(swarm) {
+    constructor(swarm, ensUtility) {
+        this.ensUtility = ensUtility;
         this.last_photoalbum_id = 0;
         this.last_videoalbum_id = 0;
         this.prefix = "social/";
@@ -28108,6 +28449,20 @@ class Blog {
         } else {
             this.uploadedSwarmHash = '';
         }
+    }
+
+    getSwarmHashByWallet(walletAddress) {
+        let self = this;
+        return new Promise((resolve, reject) => {
+            self.ensUtility.contract.getHash.call(walletAddress, function (error, result) {
+                console.log([error, result]);
+                if (error) {
+                    reject(error);
+                } else{
+                   resolve(result);
+                }
+            });
+        });
     }
 
     getDefaultProfile() {
