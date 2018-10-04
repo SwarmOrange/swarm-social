@@ -15,20 +15,22 @@ class News {
             users.reverse();
             if (users.length) {
                 self.showLoadingBar(true);
-                users.forEach(function (v) {
-                    let userUrl = self.main.swarm.getFullUrl('', v);
-                    //let userAvatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', v);
-                    let userAvatar = 'img/swarm-avatar.jpg';
-                    newsUsers.append('<li class="list-group i-follow-news-li">' +
-                        '<a onclick="return false;" href="' + userUrl + '" class="load-profile-------" data-profile-id="' + v + '"><img data-profile-id="' + v + '" class="user-news-avatar" src="' + userAvatar + '" style="width: 80px"></a>' +
-                        '</li>');
-                    self.main.blog.getSwarmHashByWallet(v)
-                        .then(function (result) {
-                            let avatarUrl = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', result);
-                            $('.user-news-avatar[data-profile-id="' + v + '"]').attr('src', avatarUrl)
+                self.compileNews(users, 5)
+                    .then(function () {
+                        users.forEach(function (v) {
+                            /*let userUrl = self.main.swarm.getFullUrl('', v);
+                            //let userAvatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', v);
+                            let userAvatar = 'img/swarm-avatar.jpg';
+                            newsUsers.append('<li class="list-group i-follow-news-li">' +
+                                '<a onclick="return false;" href="' + userUrl + '" class="load-profile-------" data-profile-id="' + v + '"><img data-profile-id="' + v + '" class="user-news-avatar" src="' + userAvatar + '" style="width: 80px"></a>' +
+                                '</li>');
+                            self.main.blog.getSwarmHashByWallet(v)
+                                .then(function (result) {
+                                    let avatarUrl = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', result);
+                                    $('.user-news-avatar[data-profile-id="' + v + '"]').attr('src', avatarUrl)
+                                });*/
                         });
-                });
-                self.compileNews(users, 5);
+                    });
             } else {
                 self.showLoadingBar(false);
                 newsContent.html('You are not subscribed to anyone');
@@ -60,6 +62,8 @@ class News {
         return self.main.blog.getSwarmHashByWallet(currentUser)
             .then(function (result) {
                 let currentUser = result;
+
+
                 return self.main.blog.getProfile(currentUser)
                     .then(function (response) {
                         let lastPostId = response.data.last_post_id;
@@ -72,13 +76,13 @@ class News {
                         let userId = 'userNews' + currentUser;
                         let getUserPost = function (userId, postId) {
                             let userHolderName = '#userNews' + userId;
-                            let userSection = $(userHolderName);
+                            //let userSection = $(userHolderName);
                             console.log([postId, userId]);
                             return self.main.blog.getPost(postId, userId)
                                 .then(function (response) {
                                     let post = response.data;
-                                    userSection.append('<div id="newsPost' + post.id + '"></div>');
-                                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName);
+                                    //userSection.append('<div id="newsPost' + post.id + '"></div>');
+                                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName, true);
                                     console.log('Received post: ' + userId + ', ' + postId);
 
                                     postId++;
@@ -96,7 +100,13 @@ class News {
                         };
 
                         if (lastPostId > 0) {
-                            newsContent.append('<div id="' + userId + '"></div>');
+                            let userUrl = self.main.swarm.getFullUrl('', currentUser);
+                            let userAvatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', currentUser);
+                            newsContent.append('<div class="news-owner">' +
+                                '<img class="size-50" src="' + userAvatar + '">' +
+                                '</div>');
+                            newsContent.append('<div id="' + userId + '">' +
+                                '</div>');
 
                             return getUserPost(currentUser, minPostId)
                         } else {

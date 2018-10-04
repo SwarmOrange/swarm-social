@@ -334,3 +334,7 @@ li > p:last-child {
 .post-attachment.list-inline-item {
     margin-bottom: 8px;
 }
+
+.news-owner {
+    margin-bottom: 8px;
+}

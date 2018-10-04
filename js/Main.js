@@ -611,7 +611,7 @@ class Main {
         return newPost;
     }
 
-    addPostByData(data, prefix, containerName) {
+    addPostByData(data, prefix, containerName, isReadOnly) {
         let self = this;
         prefix = prefix || '#userPost';
         let userPost = $(prefix + data.id);
@@ -627,8 +627,14 @@ class Main {
 
         userPost.find('.description').text(data.description);
         userPost.find('.edit-post-block textarea').val(data.description);
-        userPost.find('.delete-post').attr('data-id', data.id);
-        userPost.find('.edit-post').attr('data-id', data.id);
+        if (isReadOnly) {
+            userPost.find('.delete-post').remove();
+            userPost.find('.edit-post').remove();
+        } else {
+            userPost.find('.delete-post').attr('data-id', data.id);
+            userPost.find('.edit-post').attr('data-id', data.id);
+        }
+
         userPost.find('.save-post').attr('data-id', data.id);
         if (data.attachments && data.attachments.length) {
             let youtubeAttachment = $('#wallYoutubeAttachment');
