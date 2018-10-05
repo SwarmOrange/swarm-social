@@ -71,6 +71,7 @@ class Main {
                                 ensUtility.contract.getHash.call(web3.eth.defaultAccount, function (error, result) {
                                     console.log([error, result]);
                                     if (error) {
+                                        // todo show info about error
                                         console.log(error);
                                         self.initByHash();
                                     } else if (result) {
@@ -702,23 +703,35 @@ class Main {
     }
 
     alert(message, buttons) {
-        console.log(message);
-        if (typeof message === 'string') {
+        let show = function () {
+            console.log(message);
+            if (typeof message === 'string') {
 
-        } else {
-            console.log('Not string, skip');
-            return;
-        }
+            } else {
+                console.log('Not string, skip');
+                return;
+            }
 
-        let messageModal = $('#messageModal');
-        $('#messageBody').html(message);
-        messageModal.modal('show');
-        let btns = messageModal.find('.additional-buttons');
-        btns.html('');
-        if (buttons && buttons.length) {
-            buttons.forEach(function (v) {
-                btns.append(v);
+            let messageModal = $('#messageModal');
+            $('#messageBody').html(message);
+            messageModal.modal('show');
+            let btns = messageModal.find('.additional-buttons');
+            btns.html('');
+            if (buttons && buttons.length) {
+                buttons.forEach(function (v) {
+                    btns.append(v);
+                });
+            }
+        };
+
+        let modalShow = $('.modal.show');
+        if (modalShow.length) {
+            modalShow.on('hidden.bs.modal', function () {
+                show();
             });
+            modalShow.modal('hide');
+        } else {
+            show();
         }
     }
 }

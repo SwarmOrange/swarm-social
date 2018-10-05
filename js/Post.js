@@ -266,6 +266,8 @@ class Post {
                         });
                 }
             }
+
+            $(this).val(null);
         });
 
         $('.add-youtube-video').click(function (e) {

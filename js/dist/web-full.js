@@ -87,9 +87,15 @@ class EnsUtility {
         $('.save-blockchain').click(function (e) {
             e.preventDefault();
             if (self.contract) {
+                // todo is not filled user wallet - add it to profile
                 $('.save-blockchain').attr('disabled', 'disabled');
                 self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, function (error, result) {
-                    window.location.hash = '';
+                    if (error) {
+                        self.main.alert('Transaction error or cancelled');
+                    } else {
+                        window.location.hash = '';
+                        self.main.alert('Transaction complete');
+                    }
                 });
             } else {
                 self.main.alert('Please, install Metamask');
@@ -817,6 +823,7 @@ class Main {
                                 ensUtility.contract.getHash.call(web3.eth.defaultAccount, function (error, result) {
                                     console.log([error, result]);
                                     if (error) {
+                                        // todo show info about error
                                         console.log(error);
                                         self.initByHash();
                                     } else if (result) {
@@ -1448,23 +1455,35 @@ class Main {
     }
 
     alert(message, buttons) {
-        console.log(message);
-        if (typeof message === 'string') {
+        let show = function () {
+            console.log(message);
+            if (typeof message === 'string') {
 
-        } else {
-            console.log('Not string, skip');
-            return;
-        }
+            } else {
+                console.log('Not string, skip');
+                return;
+            }
 
-        let messageModal = $('#messageModal');
-        $('#messageBody').html(message);
-        messageModal.modal('show');
-        let btns = messageModal.find('.additional-buttons');
-        btns.html('');
-        if (buttons && buttons.length) {
-            buttons.forEach(function (v) {
-                btns.append(v);
+            let messageModal = $('#messageModal');
+            $('#messageBody').html(message);
+            messageModal.modal('show');
+            let btns = messageModal.find('.additional-buttons');
+            btns.html('');
+            if (buttons && buttons.length) {
+                buttons.forEach(function (v) {
+                    btns.append(v);
+                });
+            }
+        };
+
+        let modalShow = $('.modal.show');
+        if (modalShow.length) {
+            modalShow.on('hidden.bs.modal', function () {
+                show();
             });
+            modalShow.modal('hide');
+        } else {
+            show();
         }
     }
 }
@@ -2185,6 +2204,8 @@ class Post {
                         });
                 }
             }
+
+            $(this).val(null);
         });
 
         $('.add-youtube-video').click(function (e) {
@@ -3246,10 +3267,52 @@ class Wallet {
             }
 
             self.main.blog.myProfile.ethereum_wallet = wallet;
-            self.main.blog.saveProfile(self.main.blog.myProfile).then(function (response) {
-                $('#wallet-form').removeClass("disabled-content");
-                self.main.onAfterHashChange(response.data, true);
-            });
+            self.main.blog.saveProfile(self.main.blog.myProfile)
+                .then(function (response) {
+                    $('#wallet-form').removeClass("disabled-content");
+                    self.main.onAfterHashChange(response.data, true);
+                });
+        });
+
+        $('.send-crypto-ethereum').click(function (e) {
+            e.preventDefault();
+            // todo check is user saved ethereum address
+            if (web3 && web3.currentProvider.isMetaMask) {
+
+            } else {
+                self.main.alert('Please, install Metamask');
+                return;
+            }
+
+            let amount = $('#sendCryptoAmount').val();
+            if (amount) {
+
+            } else {
+                self.main.alert('Enter the amount to be sent');
+                return;
+            }
+
+            // todo add wait animation
+            self.main.blog.getProfile()
+                .then(function (response) {
+                    // todo hide wait animation
+                    let data = response.data;
+                    if (data.ethereum_wallet && web3.isAddress(data.ethereum_wallet)) {
+                        web3.eth.sendTransaction({
+                            to: data.ethereum_wallet,
+                            value: web3.toWei(amount, "ether")
+                        }, function (error, result) {
+                            console.log([error, result]);
+                            if (error) {
+                                self.main.alert('Payment error');
+                            } else {
+                                self.main.alert('Payment complete!');
+                            }
+                        });
+                    } else {
+                        self.main.alert('User not filled Ethereum wallet');
+                    }
+                });
         });
     }
 }

@@ -86,9 +86,15 @@ class EnsUtility {
         $('.save-blockchain').click(function (e) {
             e.preventDefault();
             if (self.contract) {
+                // todo is not filled user wallet - add it to profile
                 $('.save-blockchain').attr('disabled', 'disabled');
                 self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, function (error, result) {
-                    window.location.hash = '';
+                    if (error) {
+                        self.main.alert('Transaction error or cancelled');
+                    } else {
+                        window.location.hash = '';
+                        self.main.alert('Transaction complete');
+                    }
                 });
             } else {
                 self.main.alert('Please, install Metamask');

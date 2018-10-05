@@ -42,9 +42,9 @@
             for (var i=0; i < resp.emails.length; i++) {
                 if (resp.emails[i].type === 'account') primaryEmail = resp.emails[i].value;
             }*/
-            if (resp) {
-                googlePlus.setInfo(resp.name.givenName, resp.name.familyName, resp.image.url, resp.aboutMe);
-
+            console.log(resp);
+            if (resp && resp.name) {
+                googlePlus.setInfo(resp.name.givenName, resp.name.familyName, resp.image ? resp.image.url : '', resp.aboutMe);
             }
         }
     </script>
@@ -187,6 +187,13 @@
                                     <button id="uploadAvatarButton" type="button" class="btn btn-success"
                                             data-toggle="modal"
                                             data-target="#uploadAvatarModal" style="width: 100%">Upload avatar
+                                    </button>
+                                </p>
+                                <p>
+                                    <button id="sendCryptoButton" type="button" class="btn btn-primary"
+                                            data-toggle="modal"
+                                            data-target="#sendCryptoModal" style="width: 100%">
+                                        Send crypto
                                     </button>
                                 </p>
 
@@ -643,7 +650,8 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <input type="text" class="form-control" id="followerHash" placeholder="Follower Ethereum wallet">
+                            <input type="text" class="form-control" id="followerHash"
+                                   placeholder="Follower Ethereum wallet">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -675,6 +683,33 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary send-ens-transaction">Send transaction</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Send crypto Modal -->
+        <div class="modal fade" id="sendCryptoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Send crypto</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="sendCryptoAmount" placeholder="0.123"
+                                   aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="basic-addon2">ETH</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary send-crypto-ethereum">Send Ethereum</button>
                     </div>
                 </div>
             </div>
