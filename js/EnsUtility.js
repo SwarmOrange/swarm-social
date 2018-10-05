@@ -44,7 +44,7 @@ class EnsUtility {
                 return;
             }
 
-            var networkId = result;
+            let networkId = result;
             console.log('Network id: ' + networkId);
             /*if (networkId != 4) {
                 alert('Please, change network to Rinkeby and reload page');
@@ -85,12 +85,14 @@ class EnsUtility {
 
         $('.save-blockchain').click(function (e) {
             e.preventDefault();
-            $('.save-blockchain').attr('disabled', 'disabled');
-            self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, function (error, result) {
-                //console.log(error);
-                //console.log(result);
-                window.location.hash = '';
-            });
+            if (self.contract) {
+                $('.save-blockchain').attr('disabled', 'disabled');
+                self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, function (error, result) {
+                    window.location.hash = '';
+                });
+            } else {
+                self.main.alert('Please, install Metamask');
+            }
         });
     }
 

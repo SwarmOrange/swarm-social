@@ -24,16 +24,21 @@ class Main {
             let hash = window.location.hash.substring(1);
             if (hash) {
                 if (window.web3 && window.web3.isAddress(hash)) {
-                    ensUtility.contract.getHash.call(hash, function (error, result) {
-                        console.log([error, result]);
-                        if (error) {
-                            self.alert('Can not receive user');
-                        } else if (result) {
-                            self.initByHash(result);
-                        } else {
-                            self.alert('User not found. Enter correct Ethereum wallet');
-                        }
-                    });
+                    if (ensUtility.contract) {
+                        ensUtility.contract.getHash.call(hash, function (error, result) {
+                            console.log([error, result]);
+                            if (error) {
+                                self.alert('Can not receive user');
+                            } else if (result) {
+                                self.initByHash(result);
+                            } else {
+                                self.alert('User not found. Enter correct Ethereum wallet');
+                            }
+                        });
+                    } else {
+                        self.alert('To open user page by Ethereum wallet, you need to install Metamask');
+                    }
+
                 } else if (self.blogClass.isCorrectSwarmHash(hash)) {
                     self.initByHash(hash);
                 } else {
@@ -82,6 +87,7 @@ class Main {
                 } else {
                     console.log('not metamask');
                     self.initByHash();
+                    self.alert('Hi! Please install Metamask plugin, enter information about you and click "Save page to Blockchain"');
                 }
             }
         });
@@ -131,16 +137,13 @@ class Main {
             .then(function (response) {
                 let data = response.data;
                 console.log(data);
-                // todo autoset profile after update?
                 self.blog.setMyProfile(data);
                 self.updateInfo(data);
-                /*setTimeout(function () {
-                    $('#loadModal').modal('hide');
-                }, 1000);*/
             })
             .catch(function (error) {
                 console.log(error);
-                console.log('Some error happen');
+                // todo check is debug version. if debug - show message that Debug version not support create new user
+                self.alert('User not found or swarm hash expired - ' + self.swarm.applicationHash);
             })
             .then(function () {
                 // always executed
