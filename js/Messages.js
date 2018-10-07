@@ -20,10 +20,12 @@ class Messages {
                 $('#message-to-avatar').attr('src', 'img/swarm-avatar.jpg');
                 self.showMessageInput(true);
             })
-            .on('click', '.message-open-dialog', function (e) {
+            .on('click', '.chat_list', function (e) {
                 e.preventDefault();
+                $('.chat_list').removeClass('active_chat');
+                $(this).addClass('active_chat');
                 let userHash = $(this).attr('data-user-hash');
-                let messageDialog = $('.message-dialog');
+                let messageDialog = $('.msg_history');
                 messageDialog.html('');
                 self.showLoadingBar(true);
                 self.main.blog.getMessageInfo()
@@ -36,29 +38,34 @@ class Messages {
                             lastMessageId = data[userHash].last_message_id;
                             if (lastMessageId > 0) {
                                 let maxId = Math.min(10, lastMessageId);
+                                // todo reverse load
                                 for (let i = 1; i <= maxId; i++) {
-                                    messageDialog.append('<p class="messages-dialog-item" data-user-to="' + userHash + '" data-id="' + i + '"></p>');
-                                    let msg = $('.messages-dialog-item[data-user-to="' + userHash + '"]');
+                                    let msg = self.setMessage(userHash, 'MY_WALLET_ID_HERE', i, false, 'img/swarm-avatar.jpg', '...', '---');
+                                    //messageDialog.append(msg);
+                                    //messageDialog.append('<p class="messages-dialog-item" data-user-to="' + userHash + '" data-id="' + i + '"></p>');
+                                    //let msg = $('.messages-dialog-item[data-user-to="' + userHash + '"]');
                                     self.main.blog.getMessage(i, userHash)
                                         .then(function (response) {
                                             let data = response.data;
-                                            msg.text(data.message);
-
+                                            //msg.text(data.message);
+                                            self.setMessage(userHash, 'MY_WALLET_ID_HERE', i, false, 'img/swarm-avatar.jpg', data.message, '---');
                                         })
                                         .catch(function () {
-                                            msg.text('Message deleted');
+                                            //msg.text('Message deleted');
+                                            self.setMessage(userHash, 'MY_WALLET_ID_HERE', i, false, 'img/swarm-avatar.jpg', 'Message deleted', '---');
                                         });
                                 }
                             }
                         } else {
+                            // todo check it
                             messageDialog.append('<p>Empty dialog</p>');
                         }
 
-                        let template = $('#sendMessageTemplate')
+                        /*let template = $('#sendMessageTemplate')
                             .clone()
                             .removeAttr('id')
                             .removeAttr('style');
-                        messageDialog.append(template);
+                        messageDialog.append(template);*/
                     })
                     .catch(function () {
                         self.showLoadingBar(false);
@@ -112,21 +119,24 @@ class Messages {
                         //let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', userHash);
                         let avatar = 'img/swarm-avatar.jpg';
 
-                        messageDialogs.append('<div class="message-dialog-user">' +
+                        /*messageDialogs.append('<div class="message-dialog-user">' +
                             '<p><img data-user-id="' + userHash + '" class="message-dialog-avatar size-30" src="' + avatar + '"> <a class="message-open-dialog" href="#" data-user-hash="' + userHash + '">... ...</a></p>' +
-                            '</div>');
+                            '</div>');*/
+                        self.setDialog(userHash);
 
                         self.main.blog.getSwarmHashByWallet(userHash)
                             .then(function (hash) {
-                                let imgElement = $('.message-dialog-avatar[data-user-id="' + userHash + '"]');
-                                let textElement = $('.message-open-dialog[data-user-hash="' + userHash + '"]');
+                                //let imgElement = $('.message-dialog-avatar[data-user-id="' + userHash + '"]');
+                                //let textElement = $('.message-open-dialog[data-user-hash="' + userHash + '"]');
                                 // todo use preview
                                 let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', hash);
-                                imgElement.attr('src', avatar);
+                                //imgElement.attr('src', avatar);
                                 self.main.blog.getProfile(hash)
                                     .then(function (response) {
                                         let data = response.data;
-                                        textElement.text(data.first_name + ' ' + data.last_name);
+                                        //textElement.text(data.first_name + ' ' + data.last_name);
+
+                                        self.setDialog(userHash, data.first_name + ' ' + data.last_name, avatar);
                                     });
                             });
                     });
@@ -156,6 +166,53 @@ class Messages {
         } else {
             selector.hide('slow');
         }
+    }
+
+    setDialog(userId, name, avatar, lastMessages, lastDate, isActive) {
+        name = name || '... ...';
+        avatar = avatar || 'img/swarm-avatar.jpg';
+        lastMessages = lastMessages || '...';
+        lastDate = lastDate || '...';
+        let inbox = $('.inbox_chat');
+        let item = $('.chat_list[data-user-hash="' + userId + '"]');
+        if (!item.length) {
+            item = $('#messagesDialogItem').clone().removeAttr('id').removeAttr('style').attr('data-user-hash', userId);
+            inbox.append(item);
+        }
+
+        item.find('.messages-user-dialog-avatar').attr('src', avatar).attr('alt', name);
+        item.find('.chat_user_name').text(name); //add -<span class="chat_date">Dec 25</span>
+        item.find('.chat_date').text(lastDate);
+        item.find('.chat_message').text(lastMessages);
+        if (isActive) {
+            item.addClass('active_chat');
+        } else {
+            item.removeClass('active_chat');
+        }
+
+        return item;
+    }
+
+    setMessage(dialogId, authorId, messageId, isIncome, avatar, text, date) {
+        let template = $('.chat-message[data-dialog-id="' + dialogId + '"][data-author-id="' + authorId + '"]');
+
+        if (!template.length) {
+            template = $('#outgoingMessageTemplate').clone();
+        }
+
+        if (isIncome) {
+            template = $('#incomeMessageTemplate').clone();
+            template.find('.income-user-avatar').attr('src', avatar);
+        }
+
+        template.removeAttr('id').removeAttr('style').attr('data-dialog-id', dialogId).attr('data-author-id', authorId);
+        template.find('.message-text').text(text);
+        template.find('.time_date').text(date);
+
+        let messageDialog = $('.msg_history');
+        messageDialog.append(template);
+
+        return template;
     }
 }
 

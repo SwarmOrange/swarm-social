@@ -12,6 +12,8 @@
     <!-- CSS auto paste here -->
     <link href="css/uglify.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" type="text/css"
+          rel="stylesheet">
 
     <script src="https://vk.com/js/api/openapi.js?159" type="text/javascript"></script>
 
@@ -429,7 +431,7 @@
             <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
                 <div class="row">
                     <div class="col-sm-12">
-                        <div class="btn-group dropright">
+                        <!--<div class="btn-group dropright">
                             <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">
                                 Write message to ..
@@ -437,7 +439,7 @@
                             <div class="dropdown-menu messages-users-list">
                                 <button class="dropdown-item" type="button">Action</button>
                             </div>
-                        </div>
+                        </div>-->
 
                         <form id="send-message-to" style="display: none">
                             <hr>
@@ -461,25 +463,45 @@
                             <button type="button" class="btn btn-primary messages-send-message">Send</button>
                         </form>
 
-                        <div class="message-dialogs-info">
-                            <div class="row">
-                                <div class="col-sm-4 dialogs-column">
-                                    <p class="message-last-dialogs">Last dialogs</p>
-                                    <div class="message-dialogs">
+
+                        <div class="messaging">
+                            <div class="inbox_msg">
+                                <div class="inbox_people">
+                                    <div class="headind_srch">
+                                        <div class="recent_heading">
+                                            <h4>Recent</h4>
+                                        </div>
+                                        <!--<div class="srch_bar">
+                                            <div class="stylish-input-group">
+                                                <input type="text" class="search-bar" placeholder="Search">
+                                                <span class="input-group-addon">
+                <button type="button"> <i class="fa fa-search" aria-hidden="true"></i> </button>
+                </span></div>
+                                        </div>-->
+                                    </div>
+                                    <div class="inbox_chat">
+
 
                                     </div>
                                 </div>
-                                <div class="col-sm-8">
-                                    <!--<div class="d-flex justify-content-center messages-loader">
-                                        <div class="loader-animation"></div>
-                                    </div>-->
-                                    <div class="message-dialog">
+                                <div class="mesgs">
+                                    <div class="msg_history">
 
+                                    </div>
+                                    <div class="type_msg">
+                                        <div class="input_msg_write">
+                                            <input type="text" class="write_msg" placeholder="Type a message"/>
+                                            <button class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o"
+                                                                                          aria-hidden="true"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                         </div>
+
+
                     </div>
                 </div>
             </div>
@@ -587,11 +609,44 @@
             </div>
             <div id="sendMessageTemplate" class="message-dialog-send-message" style="display: none">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Message" aria-label="Message" aria-describedby="basic-addon2">
+                    <input type="text" class="form-control" placeholder="Message" aria-label="Message"
+                           aria-describedby="basic-addon2">
                     <div class="input-group-append">
                         <button class="btn btn-outline-secondary" type="button">Send</button>
                     </div>
                 </div>
+            </div>
+
+            <div id="messagesDialogItem" class="chat_list" data-user-id="" style="display: none">
+                <div class="chat_people">
+                    <div class="chat_img">
+                        <img class="messages-user-dialog-avatar" src="img/swarm-avatar.jpg" alt="sunil"></div>
+                    <div class="chat_ib">
+                        <h5 class="chat_user_name">Ihar Shaduryn</h5>
+                        <p class="chat_message">Test, which is a new approach to have all solutions
+                            astrology under one roof.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="incomeMessageTemplate" class="chat-message incoming_msg" style="display: none">
+                <div class="incoming_msg_img">
+                    <img class="income-user-avatar" src="https://ptetutorials.com/images/user-profile.png" alt="">
+                </div>
+                <div class="received_msg">
+                    <div class="received_withd_msg">
+                        <p class="message-text">Test which is a new approach to have all
+                            solutions 1</p>
+                        <span class="time_date"> 11:01 AM    |    June 9</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="outgoingMessageTemplate" class="chat-message outgoing_msg" style="display: none">
+                <div class="sent_msg">
+                    <p class="message-text">Test which is a new approach to have all
+                        solutions 2</p>
+                    <span class="time_date"> 11:01 AM    |    June 9</span></div>
             </div>
         </div>
 
