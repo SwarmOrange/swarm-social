@@ -338,3 +338,22 @@ li > p:last-child {
 .news-owner {
     margin-bottom: 8px;
 }
+
+.message-dialog-user {
+    border-top: 1px solid #ededed;
+    padding: 20px;
+}
+
+.message-dialog-user p {
+    margin: 0;
+}
+
+.dialogs-column {
+    border: 1px solid #ededed;
+    padding:0;
+}
+
+.message-last-dialogs{
+    margin-left: 16px;
+    margin-top: 16px;
+}
