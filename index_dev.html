@@ -478,6 +478,11 @@
                 <button type="button"> <i class="fa fa-search" aria-hidden="true"></i> </button>
                 </span></div>
                                         </div>-->
+
+                                        <i class="fa fa-plus-circle float-right messages-add-dialog" aria-hidden="true"
+                                           style="font-size: 25px; cursor: pointer" data-toggle="modal"
+                                           data-target="#addDialogModal"></i>
+
                                     </div>
                                     <div class="inbox_chat">
 
@@ -491,8 +496,8 @@
                                     <div class="type_msg">
                                         <div class="input_msg_write">
                                             <input type="text" class="write_msg" placeholder="Type a message"/>
-                                            <button class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o"
-                                                                                          aria-hidden="true"></i>
+                                            <button class="msg_send_btn messages-send-message" type="button">
+                                                <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -646,7 +651,7 @@
                 <div class="sent_msg">
                     <p class="message-text">Test which is a new approach to have all
                         solutions 2</p>
-                    <span class="time_date"> 11:01 AM    |    June 9</span></div>
+                    <!--<span class="time_date"> 11:01 AM    |    June 9</span></div>-->
             </div>
         </div>
 
@@ -695,6 +700,29 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary add-youtube-video">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Messages Dialog Modal -->
+        <div class="modal fade" id="addDialogModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Dialog</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="text" class="form-control messages-new-dialog" placeholder="User's Ethereum wallet">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary btn-messages-add-dialog">Add</button>
                     </div>
                 </div>
             </div>

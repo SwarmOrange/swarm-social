@@ -164,6 +164,7 @@ class Main {
     }
 
     init() {
+        $('#v-pills-messages-tab').click();
         let self = this;
         $('.additional-buttons').on('click', '.btn-share-item', function (e) {
             let itemType = $(this).attr('data-type');

@@ -186,20 +186,21 @@ class EnsUtility {
         var resultSwarmHash = '0x' + swarmHash;
         var resolver = this.ens.resolver(ensDomain);
         resolver.instancePromise.then(function () {
-            return resolver.setContent(resultSwarmHash, {from: web3.eth.defaultAccount}).then(function (result) {
-                $('#updateEnsModal').modal('hide');
-                // user complete transaction
-                var subdomain = '';
-                if (self.currentNetworkTitle && self.currentNetworkTitle !== 'mainnet') {
-                    subdomain = self.currentNetworkTitle + '.';
-                }
+            return resolver.setContent(resultSwarmHash, {from: web3.eth.defaultAccount})
+                .then(function (result) {
+                    $('#updateEnsModal').modal('hide');
+                    // user complete transaction
+                    var subdomain = '';
+                    if (self.currentNetworkTitle && self.currentNetworkTitle !== 'mainnet') {
+                        subdomain = self.currentNetworkTitle + '.';
+                    }
 
-                var shortResult = result.substring(0, 50) + '...';
-                self.main.blog.replaceUrlSwarmHash(swarmHash);
-                self.main.alert('Transaction complete. View transaction on Etherscan: <a href="https://' + subdomain + 'etherscan.io/tx/' + result + '" target="_blank">' + shortResult + '</a>');
-            }).catch(function (r) {
-                self.main.alert('Transaction rejected');
-            });
+                    var shortResult = result.substring(0, 50) + '...';
+                    self.main.blog.replaceUrlSwarmHash(swarmHash);
+                    self.main.alert('Transaction complete. View transaction on Etherscan: <a href="https://' + subdomain + 'etherscan.io/tx/' + result + '" target="_blank">' + shortResult + '</a>');
+                }).catch(function (r) {
+                    self.main.alert('Transaction rejected');
+                });
         }).catch(function (e) {
             self.main.alert('Domain name not found, resolver not set or it does not belong to you');
         });
