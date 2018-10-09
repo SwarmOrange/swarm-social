@@ -225,10 +225,16 @@ info.json
 }
 ```
 Message in /social/message/public/714364b9f179e51583798c5ad736965817e042d91ab243e2960fcde0076fb626/1.json
+
+after_receiver_message - is new message comes after receiver's message
+after_message_id - after which message is our message
 ```
 {
    "id":1,
-   "receiverHash":"714364b9f179e51583798c5ad736965817e042d91ab243e2960fcde0076fb626",
+   "timestamp": 1539095533,
+   "after_receiver_message": true,
+   "after_message_id": 3,
+   "receiver_hash":"714364b9f179e51583798c5ad736965817e042d91ab243e2960fcde0076fb626",
    "message":"Hello. How are you?"
 }
 ```

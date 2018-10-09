@@ -65,15 +65,29 @@ class Messages {
             })
             .on('click', '.messages-send-message', function (e) {
                 e.preventDefault();
-                let userHash = $('.messages-send-message').attr('data-user-id');
-                let userMessage = $('.write_msg').val();
-                $('.input_msg_write').addClass("disabled-content");
-                let messageId = $('.messages-send-message').attr('data-message-id');
-                self.setMessage(userHash, 'MY_WALLET_ID_HERE', messageId, false, 'img/swarm-avatar.jpg', userMessage, '');
-                $('.write_msg').val('');
-                $('.messages-send-message').attr('data-message-id', messageId + 1);
+                let writeMsg = $('.write_msg');
+                let userMessage = writeMsg.val();
 
-                self.main.blog.saveMessage(userHash, userMessage, false)
+                let userHash = $(this).attr('data-user-id');
+                let messageId = $(this).attr('data-message-id');
+                messageId = messageId || 1;
+
+                $('.input_msg_write').addClass("disabled-content");
+                let incoming = $('.chat-message[data-message-id]');
+
+                // todo fix wallets
+                self.setMessage(userHash, 'MY_WALLET_ID_HERE', messageId, false, 'img/swarm-avatar.jpg', userMessage, '');
+                writeMsg.val('');
+                $(this).attr('data-message-id', messageId + 1);
+                let afterMessageId = 0;
+                let isAfterReceiverMessage = false;
+                if (incoming.length) {
+                    let lastMsg = $(incoming[incoming.length - 1]);
+                    afterMessageId = lastMsg.attr('data-message-id');
+                    isAfterReceiverMessage = lastMsg.hasClass('incoming_msg');
+                }
+
+                self.main.blog.saveMessage(userHash, userMessage, isAfterReceiverMessage, afterMessageId, null, false)
                     .then(function (response) {
                         let data = response.data;
                         $('.input_msg_write').removeClass("disabled-content");
@@ -89,7 +103,10 @@ class Messages {
                 return;
             }
 
-            self.setDialogByWallet(newUserWallet);
+            self.setDialogByWallet(newUserWallet)
+                .then(function (data) {
+                    $('.chat_list[data-user-hash="' + newUserWallet + '"]').click();
+                });
             $('#addDialogModal').modal('hide');
         });
 
@@ -129,68 +146,103 @@ class Messages {
         let lastMessageId = 0;
         let receiverSwarmHash = null;
         let mySwarmHash = null;
+        let maxMessagesFromUser = 10;
+        /*let reorderMessage = function (msgElement, isAfterReceiverMessage, afterMessageId) {
+            console.log(afterMessageId);
+            // todo check after_message_id field
+            //console.log([msgElement, isAfterReceiverMessage, afterMessageId]);
+            let afterMessage = null;
+            // let template = $('.chat-message[data-from-author-id="' + fromAuthorId + '"][data-to-author-id="' + toAuthorId + '"][data-message-id="' + messageId + '"]');
+            if (isAfterReceiverMessage) {
+                afterMessage = $('.chat-message[data-from-author-id="' + receiverWallet + '"][data-message-id="' + afterMessageId + '"]');
+            } else {
+                afterMessage = $('.chat-message[data-from-author-id="' + myWallet + '"][data-message-id="' + afterMessageId + '"]');
+            }
+
+            if (afterMessage.length) {
+                console.log([msgElement, afterMessage]);
+                msgElement.insertAfter(afterMessage);
+            }
+        };*/
+
+        let reorderMessages = function (holderDiv, messages) {
+            messages.forEach(function (v) {
+                console.log($(v).attr('data-timestamp'));
+            });
+
+            messages.sort(function (a, b) {
+                return $(a).attr("data-timestamp") - $(b).attr("data-timestamp")
+            });
+            holderDiv.html(messages);
+        };
+
         let drawMy = function () {
+            let promises = [];
             if (receiverWallet in myMsgInfo) {
                 lastMessageId = myMsgInfo[receiverWallet].last_message_id;
                 if (lastMessageId <= 0) {
                     return;
                 }
 
-                let maxId = Math.min(10, lastMessageId);
+                let minId = Math.max(1, lastMessageId - maxMessagesFromUser);
+                let maxId = lastMessageId;
                 $('.messages-send-message').attr('data-message-id', maxId + 1);
 
                 let msg = null;
-                for (let i = 1; i <= maxId; i++) {
-                    self.setMessage(receiverWallet, myWallet, i, false, 'img/swarm-avatar.jpg', '...', '');
-                    self.main.blog.getMessage(i, receiverWallet)
+                for (let i = minId; i <= maxId; i++) {
+                    let avatar = 'img/swarm-avatar.jpg';
+                    self.setMessage(myWallet, receiverWallet, i, false, avatar, '...', '');
+                    let promise = self.main.blog.getMessage(i, receiverWallet)
                         .then(function (response) {
-                            //console.log([i, response.data.message]);
                             let data = response.data;
-                            msg = self.setMessage(receiverWallet, myWallet, i, false, 'img/swarm-avatar.jpg', data.message, '');
+                            //console.log([data, i, receiverWallet, myWallet]);
+                            msg = self.setMessage(myWallet, receiverWallet, i, false, avatar, data.message, '', data.after_message_id, data.after_receiver_message, data.timestamp);
+                            //reorderMessage(msg, data.after_receiver_message, data.after_message_id);
+                            return msg;
                         })
                         .catch(function () {
-                            msg = self.setMessage(receiverWallet, myWallet, i, false, 'img/swarm-avatar.jpg', 'Message deleted', '');
+                            msg = self.setMessage(myWallet, receiverWallet, i, false, avatar, 'Message deleted', '');
                         });
+                    promises.push(promise);
                 }
-
-
-                // todo scroll down
-                //msg.scrollTop(msg.scrollHeight);
-
-            } else {
-                // todo check it
-                //messageDialog.append('<p>Empty dialog</p>');
             }
+
+            return promises;
         };
 
         let drawReceiver = function () {
+            let promises = [];
             if (myWallet in receiverMsgInfo) {
                 lastMessageId = receiverMsgInfo[myWallet].last_message_id;
                 if (lastMessageId <= 0) {
                     return;
                 }
 
-                let maxId = Math.min(10, lastMessageId);
+                let minId = Math.max(1, lastMessageId - maxMessagesFromUser);
+                let maxId = lastMessageId;
                 //$('.messages-send-message').attr('data-message-id', maxId + 1);
 
                 let msg = null;
-                self.main.blog.getSwarmHashByWallet(receiverWallet)
-                    .then(function (receiverSwarmHash) {
-                        let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', mySwarmHash);
-                        for (let i = 1; i <= maxId; i++) {
-                            self.setMessage(myWallet, receiverWallet, i, true, avatar, '...', '');
-                            self.main.blog.getMessage(i, myWallet, receiverSwarmHash)
-                                .then(function (response) {
-                                    console.log([i, response.data.message]);
-                                    let data = response.data;
-                                    msg = self.setMessage(myWallet, receiverWallet, i, true, avatar, data.message, '');
-                                })
-                                .catch(function () {
-                                    msg = self.setMessage(myWallet, receiverWallet, i, true, avatar, 'Message deleted', '');
-                                });
-                        }
-                    });
+                let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', receiverSwarmHash);
+                for (let i = minId; i <= maxId; i++) {
+                    self.setMessage(receiverWallet, myWallet, i, true, avatar, '...', '');
+                    let promise = self.main.blog.getMessage(i, myWallet, receiverSwarmHash)
+                        .then(function (response) {
+                            let data = response.data;
+                            //console.log([i, data]);
+                            msg = self.setMessage(receiverWallet, myWallet, i, true, avatar, data.message, '', data.after_message_id, data.after_receiver_message, data.timestamp);
+                            //reorderMessage(msg, data.after_receiver_message, data.after_message_id);
+
+                            return msg;
+                        })
+                        .catch(function () {
+                            msg = self.setMessage(receiverWallet, myWallet, i, true, avatar, 'Message deleted', '');
+                        });
+                    promises.push(promise);
+                }
             }
+
+            return promises;
         };
 
         self.main.blog.getSwarmHashByWallet(receiverWallet)
@@ -199,11 +251,19 @@ class Messages {
                 return self.main.blog.getSwarmHashByWallet(myWallet);
             })
             .then(function (myHash) {
+                let promises = [];
                 mySwarmHash = myHash;
 
                 console.log([receiverSwarmHash, mySwarmHash]);
-                drawMy();
-                drawReceiver();
+                let myPromises = drawMy();
+                let receiverPromises = drawReceiver();
+                promises = promises.concat(myPromises);
+                promises = promises.concat(receiverPromises);
+                Promise.all(promises)
+                    .then(values => {
+                        //console.log(values);
+                        reorderMessages($('.msg_history'), values);
+                    });
             });
 
         /*let template = $('#sendMessageTemplate')
@@ -234,16 +294,19 @@ class Messages {
         let self = this;
         self.setDialog(wallet);
 
-        self.main.blog.getSwarmHashByWallet(wallet)
-            .then(function (hash) {
-                // todo use preview
-                let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', hash);
-                self.main.blog.getProfile(hash)
-                    .then(function (response) {
-                        let data = response.data;
-                        self.setDialog(wallet, data.first_name + ' ' + data.last_name, avatar);
-                    });
-            });
+        return new Promise((resolve, reject) => {
+            self.main.blog.getSwarmHashByWallet(wallet)
+                .then(function (hash) {
+                    // todo use preview
+                    let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', hash);
+                    self.main.blog.getProfile(hash)
+                        .then(function (response) {
+                            let data = response.data;
+                            let result = self.setDialog(wallet, data.first_name + ' ' + data.last_name, avatar);
+                            resolve(result);
+                        });
+                });
+        });
     }
 
     setDialog(userId, name, avatar, lastMessages, lastDate, isActive) {
@@ -271,8 +334,9 @@ class Messages {
         return item;
     }
 
-    setMessage(dialogId, authorId, messageId, isIncome, avatar, text, date) {
-        let template = $('.chat-message[data-dialog-id="' + dialogId + '"][data-author-id="' + authorId + '"][data-message-id="' + messageId + '"]');
+    // todo pass message object as last param but not so much params
+    setMessage(fromAuthorId, toAuthorId, messageId, isIncome, avatar, text, date, afterMessageId, afterReceiverMessage, timestamp) {
+        let template = $('.chat-message[data-from-author-id="' + fromAuthorId + '"][data-to-author-id="' + toAuthorId + '"][data-message-id="' + messageId + '"]');
 
         if (!template.length) {
             if (isIncome) {
@@ -287,9 +351,12 @@ class Messages {
         template
             .removeAttr('id')
             .removeAttr('style')
-            .attr('data-dialog-id', dialogId)
-            .attr('data-author-id', authorId)
-            .attr('data-message-id', messageId);
+            .attr('data-from-author-id', fromAuthorId)
+            .attr('data-to-author-id', toAuthorId)
+            .attr('data-message-id', messageId)
+            .attr('data-after-message-id', afterMessageId)
+            .attr('data-timestamp', timestamp)
+            .attr('data-receiver-message', afterReceiverMessage);
         template.find('.message-text').text(text);
         template.find('.time_date').text(date);
 
