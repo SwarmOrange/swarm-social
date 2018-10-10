@@ -917,7 +917,7 @@ class Main {
     }
 
     init() {
-        $('#v-pills-messages-tab').click();
+        //$('#v-pills-messages-tab').click();
         let self = this;
         $('.additional-buttons').on('click', '.btn-share-item', function (e) {
             let itemType = $(this).attr('data-type');
@@ -1067,7 +1067,7 @@ class Main {
             .on('click', '.load-profile', function (e) {
                 e.preventDefault();
                 let swarmProfileHash = $(this).attr('data-profile-id');
-                if (Blog.isCorrectSwarmHash(swarmProfileHash)) {
+                if (self.blogClass.isCorrectSwarmHash(swarmProfileHash)) {
                     self.onAfterHashChange(swarmProfileHash)
                         .then(function (response) {
                             //reload();
@@ -1369,8 +1369,9 @@ class Main {
         return newPost;
     }
 
-    addPostByData(data, prefix, containerName, isReadOnly) {
+    addPostByData(data, prefix, containerName, isReadOnly, userHash) {
         let self = this;
+        userHash = userHash || self.swarm.applicationHash;
         prefix = prefix || '#userPost';
         let userPost = $(prefix + data.id);
         if (userPost.length <= 0) {
@@ -1404,7 +1405,7 @@ class Main {
                 if (v.type === "youtube") {
                     let videoId = self.youtube_parser(v.url);
                     userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
-                        '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
+                        '<iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
                         '</div>'));
                 } else if (v.type === "photo") {
                     let content = photoAttachment
@@ -1414,11 +1415,14 @@ class Main {
                         .attr('data-post-id', data.id)
                         .attr('data-attachment-id', v.id);
                     content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
-                    let fullUrl = self.swarm.getFullUrl(v.url);
-                    let previewUrl = self.swarm.getFullUrl(v.url);
+                    let fullUrl = self.swarm.getFullUrl(v.url, userHash);
+                    let previewUrl = self.swarm.getFullUrl(v.url, userHash);
                     if ('previews' in v) {
-                        previewUrl = self.swarm.getFullUrl(v.previews['250x250']);
-                        content.addClass('list-inline-item').find('.content').html('<a href="' + fullUrl + '" data-toggle="lightbox" data-title="View photo" data-footer="" data-gallery="post-images-' + data.id + '"><img class="size-179" src="' + previewUrl + '"></a>');
+                        previewUrl = self.swarm.getFullUrl(v.previews['250x250'], userHash);
+                        content
+                            .addClass('list-inline-item')
+                            .find('.content')
+                            .html('<a href="' + fullUrl + '" data-toggle="lightbox" data-title="View photo" data-footer="" data-gallery="post-images-' + data.id + '"><img class="size-179" src="' + previewUrl + '"></a>');
                     } else {
                         content.find('.content').html('<img src="' + fullUrl + '">');
                     }
@@ -1426,13 +1430,21 @@ class Main {
                     userPost.append(content);
                 } else if (v.type === "audio") {
                     // todo move to html
-                    userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<audio controls style="display: block; width: 100%"> <source src="' + self.swarm.getFullUrl(v.url) + '" type="audio/mpeg"> Your browser does not support the audio element. </audio>'));
+                    userPost.append(videoAttachment
+                        .clone()
+                        .attr('id', '')
+                        .attr('style', '')
+                        .html('<audio controls style="display: block; width: 100%"> <source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="audio/mpeg"> Your browser does not support the audio element. </audio>'));
                 } else if (v.type === "video") {
                     // todo move to html
-                    userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
+                    userPost.append(videoAttachment
+                        .clone()
+                        .attr('id', '')
+                        .attr('style', '')
+                        .html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
                 } else if (v.type === "photoalbum") {
                     // todo move to html
-                    let previewUrl = self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg");
+                    let previewUrl = self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg", userHash);
                     userPost.append(photoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + previewUrl + '"></a></li>'));
                 } else if (v.type === "videoalbum") {
                     // todo move to html
@@ -1442,12 +1454,12 @@ class Main {
                     try {
                         info = JSON.parse(v.info);
                         if (info.type === "video") {
-                            cover = self.swarm.getFullUrl(info.cover_file);
+                            cover = self.swarm.getFullUrl(info.cover_file, userHash);
                         } else {
                             cover = info.cover_file;
                         }
                     } catch (ex) {
-                        cover = self.swarm.getFullUrl('img/video-cover.jpg');
+                        cover = self.swarm.getFullUrl('img/video-cover.jpg', userHash);
                     }
 
                     userPost.append(videoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 videoalbum-item post-videoalbum-item"><a href="#" class="load-videoalbum" data-album-id="' + v.url + '"><img class="videoalbum-img" src="' + cover + '"></a></li>'));
@@ -1516,6 +1528,7 @@ class Messages {
             })
             .on('click', '.chat_list', function (e) {
                 e.preventDefault();
+                $('.type_msg').show();
                 $('.chat_list').removeClass('active_chat');
                 $(this).addClass('active_chat');
                 let userHash = $(this).attr('data-user-hash');
@@ -1571,6 +1584,7 @@ class Messages {
 
                 // todo fix wallets
                 self.setMessage(userHash, 'MY_WALLET_ID_HERE', messageId, false, 'img/swarm-avatar.jpg', userMessage, '');
+                self.scrollDownMessages();
                 writeMsg.val('');
                 $(this).attr('data-message-id', messageId + 1);
                 let afterMessageId = 0;
@@ -1592,8 +1606,8 @@ class Messages {
 
         $('.btn-messages-add-dialog').click(function (e) {
             let newUserWallet = $('.messages-new-dialog').val();
-            if (!newUserWallet) {
-                self.main.alert('Enter wallet');
+            if (!newUserWallet || !web3.isAddress(newUserWallet)) {
+                self.main.alert('Enter correct Ethereum wallet');
                 return;
             }
 
@@ -1605,6 +1619,7 @@ class Messages {
         });
 
         $('#v-pills-messages-tab').click(function (e) {
+            $('.msg_history').html('');
             let usersList = $('.messages-users-list');
             let messageDialogs = $('.message-dialogs');
             usersList.html('<button class="dropdown-item messages-enter-user-hash" type="button">Enter user wallet</button>');
@@ -1640,30 +1655,9 @@ class Messages {
         let lastMessageId = 0;
         let receiverSwarmHash = null;
         let mySwarmHash = null;
-        let maxMessagesFromUser = 10;
-        /*let reorderMessage = function (msgElement, isAfterReceiverMessage, afterMessageId) {
-            console.log(afterMessageId);
-            // todo check after_message_id field
-            //console.log([msgElement, isAfterReceiverMessage, afterMessageId]);
-            let afterMessage = null;
-            // let template = $('.chat-message[data-from-author-id="' + fromAuthorId + '"][data-to-author-id="' + toAuthorId + '"][data-message-id="' + messageId + '"]');
-            if (isAfterReceiverMessage) {
-                afterMessage = $('.chat-message[data-from-author-id="' + receiverWallet + '"][data-message-id="' + afterMessageId + '"]');
-            } else {
-                afterMessage = $('.chat-message[data-from-author-id="' + myWallet + '"][data-message-id="' + afterMessageId + '"]');
-            }
-
-            if (afterMessage.length) {
-                console.log([msgElement, afterMessage]);
-                msgElement.insertAfter(afterMessage);
-            }
-        };*/
+        let maxMessagesFromUser = 100;
 
         let reorderMessages = function (holderDiv, messages) {
-            messages.forEach(function (v) {
-                console.log($(v).attr('data-timestamp'));
-            });
-
             messages.sort(function (a, b) {
                 return $(a).attr("data-timestamp") - $(b).attr("data-timestamp")
             });
@@ -1678,7 +1672,7 @@ class Messages {
                     return;
                 }
 
-                let minId = Math.max(1, lastMessageId - maxMessagesFromUser);
+                let minId = Math.max(1, lastMessageId - maxMessagesFromUser + 1);
                 let maxId = lastMessageId;
                 $('.messages-send-message').attr('data-message-id', maxId + 1);
 
@@ -1712,7 +1706,7 @@ class Messages {
                     return;
                 }
 
-                let minId = Math.max(1, lastMessageId - maxMessagesFromUser);
+                let minId = Math.max(1, lastMessageId - maxMessagesFromUser + 1);
                 let maxId = lastMessageId;
                 //$('.messages-send-message').attr('data-message-id', maxId + 1);
 
@@ -1755,8 +1749,9 @@ class Messages {
                 promises = promises.concat(receiverPromises);
                 Promise.all(promises)
                     .then(values => {
-                        //console.log(values);
-                        reorderMessages($('.msg_history'), values);
+                        let msgHistory = $(".msg_history");
+                        reorderMessages(msgHistory, values);
+                        self.scrollDownMessages();
                     });
             });
 
@@ -1765,6 +1760,11 @@ class Messages {
             .removeAttr('id')
             .removeAttr('style');
         messageDialog.append(template);*/
+    }
+
+    scrollDownMessages() {
+        let msgHistory = $(".msg_history");
+        msgHistory.animate({scrollTop: msgHistory.height()}, 1000);
     }
 
     showMessageInput(isShow) {
@@ -1786,11 +1786,18 @@ class Messages {
 
     setDialogByWallet(wallet) {
         let self = this;
-        self.setDialog(wallet);
+        let dialog = self.setDialog(wallet);
 
         return new Promise((resolve, reject) => {
             self.main.blog.getSwarmHashByWallet(wallet)
                 .then(function (hash) {
+                    if (!hash) {
+                        self.main.alert('This wallet not registered');
+                        dialog.remove();
+                        reject();
+                        return;
+                    }
+
                     // todo use preview
                     let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', hash);
                     self.main.blog.getProfile(hash)
@@ -1799,6 +1806,9 @@ class Messages {
                             let result = self.setDialog(wallet, data.first_name + ' ' + data.last_name, avatar);
                             resolve(result);
                         });
+                })
+                .catch(function () {
+                    // todo remove created dialog
                 });
         });
     }
@@ -1816,7 +1826,7 @@ class Messages {
         }
 
         item.find('.messages-user-dialog-avatar').attr('src', avatar).attr('alt', name);
-        item.find('.chat_user_name').text(name); //add -<span class="chat_date">Dec 25</span>
+        item.find('.chat_user_name').text(name); //add text - <span class="chat_date">Dec 25</span>
         item.find('.chat_date').text(lastDate);
         item.find('.chat_message').text(lastMessages);
         if (isActive) {
@@ -1927,10 +1937,8 @@ class News {
         let currentUser = users.shift();
         return self.main.blog.getSwarmHashByWallet(currentUser)
             .then(function (result) {
-                let currentUser = result;
-
-
-                return self.main.blog.getProfile(currentUser)
+                let currentUserHash = result;
+                return self.main.blog.getProfile(currentUserHash)
                     .then(function (response) {
                         let lastPostId = response.data.last_post_id;
                         if (!lastPostId || lastPostId <= 0) {
@@ -1938,18 +1946,17 @@ class News {
                         }
 
                         let minPostId = Math.max(1, lastPostId - maxPostsFromUser);
-                        console.log('Received profile: ' + currentUser + ', ' + lastPostId + ', ' + minPostId);
-                        let userId = 'userNews' + currentUser;
+                        //console.log('Received profile: ' + currentUserHash + ', ' + lastPostId + ', ' + minPostId);
+                        let userId = 'userNews' + currentUserHash;
                         let getUserPost = function (userId, postId) {
                             let userHolderName = '#userNews' + userId;
-                            //let userSection = $(userHolderName);
                             console.log([postId, userId]);
                             return self.main.blog.getPost(postId, userId)
                                 .then(function (response) {
                                     let post = response.data;
-                                    //userSection.append('<div id="newsPost' + post.id + '"></div>');
-                                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName, true);
+                                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName, true, currentUserHash);
                                     console.log('Received post: ' + userId + ', ' + postId);
+                                    console.log(post);
 
                                     postId++;
                                     if (postId <= lastPostId) {
@@ -1966,15 +1973,15 @@ class News {
                         };
 
                         if (lastPostId > 0) {
-                            let userUrl = self.main.swarm.getFullUrl('', currentUser);
-                            let userAvatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', currentUser);
+                            //let userUrl = self.main.swarm.getFullUrl('', currentUserHash);
+                            let userAvatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', currentUserHash);
                             newsContent.append('<div class="news-owner">' +
                                 '<img class="size-50" src="' + userAvatar + '">' +
                                 '</div>');
                             newsContent.append('<div id="' + userId + '">' +
                                 '</div>');
 
-                            return getUserPost(currentUser, minPostId)
+                            return getUserPost(currentUserHash, minPostId)
                         } else {
                             return self.compileNews(users, maxPostsFromUser);
                         }
@@ -3565,7 +3572,7 @@ class Wallet {
                         }, function (error, result) {
                             console.log([error, result]);
                             if (error) {
-                                self.main.alert('Payment error');
+                                self.main.alert('Payment error or cancelled');
                             } else {
                                 self.main.alert('Payment complete!');
                             }

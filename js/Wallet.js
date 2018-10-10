@@ -59,7 +59,7 @@ class Wallet {
                         }, function (error, result) {
                             console.log([error, result]);
                             if (error) {
-                                self.main.alert('Payment error');
+                                self.main.alert('Payment error or cancelled');
                             } else {
                                 self.main.alert('Payment complete!');
                             }

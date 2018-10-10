@@ -22,6 +22,7 @@ class Messages {
             })
             .on('click', '.chat_list', function (e) {
                 e.preventDefault();
+                $('.type_msg').show();
                 $('.chat_list').removeClass('active_chat');
                 $(this).addClass('active_chat');
                 let userHash = $(this).attr('data-user-hash');
@@ -77,6 +78,7 @@ class Messages {
 
                 // todo fix wallets
                 self.setMessage(userHash, 'MY_WALLET_ID_HERE', messageId, false, 'img/swarm-avatar.jpg', userMessage, '');
+                self.scrollDownMessages();
                 writeMsg.val('');
                 $(this).attr('data-message-id', messageId + 1);
                 let afterMessageId = 0;
@@ -98,8 +100,8 @@ class Messages {
 
         $('.btn-messages-add-dialog').click(function (e) {
             let newUserWallet = $('.messages-new-dialog').val();
-            if (!newUserWallet) {
-                self.main.alert('Enter wallet');
+            if (!newUserWallet || !web3.isAddress(newUserWallet)) {
+                self.main.alert('Enter correct Ethereum wallet');
                 return;
             }
 
@@ -111,6 +113,7 @@ class Messages {
         });
 
         $('#v-pills-messages-tab').click(function (e) {
+            $('.msg_history').html('');
             let usersList = $('.messages-users-list');
             let messageDialogs = $('.message-dialogs');
             usersList.html('<button class="dropdown-item messages-enter-user-hash" type="button">Enter user wallet</button>');
@@ -146,30 +149,9 @@ class Messages {
         let lastMessageId = 0;
         let receiverSwarmHash = null;
         let mySwarmHash = null;
-        let maxMessagesFromUser = 10;
-        /*let reorderMessage = function (msgElement, isAfterReceiverMessage, afterMessageId) {
-            console.log(afterMessageId);
-            // todo check after_message_id field
-            //console.log([msgElement, isAfterReceiverMessage, afterMessageId]);
-            let afterMessage = null;
-            // let template = $('.chat-message[data-from-author-id="' + fromAuthorId + '"][data-to-author-id="' + toAuthorId + '"][data-message-id="' + messageId + '"]');
-            if (isAfterReceiverMessage) {
-                afterMessage = $('.chat-message[data-from-author-id="' + receiverWallet + '"][data-message-id="' + afterMessageId + '"]');
-            } else {
-                afterMessage = $('.chat-message[data-from-author-id="' + myWallet + '"][data-message-id="' + afterMessageId + '"]');
-            }
-
-            if (afterMessage.length) {
-                console.log([msgElement, afterMessage]);
-                msgElement.insertAfter(afterMessage);
-            }
-        };*/
+        let maxMessagesFromUser = 100;
 
         let reorderMessages = function (holderDiv, messages) {
-            messages.forEach(function (v) {
-                console.log($(v).attr('data-timestamp'));
-            });
-
             messages.sort(function (a, b) {
                 return $(a).attr("data-timestamp") - $(b).attr("data-timestamp")
             });
@@ -184,7 +166,7 @@ class Messages {
                     return;
                 }
 
-                let minId = Math.max(1, lastMessageId - maxMessagesFromUser);
+                let minId = Math.max(1, lastMessageId - maxMessagesFromUser + 1);
                 let maxId = lastMessageId;
                 $('.messages-send-message').attr('data-message-id', maxId + 1);
 
@@ -218,7 +200,7 @@ class Messages {
                     return;
                 }
 
-                let minId = Math.max(1, lastMessageId - maxMessagesFromUser);
+                let minId = Math.max(1, lastMessageId - maxMessagesFromUser + 1);
                 let maxId = lastMessageId;
                 //$('.messages-send-message').attr('data-message-id', maxId + 1);
 
@@ -261,8 +243,9 @@ class Messages {
                 promises = promises.concat(receiverPromises);
                 Promise.all(promises)
                     .then(values => {
-                        //console.log(values);
-                        reorderMessages($('.msg_history'), values);
+                        let msgHistory = $(".msg_history");
+                        reorderMessages(msgHistory, values);
+                        self.scrollDownMessages();
                     });
             });
 
@@ -271,6 +254,11 @@ class Messages {
             .removeAttr('id')
             .removeAttr('style');
         messageDialog.append(template);*/
+    }
+
+    scrollDownMessages() {
+        let msgHistory = $(".msg_history");
+        msgHistory.animate({scrollTop: msgHistory.height()}, 1000);
     }
 
     showMessageInput(isShow) {
@@ -292,11 +280,18 @@ class Messages {
 
     setDialogByWallet(wallet) {
         let self = this;
-        self.setDialog(wallet);
+        let dialog = self.setDialog(wallet);
 
         return new Promise((resolve, reject) => {
             self.main.blog.getSwarmHashByWallet(wallet)
                 .then(function (hash) {
+                    if (!hash) {
+                        self.main.alert('This wallet not registered');
+                        dialog.remove();
+                        reject();
+                        return;
+                    }
+
                     // todo use preview
                     let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', hash);
                     self.main.blog.getProfile(hash)
@@ -305,6 +300,9 @@ class Messages {
                             let result = self.setDialog(wallet, data.first_name + ' ' + data.last_name, avatar);
                             resolve(result);
                         });
+                })
+                .catch(function () {
+                    // todo remove created dialog
                 });
         });
     }
@@ -322,7 +320,7 @@ class Messages {
         }
 
         item.find('.messages-user-dialog-avatar').attr('src', avatar).attr('alt', name);
-        item.find('.chat_user_name').text(name); //add -<span class="chat_date">Dec 25</span>
+        item.find('.chat_user_name').text(name); //add text - <span class="chat_date">Dec 25</span>
         item.find('.chat_date').text(lastDate);
         item.find('.chat_message').text(lastMessages);
         if (isActive) {

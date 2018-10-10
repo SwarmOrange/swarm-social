@@ -61,10 +61,8 @@ class News {
         let currentUser = users.shift();
         return self.main.blog.getSwarmHashByWallet(currentUser)
             .then(function (result) {
-                let currentUser = result;
-
-
-                return self.main.blog.getProfile(currentUser)
+                let currentUserHash = result;
+                return self.main.blog.getProfile(currentUserHash)
                     .then(function (response) {
                         let lastPostId = response.data.last_post_id;
                         if (!lastPostId || lastPostId <= 0) {
@@ -72,18 +70,17 @@ class News {
                         }
 
                         let minPostId = Math.max(1, lastPostId - maxPostsFromUser);
-                        console.log('Received profile: ' + currentUser + ', ' + lastPostId + ', ' + minPostId);
-                        let userId = 'userNews' + currentUser;
+                        //console.log('Received profile: ' + currentUserHash + ', ' + lastPostId + ', ' + minPostId);
+                        let userId = 'userNews' + currentUserHash;
                         let getUserPost = function (userId, postId) {
                             let userHolderName = '#userNews' + userId;
-                            //let userSection = $(userHolderName);
                             console.log([postId, userId]);
                             return self.main.blog.getPost(postId, userId)
                                 .then(function (response) {
                                     let post = response.data;
-                                    //userSection.append('<div id="newsPost' + post.id + '"></div>');
-                                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName, true);
+                                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName, true, currentUserHash);
                                     console.log('Received post: ' + userId + ', ' + postId);
+                                    console.log(post);
 
                                     postId++;
                                     if (postId <= lastPostId) {
@@ -100,15 +97,15 @@ class News {
                         };
 
                         if (lastPostId > 0) {
-                            let userUrl = self.main.swarm.getFullUrl('', currentUser);
-                            let userAvatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', currentUser);
+                            //let userUrl = self.main.swarm.getFullUrl('', currentUserHash);
+                            let userAvatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', currentUserHash);
                             newsContent.append('<div class="news-owner">' +
                                 '<img class="size-50" src="' + userAvatar + '">' +
                                 '</div>');
                             newsContent.append('<div id="' + userId + '">' +
                                 '</div>');
 
-                            return getUserPost(currentUser, minPostId)
+                            return getUserPost(currentUserHash, minPostId)
                         } else {
                             return self.compileNews(users, maxPostsFromUser);
                         }

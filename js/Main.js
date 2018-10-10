@@ -164,7 +164,7 @@ class Main {
     }
 
     init() {
-        $('#v-pills-messages-tab').click();
+        //$('#v-pills-messages-tab').click();
         let self = this;
         $('.additional-buttons').on('click', '.btn-share-item', function (e) {
             let itemType = $(this).attr('data-type');
@@ -314,7 +314,7 @@ class Main {
             .on('click', '.load-profile', function (e) {
                 e.preventDefault();
                 let swarmProfileHash = $(this).attr('data-profile-id');
-                if (Blog.isCorrectSwarmHash(swarmProfileHash)) {
+                if (self.blogClass.isCorrectSwarmHash(swarmProfileHash)) {
                     self.onAfterHashChange(swarmProfileHash)
                         .then(function (response) {
                             //reload();
@@ -616,8 +616,9 @@ class Main {
         return newPost;
     }
 
-    addPostByData(data, prefix, containerName, isReadOnly) {
+    addPostByData(data, prefix, containerName, isReadOnly, userHash) {
         let self = this;
+        userHash = userHash || self.swarm.applicationHash;
         prefix = prefix || '#userPost';
         let userPost = $(prefix + data.id);
         if (userPost.length <= 0) {
@@ -651,7 +652,7 @@ class Main {
                 if (v.type === "youtube") {
                     let videoId = self.youtube_parser(v.url);
                     userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
-                        '  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
+                        '<iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
                         '</div>'));
                 } else if (v.type === "photo") {
                     let content = photoAttachment
@@ -661,11 +662,14 @@ class Main {
                         .attr('data-post-id', data.id)
                         .attr('data-attachment-id', v.id);
                     content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
-                    let fullUrl = self.swarm.getFullUrl(v.url);
-                    let previewUrl = self.swarm.getFullUrl(v.url);
+                    let fullUrl = self.swarm.getFullUrl(v.url, userHash);
+                    let previewUrl = self.swarm.getFullUrl(v.url, userHash);
                     if ('previews' in v) {
-                        previewUrl = self.swarm.getFullUrl(v.previews['250x250']);
-                        content.addClass('list-inline-item').find('.content').html('<a href="' + fullUrl + '" data-toggle="lightbox" data-title="View photo" data-footer="" data-gallery="post-images-' + data.id + '"><img class="size-179" src="' + previewUrl + '"></a>');
+                        previewUrl = self.swarm.getFullUrl(v.previews['250x250'], userHash);
+                        content
+                            .addClass('list-inline-item')
+                            .find('.content')
+                            .html('<a href="' + fullUrl + '" data-toggle="lightbox" data-title="View photo" data-footer="" data-gallery="post-images-' + data.id + '"><img class="size-179" src="' + previewUrl + '"></a>');
                     } else {
                         content.find('.content').html('<img src="' + fullUrl + '">');
                     }
@@ -673,13 +677,21 @@ class Main {
                     userPost.append(content);
                 } else if (v.type === "audio") {
                     // todo move to html
-                    userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<audio controls style="display: block; width: 100%"> <source src="' + self.swarm.getFullUrl(v.url) + '" type="audio/mpeg"> Your browser does not support the audio element. </audio>'));
+                    userPost.append(videoAttachment
+                        .clone()
+                        .attr('id', '')
+                        .attr('style', '')
+                        .html('<audio controls style="display: block; width: 100%"> <source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="audio/mpeg"> Your browser does not support the audio element. </audio>'));
                 } else if (v.type === "video") {
                     // todo move to html
-                    userPost.append(videoAttachment.clone().attr('id', '').attr('style', '').html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
+                    userPost.append(videoAttachment
+                        .clone()
+                        .attr('id', '')
+                        .attr('style', '')
+                        .html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
                 } else if (v.type === "photoalbum") {
                     // todo move to html
-                    let previewUrl = self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg");
+                    let previewUrl = self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg", userHash);
                     userPost.append(photoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + previewUrl + '"></a></li>'));
                 } else if (v.type === "videoalbum") {
                     // todo move to html
@@ -689,12 +701,12 @@ class Main {
                     try {
                         info = JSON.parse(v.info);
                         if (info.type === "video") {
-                            cover = self.swarm.getFullUrl(info.cover_file);
+                            cover = self.swarm.getFullUrl(info.cover_file, userHash);
                         } else {
                             cover = info.cover_file;
                         }
                     } catch (ex) {
-                        cover = self.swarm.getFullUrl('img/video-cover.jpg');
+                        cover = self.swarm.getFullUrl('img/video-cover.jpg', userHash);
                     }
 
                     userPost.append(videoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 videoalbum-item post-videoalbum-item"><a href="#" class="load-videoalbum" data-album-id="' + v.url + '"><img class="videoalbum-img" src="' + cover + '"></a></li>'));
