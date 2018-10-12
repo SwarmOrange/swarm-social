@@ -18,11 +18,18 @@
     <script src="https://vk.com/js/api/openapi.js?159" type="text/javascript"></script>
 
     <script>
+        let onSignResp = null;
+
         /** Google Plus **/
         /**
          * Handler for the signin callback triggered after the user selects an account.
          */
         function onSignInCallback(resp) {
+            onSignResp = resp;
+            console.log('onSignInCallback');
+            console.log(resp);
+            $('.btn-save-google-plus-info').hide();
+            $('.google-plus-data').html('');
             gapi.client.load('plus', 'v1', apiClientLoaded);
         }
 
@@ -30,7 +37,22 @@
          * Sets up an API call after the Google API client loads.
          */
         function apiClientLoaded() {
-            gapi.client.plus.people.get({userId: 'me'}).execute(handleEmailResponse);
+            console.log('apiClientLoaded');
+            $('.btn-save-google-plus-info').hide();
+            if (onSignResp.status && onSignResp.status.signed_in) {
+                $('.g-plus-loader').show();
+                gapi.client.plus.people.get({userId: 'me'}).execute(handleEmailResponse);
+            }
+        }
+
+        function strip(html) {
+            if (html) {
+                var tmp = document.createElement("DIV");
+                tmp.innerHTML = html;
+                return tmp.textContent || tmp.innerText || "";
+            } else {
+                return '';
+            }
         }
 
         /**
@@ -39,15 +61,24 @@
          * @param resp The API response object with the user email and profile information.
          */
         function handleEmailResponse(resp) {
-            /*console.log(resp);
-            var primaryEmail;
-            for (var i=0; i < resp.emails.length; i++) {
-                if (resp.emails[i].type === 'account') primaryEmail = resp.emails[i].value;
-            }*/
+            console.log('handleEmailResponse');
             console.log(resp);
-            if (resp && resp.name) {
-                googlePlus.setInfo(resp.name.givenName, resp.name.familyName, resp.image ? resp.image.url : '', resp.aboutMe);
+            if (resp && resp.code && resp.code == 403) {
+                $('.google-plus-data').text(resp.message);
+            } else if (resp && resp.name) {
+                console.log('googlePlus.setInfo');
+                let img = resp.image ? resp.image.url : '';
+                let about = strip(resp.aboutMe);
+                googlePlus.setInfo(resp.name.givenName, resp.name.familyName, img, about);
+                $('.google-plus-data').html('<p>First name: ' + resp.name.givenName + '</p>' +
+                    '<p>Last name: ' + resp.name.familyName + '</p>' +
+                    '<p><img src="' + img + '"></p>' +
+                    '<p>About: ' + about + '</p>');
+
+                $('.btn-save-google-plus-info').show();
             }
+
+            $('.g-plus-loader').hide();
         }
     </script>
     <!--<script src="https://plus.google.com/js/client:platform.js" async defer></script>-->
@@ -489,10 +520,17 @@
 
                                     </div>
                                 </div>
+
                                 <div class="mesgs">
+
+                                    <div class="d-flex justify-content-center loader" style="display: none;">
+                                        <div class="loader-animation loader" style="display: none;"></div>
+                                    </div>
+
                                     <div class="msg_history">
 
                                     </div>
+
                                     <div class="type_msg" style="display: none;">
                                         <div class="input_msg_write">
                                             <input type="text" class="write_msg" placeholder="Type a message"/>
@@ -1053,19 +1091,28 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="d-flex justify-content-center messages-loader">
+                        <div class="d-flex justify-content-center">
                             <div id="gConnect" class="button">
-                                <button class="g-signin"
-                                        data-scope="email"
-                                        data-clientid="69055588705-3504td09tlhvqpfns5li4udtt2ognqa8.apps.googleusercontent.com"
-                                        data-callback="onSignInCallback"
-                                        data-theme="dark"
-                                        data-cookiepolicy="single_host_origin">
-                                </button>
-                                <!-- Textarea for outputting data -->
-                                <div id="response" class="hide">
-                                    <textarea id="responseContainer" style="width:100%; height:150px"></textarea>
-                                </div>
+                                <p>
+                                    <button class="g-signin"
+                                            data-scope="email"
+                                            data-clientid="69055588705-3504td09tlhvqpfns5li4udtt2ognqa8.apps.googleusercontent.com"
+                                            data-callback="onSignInCallback"
+                                            data-theme="dark"
+                                            data-cookiepolicy="single_host_origin">
+                                    </button>
+                                </p>
+
+                                <p class="google-plus-data"></p>
+
+                                <p>
+                                    <button class="btn btn-success btn-save-google-plus-info hide">
+                                        Save info to profile
+                                    </button>
+                                </p>
+
+                                <div class="loader-animation g-plus-loader hide"></div>
+
                             </div>
                         </div>
                     </div>

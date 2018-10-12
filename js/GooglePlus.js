@@ -37,6 +37,7 @@ class GooglePlus {
                 })
                 .then(function (response) {
                     self.main.onAfterHashChange(response.data);
+                    $('#googlePlusImportModal').modal('hide');
                 });
         });
     }

@@ -22,6 +22,7 @@ class Messages {
             })
             .on('click', '.chat_list', function (e) {
                 e.preventDefault();
+                //$('.mesgs .loader').show();
                 $('.type_msg').show();
                 $('.chat_list').removeClass('active_chat');
                 $(this).addClass('active_chat');
@@ -245,6 +246,7 @@ class Messages {
                     .then(values => {
                         let msgHistory = $(".msg_history");
                         reorderMessages(msgHistory, values);
+                        //$('.mesgs .loader').hide();
                         self.scrollDownMessages();
                     });
             });
