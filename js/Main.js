@@ -566,7 +566,7 @@ class Main {
                 let userUrl = self.swarm.getFullUrl('', v);
                 iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
                     '<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
-                    '<a onclick="return false;" href="' + userUrl + '" class="load-profile" data-profile-id="' + v + '"><img class="follower-user-avatar" data-profile-id="' + v + '" src="' + avatarUrl + '" style="width: 30px"></a></li>');
+                    '<a onclick="return false;" href="' + userUrl + '" class="load-profile" data-profile-id="' + v + '"><img class="follower-user-avatar circle-element" data-profile-id="' + v + '" src="' + avatarUrl + '" style="width: 30px"></a></li>');
                 self.blog.getSwarmHashByWallet(v)
                     .then(function (result) {
                         let avatarUrl = self.swarm.getFullUrl('social/file/avatar/original.jpg', result);
@@ -591,12 +591,17 @@ class Main {
                 $('#loadMore').show();
             }
 
-            self.blog.getPost(i, self.swarm.applicationHash).then(function (response) {
-                let data = response.data;
-                self.addPostByData(data);
-            }).catch(function () {
-                $('#userPost' + i).remove();
-            });
+            self.blog.getPost(i, self.swarm.applicationHash)
+                .then(function (response) {
+                    let data = response.data;
+                    self.addPostByData(data, {
+                        userProfile: self.blog.myProfile,
+                        userHash: self.swarm.applicationHash
+                    });
+                })
+                .catch(function () {
+                    $('#userPost' + i).remove();
+                });
         }
     }
 
@@ -616,7 +621,14 @@ class Main {
         return newPost;
     }
 
-    addPostByData(data, prefix, containerName, isReadOnly, userHash) {
+    addPostByData(data, params) {
+        params = params || {};
+        let prefix = params.prefix;
+        let containerName = params.containerName;
+        let isReadOnly = params.isReadOnly;
+        let userHash = params.userHash;
+        let userProfile = params.userProfile;
+
         let self = this;
         userHash = userHash || self.swarm.applicationHash;
         prefix = prefix || '#userPost';
@@ -629,6 +641,12 @@ class Main {
             userPost.remove();
 
             return;
+        }
+
+        if (userProfile) {
+            let userAvatar = self.swarm.getFullUrl('social/file/avatar/original.jpg', userHash);
+            userPost.find('.post-owner-name').text(userProfile.first_name + ' ' + userProfile.last_name);
+            userPost.find('.post-owner-avatar').attr('src', userAvatar);
         }
 
         userPost.find('.description').text(data.description);
@@ -651,9 +669,12 @@ class Main {
             data.attachments.forEach(function (v) {
                 if (v.type === "youtube") {
                     let videoId = self.youtube_parser(v.url);
-                    userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
-                        '<iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
-                        '</div>'));
+                    userPost.append(youtubeAttachment
+                        .clone()
+                        .attr('style', '')
+                        .html('<div class="embed-responsive embed-responsive-16by9">\n' +
+                            '<iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
+                            '</div>'));
                 } else if (v.type === "photo") {
                     let content = photoAttachment
                         .clone()
@@ -692,7 +713,11 @@ class Main {
                 } else if (v.type === "photoalbum") {
                     // todo move to html
                     let previewUrl = self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg", userHash);
-                    userPost.append(photoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + previewUrl + '"></a></li>'));
+                    userPost.append(photoalbumAttachment
+                        .clone()
+                        .attr('id', '')
+                        .attr('style', '')
+                        .html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + previewUrl + '"></a></li>'));
                 } else if (v.type === "videoalbum") {
                     // todo move to html
                     let info;
@@ -709,7 +734,11 @@ class Main {
                         cover = self.swarm.getFullUrl('img/video-cover.jpg', userHash);
                     }
 
-                    userPost.append(videoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 videoalbum-item post-videoalbum-item"><a href="#" class="load-videoalbum" data-album-id="' + v.url + '"><img class="videoalbum-img" src="' + cover + '"></a></li>'));
+                    userPost.append(videoalbumAttachment
+                        .clone()
+                        .attr('id', '')
+                        .attr('style', '')
+                        .html('<li class="list-inline-item col-sm-4 videoalbum-item post-videoalbum-item"><a href="#" class="load-videoalbum" data-album-id="' + v.url + '"><img class="videoalbum-img" src="' + cover + '"></a></li>'));
                 }
             });
         }

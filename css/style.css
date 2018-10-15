@@ -576,3 +576,15 @@ img {
 .chat_list {
     cursor: pointer;
 }
+
+.circle-element {
+    border-radius: 50%;
+}
+
+.post-owner {
+    margin-bottom: 18px;
+}
+
+.post-owner-name {
+    margin-left: 8px;
+}

@@ -1320,7 +1320,7 @@ class Main {
                 let userUrl = self.swarm.getFullUrl('', v);
                 iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
                     '<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
-                    '<a onclick="return false;" href="' + userUrl + '" class="load-profile" data-profile-id="' + v + '"><img class="follower-user-avatar" data-profile-id="' + v + '" src="' + avatarUrl + '" style="width: 30px"></a></li>');
+                    '<a onclick="return false;" href="' + userUrl + '" class="load-profile" data-profile-id="' + v + '"><img class="follower-user-avatar circle-element" data-profile-id="' + v + '" src="' + avatarUrl + '" style="width: 30px"></a></li>');
                 self.blog.getSwarmHashByWallet(v)
                     .then(function (result) {
                         let avatarUrl = self.swarm.getFullUrl('social/file/avatar/original.jpg', result);
@@ -1345,12 +1345,17 @@ class Main {
                 $('#loadMore').show();
             }
 
-            self.blog.getPost(i, self.swarm.applicationHash).then(function (response) {
-                let data = response.data;
-                self.addPostByData(data);
-            }).catch(function () {
-                $('#userPost' + i).remove();
-            });
+            self.blog.getPost(i, self.swarm.applicationHash)
+                .then(function (response) {
+                    let data = response.data;
+                    self.addPostByData(data, {
+                        userProfile: self.blog.myProfile,
+                        userHash: self.swarm.applicationHash
+                    });
+                })
+                .catch(function () {
+                    $('#userPost' + i).remove();
+                });
         }
     }
 
@@ -1370,7 +1375,14 @@ class Main {
         return newPost;
     }
 
-    addPostByData(data, prefix, containerName, isReadOnly, userHash) {
+    addPostByData(data, params) {
+        params = params || {};
+        let prefix = params.prefix;
+        let containerName = params.containerName;
+        let isReadOnly = params.isReadOnly;
+        let userHash = params.userHash;
+        let userProfile = params.userProfile;
+
         let self = this;
         userHash = userHash || self.swarm.applicationHash;
         prefix = prefix || '#userPost';
@@ -1383,6 +1395,12 @@ class Main {
             userPost.remove();
 
             return;
+        }
+
+        if (userProfile) {
+            let userAvatar = self.swarm.getFullUrl('social/file/avatar/original.jpg', userHash);
+            userPost.find('.post-owner-name').text(userProfile.first_name + ' ' + userProfile.last_name);
+            userPost.find('.post-owner-avatar').attr('src', userAvatar);
         }
 
         userPost.find('.description').text(data.description);
@@ -1405,9 +1423,12 @@ class Main {
             data.attachments.forEach(function (v) {
                 if (v.type === "youtube") {
                     let videoId = self.youtube_parser(v.url);
-                    userPost.append(youtubeAttachment.clone().attr('style', '').html('<div class="embed-responsive embed-responsive-16by9">\n' +
-                        '<iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
-                        '</div>'));
+                    userPost.append(youtubeAttachment
+                        .clone()
+                        .attr('style', '')
+                        .html('<div class="embed-responsive embed-responsive-16by9">\n' +
+                            '<iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
+                            '</div>'));
                 } else if (v.type === "photo") {
                     let content = photoAttachment
                         .clone()
@@ -1446,7 +1467,11 @@ class Main {
                 } else if (v.type === "photoalbum") {
                     // todo move to html
                     let previewUrl = self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg", userHash);
-                    userPost.append(photoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + previewUrl + '"></a></li>'));
+                    userPost.append(photoalbumAttachment
+                        .clone()
+                        .attr('id', '')
+                        .attr('style', '')
+                        .html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + previewUrl + '"></a></li>'));
                 } else if (v.type === "videoalbum") {
                     // todo move to html
                     let info;
@@ -1463,7 +1488,11 @@ class Main {
                         cover = self.swarm.getFullUrl('img/video-cover.jpg', userHash);
                     }
 
-                    userPost.append(videoalbumAttachment.clone().attr('id', '').attr('style', '').html('<li class="list-inline-item col-sm-4 videoalbum-item post-videoalbum-item"><a href="#" class="load-videoalbum" data-album-id="' + v.url + '"><img class="videoalbum-img" src="' + cover + '"></a></li>'));
+                    userPost.append(videoalbumAttachment
+                        .clone()
+                        .attr('id', '')
+                        .attr('style', '')
+                        .html('<li class="list-inline-item col-sm-4 videoalbum-item post-videoalbum-item"><a href="#" class="load-videoalbum" data-album-id="' + v.url + '"><img class="videoalbum-img" src="' + cover + '"></a></li>'));
                 }
             });
         }
@@ -1938,58 +1967,67 @@ class News {
         let self = this;
         let newsContent = $('.news-content');
         let currentUser = users.shift();
+        let currentUserHash = null;
+        let currentUserProfile = null;
         return self.main.blog.getSwarmHashByWallet(currentUser)
             .then(function (result) {
-                let currentUserHash = result;
-                return self.main.blog.getProfile(currentUserHash)
-                    .then(function (response) {
-                        let lastPostId = response.data.last_post_id;
-                        if (!lastPostId || lastPostId <= 0) {
-                            return self.compileNews(users, maxPostsFromUser);
-                        }
-
-                        let minPostId = Math.max(1, lastPostId - maxPostsFromUser);
-                        //console.log('Received profile: ' + currentUserHash + ', ' + lastPostId + ', ' + minPostId);
-                        let userId = 'userNews' + currentUserHash;
-                        let getUserPost = function (userId, postId) {
-                            let userHolderName = '#userNews' + userId;
-                            console.log([postId, userId]);
-                            return self.main.blog.getPost(postId, userId)
-                                .then(function (response) {
-                                    let post = response.data;
-                                    self.main.addPostByData(post, '#newsPost' + userId, userHolderName, true, currentUserHash);
-                                    console.log('Received post: ' + userId + ', ' + postId);
-                                    console.log(post);
-
-                                    postId++;
-                                    if (postId <= lastPostId) {
-                                        return getUserPost(userId, postId);
-                                    } else {
-                                        return self.compileNews(users, maxPostsFromUser);
-                                    }
-                                })
-                                .catch(function (e) {
-                                    console.log(e);
-                                    postId++;
-                                    return getUserPost(userId, postId);
-                                });
-                        };
-
-                        if (lastPostId > 0) {
-                            //let userUrl = self.main.swarm.getFullUrl('', currentUserHash);
-                            let userAvatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', currentUserHash);
-                            newsContent.append('<div class="news-owner">' +
-                                '<img class="size-50" src="' + userAvatar + '">' +
-                                '</div>');
-                            newsContent.append('<div id="' + userId + '">' +
-                                '</div>');
-
-                            return getUserPost(currentUserHash, minPostId)
-                        } else {
-                            return self.compileNews(users, maxPostsFromUser);
-                        }
-                    });
+                currentUserHash = result;
+                return self.main.blog.getProfile(currentUserHash);
             })
+            .then(function (response) {
+                currentUserProfile = response.data;
+                let lastPostId = response.data.last_post_id;
+                if (!lastPostId || lastPostId <= 0) {
+                    return self.compileNews(users, maxPostsFromUser);
+                }
+
+                let minPostId = Math.max(1, lastPostId - maxPostsFromUser);
+                //console.log('Received profile: ' + currentUserHash + ', ' + lastPostId + ', ' + minPostId);
+                let userId = 'userNews' + currentUserHash;
+                let getUserPost = function (userId, postId) {
+                    let userHolderName = '#userNews' + userId;
+                    console.log([postId, userId]);
+                    return self.main.blog.getPost(postId, userId)
+                        .then(function (response) {
+                            let post = response.data;
+                            self.main.addPostByData(post, {
+                                'prefix': '#newsPost' + userId,
+                                'containerName': userHolderName,
+                                'isReadOnly': true,
+                                'userHash': currentUserHash,
+                                'userProfile': currentUserProfile
+                            });
+                            console.log('Received post: ' + userId + ', ' + postId);
+                            console.log(post);
+
+                            postId++;
+                            if (postId <= lastPostId) {
+                                return getUserPost(userId, postId);
+                            } else {
+                                return self.compileNews(users, maxPostsFromUser);
+                            }
+                        })
+                        .catch(function (e) {
+                            console.log(e);
+                            postId++;
+                            return getUserPost(userId, postId);
+                        });
+                };
+
+                if (lastPostId > 0) {
+                    //let userUrl = self.main.swarm.getFullUrl('', currentUserHash);
+                    let userAvatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', currentUserHash);
+                    /*newsContent.append('<div class="news-owner">' +
+                        '<img class="size-50 circle-element" src="' + userAvatar + '">' +
+                        '</div>');*/
+                    newsContent.append('<div id="' + userId + '">' +
+                        '</div>');
+
+                    return getUserPost(currentUserHash, minPostId)
+                } else {
+                    return self.compileNews(users, maxPostsFromUser);
+                }
+            });
     }
 }
 
