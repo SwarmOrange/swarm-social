@@ -68,7 +68,10 @@ class Messages {
             .on('click', '.messages-send-message', function (e) {
                 e.preventDefault();
                 let writeMsg = $('.write_msg');
-                let userMessage = writeMsg.val();
+                let userMessage = writeMsg.val().trim();
+                if (!userMessage) {
+                    return;
+                }
 
                 let userHash = $(this).attr('data-user-id');
                 let messageId = $(this).attr('data-message-id');

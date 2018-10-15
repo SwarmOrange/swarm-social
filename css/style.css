@@ -588,3 +588,7 @@ img {
 .post-owner-name {
     margin-left: 8px;
 }
+
+.messages-send-message {
+    border: 0;
+}
