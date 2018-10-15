@@ -118,22 +118,6 @@ class Messages {
 
         $('#v-pills-messages-tab').click(function (e) {
             $('.msg_history').html('');
-            let usersList = $('.messages-users-list');
-            let messageDialogs = $('.message-dialogs');
-            usersList.html('<button class="dropdown-item messages-enter-user-hash" type="button">Enter user wallet</button>');
-            messageDialogs.html('');
-            let users = self.main.blog.getIFollow();
-            users.forEach(function (v) {
-                let avatar = 'img/swarm-avatar.jpg';
-                usersList.append('<button class="dropdown-item text-center messages-write-message" type="button" data-user-id="' + v + '"><img data-user-id="' + v + '" src="' + avatar + '" alt="" class="message-drop-users size-36"></button>');
-                self.main.blog.getSwarmHashByWallet(v)
-                    .then(function (hash) {
-                        // todo use preview
-                        let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', hash);
-                        $('.message-drop-users[data-user-id="' + v + '"]').attr('src', avatar);
-                    });
-            });
-
             self.main.blog.getMessageInfo()
                 .then(function (response) {
                     let data = response.data;
@@ -181,9 +165,8 @@ class Messages {
                     let promise = self.main.blog.getMessage(i, receiverWallet)
                         .then(function (response) {
                             let data = response.data;
-                            //console.log([data, i, receiverWallet, myWallet]);
                             msg = self.setMessage(myWallet, receiverWallet, i, false, avatar, data.message, '', data.after_message_id, data.after_receiver_message, data.timestamp);
-                            //reorderMessage(msg, data.after_receiver_message, data.after_message_id);
+
                             return msg;
                         })
                         .catch(function () {
@@ -206,8 +189,6 @@ class Messages {
 
                 let minId = Math.max(1, lastMessageId - maxMessagesFromUser + 1);
                 let maxId = lastMessageId;
-                //$('.messages-send-message').attr('data-message-id', maxId + 1);
-
                 let msg = null;
                 let avatar = self.main.swarm.getFullUrl('social/file/avatar/original.jpg', receiverSwarmHash);
                 for (let i = minId; i <= maxId; i++) {
@@ -215,9 +196,7 @@ class Messages {
                     let promise = self.main.blog.getMessage(i, myWallet, receiverSwarmHash)
                         .then(function (response) {
                             let data = response.data;
-                            //console.log([i, data]);
                             msg = self.setMessage(receiverWallet, myWallet, i, true, avatar, data.message, '', data.after_message_id, data.after_receiver_message, data.timestamp);
-                            //reorderMessage(msg, data.after_receiver_message, data.after_message_id);
 
                             return msg;
                         })
@@ -253,12 +232,6 @@ class Messages {
                         self.scrollDownMessages();
                     });
             });
-
-        /*let template = $('#sendMessageTemplate')
-            .clone()
-            .removeAttr('id')
-            .removeAttr('style');
-        messageDialog.append(template);*/
     }
 
     scrollDownMessages() {
@@ -294,6 +267,7 @@ class Messages {
                         self.main.alert('This wallet not registered');
                         dialog.remove();
                         reject();
+
                         return;
                     }
 
@@ -365,7 +339,6 @@ class Messages {
 
         let messageDialog = $('.msg_history');
         messageDialog.append(template);
-        //console.log(template);
 
         return template;
     }

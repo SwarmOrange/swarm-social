@@ -39,6 +39,8 @@ class Post {
                 id: newPostId,
                 description: description,
                 attachments: attachments
+            }, {
+                userProfile: self.main.blog.myProfile
             });
             $('#postBlock').addClass("disabled-content");
             self.blog.createPost(newPostId, description, attachments)
@@ -315,9 +317,10 @@ class Post {
                 let description = $(this).closest('.edit-post-block').find('textarea').val();
                 $('#userPost' + id + ' .description').text(description).toggle();
                 $('#userPost' + id + ' .edit-post-block').toggle();
-                self.blog.editPost(id, description).then(function (response) {
-                    self.main.onAfterHashChange(response.data, true);
-                });
+                self.blog.editPost(id, description)
+                    .then(function (response) {
+                        self.main.onAfterHashChange(response.data, true);
+                    });
             });
     }
 }
