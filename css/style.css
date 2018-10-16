@@ -592,3 +592,7 @@ img {
 .messages-send-message {
     border: 0;
 }
+
+.post-feedback {
+    margin-top: 8px;
+}

@@ -657,6 +657,7 @@ class Main {
         } else {
             userPost.find('.delete-post').attr('data-id', data.id);
             userPost.find('.edit-post').attr('data-id', data.id);
+            userPost.find('.post-like').attr('data-id', data.id);
         }
 
         userPost.find('.save-post').attr('data-id', data.id);
@@ -667,14 +668,15 @@ class Main {
             let photoalbumAttachment = $('#photoalbumAttachment');
             let videoalbumAttachment = $('#videoalbumAttachment');
             data.attachments.forEach(function (v) {
+                let appendContent = null;
                 if (v.type === "youtube") {
                     let videoId = self.youtube_parser(v.url);
-                    userPost.append(youtubeAttachment
+                    appendContent = youtubeAttachment
                         .clone()
                         .attr('style', '')
                         .html('<div class="embed-responsive embed-responsive-16by9">\n' +
                             '<iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + videoId + '?rel=0" allowfullscreen></iframe>\n' +
-                            '</div>'));
+                            '</div>');
                 } else if (v.type === "photo") {
                     let content = photoAttachment
                         .clone()
@@ -695,29 +697,29 @@ class Main {
                         content.find('.content').html('<img src="' + fullUrl + '">');
                     }
 
-                    userPost.append(content);
+                    appendContent = content;
                 } else if (v.type === "audio") {
                     // todo move to html
-                    userPost.append(videoAttachment
+                    appendContent = videoAttachment
                         .clone()
                         .attr('id', '')
                         .attr('style', '')
-                        .html('<audio controls style="display: block; width: 100%"> <source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="audio/mpeg"> Your browser does not support the audio element. </audio>'));
+                        .html('<audio controls style="display: block; width: 100%"> <source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="audio/mpeg"> Your browser does not support the audio element. </audio>');
                 } else if (v.type === "video") {
                     // todo move to html
-                    userPost.append(videoAttachment
+                    appendContent = videoAttachment
                         .clone()
                         .attr('id', '')
                         .attr('style', '')
-                        .html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="video/mp4">Your browser does not support the video tag.</video>'));
+                        .html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="video/mp4">Your browser does not support the video tag.</video>');
                 } else if (v.type === "photoalbum") {
                     // todo move to html
                     let previewUrl = self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg", userHash);
-                    userPost.append(photoalbumAttachment
+                    appendContent = photoalbumAttachment
                         .clone()
                         .attr('id', '')
                         .attr('style', '')
-                        .html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + previewUrl + '"></a></li>'));
+                        .html('<li class="list-inline-item col-sm-4 photoalbum-item post-photoalbum-item"><a href="#" class="load-photoalbum" data-album-id="' + v.url + '"><img class="photoalbum-img" src="' + previewUrl + '"></a></li>');
                 } else if (v.type === "videoalbum") {
                     // todo move to html
                     let info;
@@ -734,11 +736,15 @@ class Main {
                         cover = self.swarm.getFullUrl('img/video-cover.jpg', userHash);
                     }
 
-                    userPost.append(videoalbumAttachment
+                    appendContent = videoalbumAttachment
                         .clone()
                         .attr('id', '')
                         .attr('style', '')
-                        .html('<li class="list-inline-item col-sm-4 videoalbum-item post-videoalbum-item"><a href="#" class="load-videoalbum" data-album-id="' + v.url + '"><img class="videoalbum-img" src="' + cover + '"></a></li>'));
+                        .html('<li class="list-inline-item col-sm-4 videoalbum-item post-videoalbum-item"><a href="#" class="load-videoalbum" data-album-id="' + v.url + '"><img class="videoalbum-img" src="' + cover + '"></a></li>');
+                }
+
+                if (appendContent) {
+                    userPost.find('.post-content').append(appendContent);
                 }
             });
         }

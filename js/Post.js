@@ -309,6 +309,12 @@ class Post {
                 let id = $(this).attr('data-id');
                 self.toggleEditElements(id);
             })
+            .on('click', '.post-like', function (e) {
+                e.preventDefault();
+                let id = $(this).attr('data-id');
+                // todo send transaction or add transaction to list for save
+                alert('not implemented');
+            })
             .on('click', '.save-post', function (e) {
                 e.preventDefault();
                 let id = $(this).attr('data-id');
