@@ -307,21 +307,31 @@ class Post {
             .on('click', '.edit-post', function (e) {
                 e.preventDefault();
                 let id = $(this).attr('data-id');
-                $('#userPost' + id + ' .description').toggle();
-                $('#userPost' + id + ' .edit-post-block').toggle();
-                $('#userPost' + id + ' .delete-post-content').toggle();
+                self.toggleEditElements(id);
             })
             .on('click', '.save-post', function (e) {
                 e.preventDefault();
                 let id = $(this).attr('data-id');
                 let description = $(this).closest('.edit-post-block').find('textarea').val();
-                $('#userPost' + id + ' .description').text(description).toggle();
-                $('#userPost' + id + ' .edit-post-block').toggle();
+                $('#userPost' + id + ' .description').text(description);
+                self.toggleEditElements(id);
                 self.blog.editPost(id, description)
                     .then(function (response) {
                         self.main.onAfterHashChange(response.data, true);
                     });
             });
+    }
+
+    toggleEditElements(postId) {
+        let userPost = $('#userPost' + postId);
+        let elements = [
+            userPost.find('.description'),
+            userPost.find('.edit-post-block'),
+            userPost.find('.delete-post-content')
+        ];
+        elements.forEach(function (v) {
+            v.toggle();
+        });
     }
 }
 
