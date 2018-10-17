@@ -654,19 +654,46 @@
             <div id="wallYoutubeAttachment" class="wall-attachment" style="display: none">
 
             </div>
+
             <div id="photoAttachment" class="wall-attachment photo-attachment" style="display: none">
                 <div class="delete-post-content hide">&times;</div>
                 <div class="content"></div>
             </div>
+
             <div id="videoAttachment" class="wall-attachment" style="display: none">
 
             </div>
+
+            <div id="audioAttachment"
+                 class="wall-attachment audio-attachment"
+                 data-post-id="{{postId}}"
+                 data-attachment-id="{{attachmentId}}"
+                 style="display: none">
+                <div class="row">
+                    <div class="col-sm-1 delete-post-content hide"
+                         data-post-id="{{postId}}"
+                         data-attachment-id="{{attachmentId}}"
+                         style="position: relative; color:black">
+                        &times;
+                    </div>
+                    <div class="col-sm-11">
+                        <audio controls style="display: block; width: 100%">
+                            <source src="{{source}}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+
+                    </div>
+                </div>
+            </div>
+
             <div id="photoalbumAttachment" class="wall-attachment photoalbum-attachment" style="display: none">
 
             </div>
+
             <div id="videoalbumAttachment" class="wall-attachment videoalbum-attachment" style="display: none">
 
             </div>
+
             <div id="sendMessageTemplate" class="message-dialog-send-message" style="display: none">
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" placeholder="Message" aria-label="Message"

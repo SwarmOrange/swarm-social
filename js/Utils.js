@@ -117,6 +117,22 @@ class Utils {
             video.src = file;
         });
     }
+
+    static getTemplate(id, params) {
+        let element = $('#' + id)
+            .clone()
+            .attr('id', '')
+            .attr('style', '');
+        let elementHtml = element[0].outerHTML;
+        Object.keys(params).forEach(function (key) {
+            let value = params[key];
+            let myKey = '{{' + key + '}}';
+            elementHtml = elementHtml.replace(new RegExp(myKey, 'g'), value);
+        });
+        element = $(elementHtml);
+
+        return element;
+    }
 }
 
 module.exports = Utils;

@@ -699,12 +699,12 @@ class Main {
 
                     appendContent = content;
                 } else if (v.type === "audio") {
-                    // todo move to html
-                    appendContent = videoAttachment
-                        .clone()
-                        .attr('id', '')
-                        .attr('style', '')
-                        .html('<audio controls style="display: block; width: 100%"> <source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="audio/mpeg"> Your browser does not support the audio element. </audio>');
+                    let source = self.swarm.getFullUrl(v.url, userHash);
+                    appendContent = Utils.getTemplate('audioAttachment', {
+                        source: source,
+                        postId: data.id,
+                        attachmentId: v.id
+                    })
                 } else if (v.type === "video") {
                     // todo move to html
                     appendContent = videoAttachment

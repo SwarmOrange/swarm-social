@@ -58,6 +58,7 @@ class Photoalbum {
                     viewAlbumContent.append('</ul>');
                 });
             })
+            // todo move to post module
             .on('click', '.delete-post-content', function (e) {
                 let postId = $(this).attr('data-post-id');
                 let attachmentId = $(this).attr('data-attachment-id');
@@ -74,6 +75,7 @@ class Photoalbum {
                                 self.main.onAfterHashChange(response.data, true);
                             });
                     } else {
+                        // todo optimize for other content
                         $('.photo-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
                         self.main.blog.deletePostAttachment(postId, attachmentId)
                             .then(function (response) {

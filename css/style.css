@@ -310,7 +310,7 @@ li > p:last-child {
     margin-top: 8px;
 }
 
-.photo-attachment, .post-attachment[data-type="photo"] {
+.photo-attachment, .post-attachment[data-type="photo"], .audio-attachment {
     position: relative;
 }
 
