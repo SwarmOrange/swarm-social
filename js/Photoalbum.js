@@ -75,8 +75,7 @@ class Photoalbum {
                                 self.main.onAfterHashChange(response.data, true);
                             });
                     } else {
-                        // todo optimize for other content
-                        $('.photo-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
+                        $('.wall-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
                         self.main.blog.deletePostAttachment(postId, attachmentId)
                             .then(function (response) {
                                 self.main.onAfterHashChange(response.data, true);

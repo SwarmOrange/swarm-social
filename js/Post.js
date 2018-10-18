@@ -60,6 +60,7 @@ class Post {
         });
 
         $('#postBlock')
+            // todo where it used? different between '.delete-post-content' handler?
             .on('click', '.delete-post-attachment', function (e) {
                 e.preventDefault();
                 let url = $(this).attr('data-url');
@@ -68,9 +69,10 @@ class Post {
                     $(this).remove();
                 });
                 if (type !== 'youtube') {
-                    self.main.swarm.delete(url).then(function (response) {
-                        self.main.onAfterHashChange(response.data, true);
-                    });
+                    self.main.swarm.delete(url)
+                        .then(function (response) {
+                            self.main.onAfterHashChange(response.data, true);
+                        });
                 }
             });
 
@@ -152,6 +154,7 @@ class Post {
                         .attr('style', '')
                         .attr('data-type', fileType)
                         .attr('data-url', url);
+                    // todo move to html, use getTemplate
                     postAttachmentTemplate
                         .find('.content')
                         .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="' + fileType + '"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + fullUrl + '">' + url + '</a>')
