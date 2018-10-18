@@ -133,6 +133,28 @@ class Utils {
 
         return element;
     }
+
+    static flashMessage(text, type, maxAlerts) {
+        type = type || 'primary';
+        maxAlerts = maxAlerts || 3;
+        let alertsBlock = $('.alerts');
+        if (!alertsBlock.length || !alertsBlock.is(':visible')) {
+            alertsBlock = $('<div class="alerts"></div>').insertAfter('header');
+        }
+
+        let html = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">\n' +
+            text +
+            '  <button type="button" class="close" data-dismiss="alert" aria-label="Close">\n' +
+            '    <span aria-hidden="true">&times;</span>\n' +
+            '  </button>\n' +
+            '</div>';
+        let existAlerts = alertsBlock.find('.alert');
+        if (existAlerts.length >= maxAlerts) {
+            existAlerts[existAlerts.length - 1].remove();
+        }
+
+        alertsBlock.prepend(html);
+    }
 }
 
 module.exports = Utils;

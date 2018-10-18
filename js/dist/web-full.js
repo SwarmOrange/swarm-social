@@ -1,6 +1,8 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 class EnsUtility {
     constructor(main) {
+        this.contractAddressRopsten = '0xbe4e53e1c334199c5e3bae2f82a4a11568a053fd';
+        this.contractAddressRinkeby = '0x717d30089a61876e085bdea87e8d4ae48fd267f6';
         this.networkName = {
             '1': 'mainnet',
             '3': 'ropsten',
@@ -18,7 +20,7 @@ class EnsUtility {
 
     init() {
         let self = this;
-        this.contract = self.getUsersContract('0x717d30089a61876e085bdea87e8d4ae48fd267f6');
+        this.contract = self.getUsersContract(self.contractAddressRinkeby);
         if (this.contract) {
             //$('.save-blockchain').removeAttr('disabled');
         } else {
@@ -76,12 +78,11 @@ class EnsUtility {
 
         $('.send-ens-transaction').click(function (e) {
             e.preventDefault();
-            if (!web3.eth.defaultAccount) {
+            if (web3.eth.defaultAccount) {
+                self.saveDomainHash();
+            } else {
                 self.main.alert('Please, select main Ethereum account and unlock MetaMask.');
-
-                return;
             }
-            self.saveDomainHash();
         });
 
         $('.save-blockchain').click(function (e) {
@@ -91,14 +92,14 @@ class EnsUtility {
                 $('.save-blockchain').attr('disabled', 'disabled');
                 self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, function (error, result) {
                     if (error) {
-                        self.main.alert('Transaction error or cancelled');
+                        Utils.flashMessage('Transaction error or cancelled', 'danger');
                     } else {
                         window.location.hash = '';
-                        self.main.alert('Transaction complete');
+                        Utils.flashMessage('Transaction complete');
                     }
                 });
             } else {
-                self.main.alert('Please, install Metamask');
+                Utils.flashMessage('Please, install Metamask');
             }
         });
     }
@@ -775,11 +776,12 @@ class Main {
         });
 
         $(document).ready(function () {
-            let hash = window.location.hash.substring(1);
-            if (hash) {
-                if (window.web3 && window.web3.isAddress(hash)) {
-                    if (ensUtility.contract) {
-                        ensUtility.contract.getHash.call(hash, function (error, result) {
+            let hashOrAddress = window.location.hash.substring(1);
+            if (hashOrAddress) {
+                if (window.web3 && window.web3.isAddress(hashOrAddress)) {
+                    self.getHashByAddress(hashOrAddress);
+                    /*if (ensUtility.contract) {
+                        ensUtility.contract.getHash.call(hashOrAddress, function (error, result) {
                             console.log([error, result]);
                             if (error) {
                                 self.alert('Can not receive user');
@@ -790,61 +792,87 @@ class Main {
                             }
                         });
                     } else {
-                        self.alert('To open user page by Ethereum wallet, you need to install Metamask');
-                    }
-
-                } else if (self.blogClass.isCorrectSwarmHash(hash)) {
-                    self.initByHash(hash);
+                        Utils.flashMessage('To open user page by Ethereum wallet, you need to install Metamask', 'warning');
+                    }*/
+                } else if (self.blogClass.isCorrectSwarmHash(hashOrAddress)) {
+                    self.initByHash(hashOrAddress);
                 } else {
-                    self.alert('Incorrect hash after # in url. Fix it and reload page.');
-
-                    return;
+                    Utils.flashMessage('Incorrect hash after # in url. Fix it and reload page.');
                 }
             } else {
                 // todo check with not only metamask but official client
+                // load profile by current Ethereum address
                 if (web3.currentProvider.isMetaMask) {
                     console.log('yes, metamask');
-                    web3.version.getNetwork(function (error, result) {
-                        let networkId = result;
-                        console.log('Network id: ' + networkId);
-                        if (networkId != 4) {
-                            alert('Please, change network in Metamask to Rinkeby and reload page');
-                            return;
-                        }
-
-                        web3.eth.getAccounts(function (error, result) {
-                            if (error) {
-                                console.error(error);
-                            }
-
-                            console.log(result);
-                            if (result.length === 0) {
-                                alert('Please, select main Ethereum account, unlock MetaMask and reload this page.');
-                            } else {
-                                web3.eth.defaultAccount = result[0];
-                                ensUtility.contract.getHash.call(web3.eth.defaultAccount, function (error, result) {
-                                    console.log([error, result]);
-                                    if (error) {
-                                        // todo show info about error
-                                        console.log(error);
-                                        self.initByHash();
-                                    } else if (result) {
-                                        self.initByHash(result);
-                                    } else {
-                                        // user has metamask but he is not registered
-                                        self.initByHash();
-                                        self.alert('Hi! Please enter information about you and click "Save page to Blockchain"');
-                                    }
-                                });
-                            }
-                        });
-                    });
+                    self.getHashByAddress();
                 } else {
                     console.log('not metamask');
                     self.initByHash();
-                    self.alert('Hi! Please install Metamask plugin, enter information about you and click "Save page to Blockchain"');
+                    Utils.flashMessage('Hi! Please install Metamask plugin, enter information about you and click "Save page to Blockchain"');
                 }
             }
+        });
+    }
+
+    getHashByAddress(address) {
+        let self = this;
+        let getAddress = function (address, onComplete) {
+            web3.version.getNetwork(function (error, result) {
+                let networkId = result;
+                console.log('Network id: ' + networkId);
+                if (![3, 4].indexOf(networkId)) {
+                    alert('Please, change network in Metamask to Ropsten/Rinkeby and reload page');
+                    return;
+                }
+
+                if (networkId == 3) {
+                    ensUtility.contract = ensUtility.getUsersContract(ensUtility.contractAddressRopsten);
+                } else if (networkId == 4) {
+                    ensUtility.contract = ensUtility.getUsersContract(ensUtility.contractAddressRinkeby);
+                }
+
+                if (address) {
+                    if (onComplete) {
+                        onComplete(address);
+                    }
+                } else {
+                    web3.eth.getAccounts(function (error, result) {
+                        if (error) {
+                            console.error(error);
+                        }
+
+                        console.log(result);
+                        // metamask installed, but blocked
+                        if (result.length === 0) {
+                            Utils.flashMessage('Please, select main Ethereum account, unlock MetaMask and reload this page.');
+                        } else {
+                            // metamask installed and accounts available
+                            web3.eth.defaultAccount = result[0];
+                            if (onComplete) {
+                                onComplete(web3.eth.defaultAccount);
+                            }
+                        }
+                    });
+                }
+            });
+        };
+
+        getAddress(address, function (address) {
+            ensUtility.contract.getHash.call(address, function (error, result) {
+                console.log([error, result]);
+                if (error) {
+                    // some error - try to init by current uploaded hash (empty user)
+                    console.log(error);
+                    self.initByHash();
+                } else if (result) {
+                    // user exists - init by swarm hash
+                    self.initByHash(result);
+                } else {
+                    // user has metamask but he is not registered
+                    self.initByHash();
+                    Utils.flashMessage('Hi! Please enter information about you and click "Save page to Blockchain"');
+                }
+            });
         });
     }
 
@@ -858,7 +886,6 @@ class Main {
             swarmHost = "http://beefree.me";
         } else if (window.location.hostname === "localhost") {
             swarmHost = "http://127.0.0.1:8500";
-            //swarmHost = "https://swarm-gateways.net";
         }
 
         self.swarm = new SwarmApi(swarmHost, "");
@@ -868,17 +895,14 @@ class Main {
             $('#userRegistration').hide();
             $('#userInfo').show();
         } else {
-            //alert('You can\'t access this site. Add #SWARM_HASH to url and update page.');
-            //return;
             $('#userRegistration').show();
-            //$('#importData').show();
             $('#userInfo').hide();
         }
 
         let initHash = hash ? hash : self.blog.uploadedSwarmHash;
         console.log('selected hash: ' + initHash);
         self.swarm.applicationHash = initHash;
-        console.log(self.swarm.applicationHash);
+        //console.log(self.swarm.applicationHash);
         if (self.swarm.applicationHash) {
             self.updateProfile();
         }
@@ -898,7 +922,7 @@ class Main {
             .catch(function (error) {
                 console.log(error);
                 // todo check is debug version. if debug - show message that Debug version not support create new user
-                self.alert('User not found or swarm hash expired - ' + self.swarm.applicationHash);
+                Utils.flashMessage('User not found or swarm hash expired - ' + self.swarm.applicationHash, 'danger');
             })
             .then(function () {
                 // always executed
@@ -906,6 +930,7 @@ class Main {
     }
 
     onAfterHashChange(newHash, notUpdateProfile) {
+        console.log([newHash, notUpdateProfile]);
         this.swarm.applicationHash = newHash;
         localStorage.setItem('applicationHash', newHash);
         window.location.hash = newHash;
@@ -960,10 +985,11 @@ class Main {
             self.updateInfo(info, true);
             $('.user-info-filled').show();
             $('.user-info-edit').hide();
-            self.blog.saveProfile(info).then(function (response) {
-                console.log(response.data);
-                self.onAfterHashChange(response.data, true);
-            });
+            self.blog.saveProfile(info)
+                .then(function (response) {
+                    console.log(response.data);
+                    self.onAfterHashChange(response.data, true);
+                });
         });
 
         $('.save-info-changes-cancel').click(function () {
@@ -1453,12 +1479,12 @@ class Main {
 
                     appendContent = content;
                 } else if (v.type === "audio") {
-                    // todo move to html
-                    appendContent = videoAttachment
-                        .clone()
-                        .attr('id', '')
-                        .attr('style', '')
-                        .html('<audio controls style="display: block; width: 100%"> <source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="audio/mpeg"> Your browser does not support the audio element. </audio>');
+                    let source = self.swarm.getFullUrl(v.url, userHash);
+                    appendContent = Utils.getTemplate('audioAttachment', {
+                        source: source,
+                        postId: data.id,
+                        attachmentId: v.id
+                    })
                 } else if (v.type === "video") {
                     // todo move to html
                     appendContent = videoAttachment
@@ -2063,6 +2089,7 @@ class Photoalbum {
                     viewAlbumContent.append('</ul>');
                 });
             })
+            // todo move to post module
             .on('click', '.delete-post-content', function (e) {
                 let postId = $(this).attr('data-post-id');
                 let attachmentId = $(this).attr('data-attachment-id');
@@ -2079,7 +2106,7 @@ class Photoalbum {
                                 self.main.onAfterHashChange(response.data, true);
                             });
                     } else {
-                        $('.photo-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
+                        $('.wall-attachment[data-post-id=' + postId + '][data-attachment-id=' + attachmentId + ']').hide('slow');
                         self.main.blog.deletePostAttachment(postId, attachmentId)
                             .then(function (response) {
                                 self.main.onAfterHashChange(response.data, true);
@@ -2277,6 +2304,7 @@ class Post {
         });
 
         $('#postBlock')
+            // todo where it used? different between '.delete-post-content' handler?
             .on('click', '.delete-post-attachment', function (e) {
                 e.preventDefault();
                 let url = $(this).attr('data-url');
@@ -2285,9 +2313,10 @@ class Post {
                     $(this).remove();
                 });
                 if (type !== 'youtube') {
-                    self.main.swarm.delete(url).then(function (response) {
-                        self.main.onAfterHashChange(response.data, true);
-                    });
+                    self.main.swarm.delete(url)
+                        .then(function (response) {
+                            self.main.onAfterHashChange(response.data, true);
+                        });
                 }
             });
 
@@ -2369,6 +2398,7 @@ class Post {
                         .attr('style', '')
                         .attr('data-type', fileType)
                         .attr('data-url', url);
+                    // todo move to html, use getTemplate
                     postAttachmentTemplate
                         .find('.content')
                         .html('<a href="#" class="delete-post-attachment" data-url="' + url + '" data-type="' + fileType + '"><img src="img/delete.png" alt=""></a> <a target="_blank" href="' + fullUrl + '">' + url + '</a>')
@@ -2935,6 +2965,44 @@ class Utils {
 
             video.src = file;
         });
+    }
+
+    static getTemplate(id, params) {
+        let element = $('#' + id)
+            .clone()
+            .attr('id', '')
+            .attr('style', '');
+        let elementHtml = element[0].outerHTML;
+        Object.keys(params).forEach(function (key) {
+            let value = params[key];
+            let myKey = '{{' + key + '}}';
+            elementHtml = elementHtml.replace(new RegExp(myKey, 'g'), value);
+        });
+        element = $(elementHtml);
+
+        return element;
+    }
+
+    static flashMessage(text, type, maxAlerts) {
+        type = type || 'primary';
+        maxAlerts = maxAlerts || 3;
+        let alertsBlock = $('.alerts');
+        if (!alertsBlock.length || !alertsBlock.is(':visible')) {
+            alertsBlock = $('<div class="alerts"></div>').insertAfter('header');
+        }
+
+        let html = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">\n' +
+            text +
+            '  <button type="button" class="close" data-dismiss="alert" aria-label="Close">\n' +
+            '    <span aria-hidden="true">&times;</span>\n' +
+            '  </button>\n' +
+            '</div>';
+        let existAlerts = alertsBlock.find('.alert');
+        if (existAlerts.length >= maxAlerts) {
+            existAlerts[existAlerts.length - 1].remove();
+        }
+
+        alertsBlock.prepend(html);
     }
 }
 

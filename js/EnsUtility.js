@@ -1,5 +1,7 @@
 class EnsUtility {
     constructor(main) {
+        this.contractAddressRopsten = '0xbe4e53e1c334199c5e3bae2f82a4a11568a053fd';
+        this.contractAddressRinkeby = '0x717d30089a61876e085bdea87e8d4ae48fd267f6';
         this.networkName = {
             '1': 'mainnet',
             '3': 'ropsten',
@@ -17,7 +19,7 @@ class EnsUtility {
 
     init() {
         let self = this;
-        this.contract = self.getUsersContract('0x717d30089a61876e085bdea87e8d4ae48fd267f6');
+        this.contract = self.getUsersContract(self.contractAddressRinkeby);
         if (this.contract) {
             //$('.save-blockchain').removeAttr('disabled');
         } else {
@@ -75,12 +77,11 @@ class EnsUtility {
 
         $('.send-ens-transaction').click(function (e) {
             e.preventDefault();
-            if (!web3.eth.defaultAccount) {
+            if (web3.eth.defaultAccount) {
+                self.saveDomainHash();
+            } else {
                 self.main.alert('Please, select main Ethereum account and unlock MetaMask.');
-
-                return;
             }
-            self.saveDomainHash();
         });
 
         $('.save-blockchain').click(function (e) {
@@ -90,14 +91,14 @@ class EnsUtility {
                 $('.save-blockchain').attr('disabled', 'disabled');
                 self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, function (error, result) {
                     if (error) {
-                        self.main.alert('Transaction error or cancelled');
+                        Utils.flashMessage('Transaction error or cancelled', 'danger');
                     } else {
                         window.location.hash = '';
-                        self.main.alert('Transaction complete');
+                        Utils.flashMessage('Transaction complete');
                     }
                 });
             } else {
-                self.main.alert('Please, install Metamask');
+                Utils.flashMessage('Please, install Metamask');
             }
         });
     }
