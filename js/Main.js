@@ -776,6 +776,11 @@ class Main {
     }
 
     alert(message, buttons) {
+        if (!buttons) {
+            Utils.flashMessage(message);
+            return;
+        }
+
         let show = function () {
             console.log(message);
             if (typeof message === 'string') {
