@@ -664,7 +664,13 @@ class Main {
             userPost.find('.post-owner-avatar').attr('src', userAvatar);
         }
 
-        userPost.find('.description').text(data.description);
+        let showHidePosition = 500;
+        let description = Utils.stripHtml(data.description);
+        if (description.length > showHidePosition) {
+            description = description.substr(0, showHidePosition) + '<span class="post-text-appended" data-post-id="' + data.id + '">...<a href="#" class="post-text-show-hidden" data-post-id="' + data.id + '"><br>Show all text</a><div class="post-text-hidden" data-post-id="' + data.id + '">' + description.substr(showHidePosition) + '</div></span>';
+        }
+
+        userPost.find('.description').html(description);
         userPost.find('.edit-post-block textarea').val(data.description);
         if (isReadOnly) {
             userPost.find('.delete-post').remove();

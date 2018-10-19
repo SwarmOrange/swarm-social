@@ -596,3 +596,7 @@ img {
 .post-feedback {
     margin-top: 8px;
 }
+
+.post-text-hidden {
+    display: none;
+}

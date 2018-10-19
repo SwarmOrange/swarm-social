@@ -296,6 +296,13 @@ class Post {
         });
 
         $('#userPosts')
+            .on('click', '.post-text-show-hidden', function (e) {
+                e.preventDefault();
+                let id = $(this).attr('data-post-id');
+                let hiddenText = $('.post-text-hidden[data-post-id="' + id + '"]').text();
+                let appendedElement = $('.post-text-appended[data-post-id="' + id + '"]');
+                appendedElement.replaceWith(hiddenText);
+            })
             .on('click', '.delete-post', function (e) {
                 e.preventDefault();
                 let id = $(this).attr('data-id');

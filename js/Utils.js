@@ -155,6 +155,16 @@ class Utils {
 
         alertsBlock.prepend(html);
     }
+
+    static stripHtml(html) {
+        if (html) {
+            let tmp = document.createElement("div");
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || "";
+        } else {
+            return '';
+        }
+    }
 }
 
 module.exports = Utils;
