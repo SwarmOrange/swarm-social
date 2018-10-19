@@ -1,6 +1,7 @@
 class Main {
 
     constructor(blogClass, blog) {
+        this.isCheckHashChange = true;
         this.blogClass = blogClass;
         this.swarm = null;
         this.blog = blog;
@@ -11,6 +12,7 @@ class Main {
         this.photoAlbumPhotoId = 0;
 
         this.initDocument();
+        this.init();
     }
 
     initDocument() {
@@ -22,41 +24,32 @@ class Main {
 
         $(document).ready(function () {
             let hashOrAddress = window.location.hash.substring(1);
-            if (hashOrAddress) {
-                if (window.web3 && window.web3.isAddress(hashOrAddress)) {
-                    self.getHashByAddress(hashOrAddress);
-                    /*if (ensUtility.contract) {
-                        ensUtility.contract.getHash.call(hashOrAddress, function (error, result) {
-                            console.log([error, result]);
-                            if (error) {
-                                self.alert('Can not receive user');
-                            } else if (result) {
-                                self.initByHash(result);
-                            } else {
-                                self.alert('User not found. Enter correct Ethereum wallet');
-                            }
-                        });
-                    } else {
-                        Utils.flashMessage('To open user page by Ethereum wallet, you need to install Metamask', 'warning');
-                    }*/
-                } else if (self.blogClass.isCorrectSwarmHash(hashOrAddress)) {
-                    self.initByHash(hashOrAddress);
-                } else {
-                    Utils.flashMessage('Incorrect hash after # in url. Fix it and reload page.');
-                }
-            } else {
-                // todo check with not only metamask but official client
-                // load profile by current Ethereum address
-                if (web3.currentProvider.isMetaMask) {
-                    console.log('yes, metamask');
-                    self.getHashByAddress();
-                } else {
-                    console.log('not metamask');
-                    self.initByHash();
-                    Utils.flashMessage('Hi! Please install Metamask plugin, enter information about you and click "Save page to Blockchain"');
-                }
-            }
+            self.loadPageInfo(hashOrAddress);
         });
+    }
+
+    loadPageInfo(hashOrAddress) {
+        let self = this;
+        if (hashOrAddress) {
+            if (window.web3 && window.web3.isAddress(hashOrAddress)) {
+                self.getHashByAddress(hashOrAddress);
+            } else if (self.blogClass.isCorrectSwarmHash(hashOrAddress)) {
+                self.initByHash(hashOrAddress);
+            } else {
+                Utils.flashMessage('Incorrect hash after # in url. Fix it and reload page.');
+            }
+        } else {
+            // todo check with not only metamask but official client
+            // load profile by current Ethereum address
+            if (web3.currentProvider.isMetaMask) {
+                console.log('yes, metamask');
+                self.getHashByAddress();
+            } else {
+                console.log('not metamask');
+                self.initByHash();
+                Utils.flashMessage('Hi! Please install Metamask plugin, enter information about you and click "Save page to Blockchain"');
+            }
+        }
     }
 
     getHashByAddress(address) {
@@ -152,7 +145,6 @@ class Main {
             self.updateProfile();
         }
 
-        self.init();
     }
 
     updateProfile() {
@@ -178,6 +170,7 @@ class Main {
         console.log([newHash, notUpdateProfile]);
         this.swarm.applicationHash = newHash;
         localStorage.setItem('applicationHash', newHash);
+        this.isCheckHashChange = false;
         window.location.hash = newHash;
         $('.save-blockchain').removeAttr('disabled');
         if (notUpdateProfile) {
@@ -190,6 +183,17 @@ class Main {
     init() {
         //$('#v-pills-messages-tab').click();
         let self = this;
+        $(window).on('hashchange', function (data) {
+            console.log([self.isCheckHashChange, data]);
+            if (self.isCheckHashChange) {
+                let hashOrAddress = window.location.hash.substring(1);
+                $('.alerts').find('.alert').remove();
+                self.loadPageInfo(hashOrAddress);
+            }
+
+            self.isCheckHashChange = true;
+        });
+
         $('.additional-buttons').on('click', '.btn-share-item', function (e) {
             let itemType = $(this).attr('data-type');
             let itemInfo = $(this).attr('data-info');
@@ -339,22 +343,8 @@ class Main {
             .on('click', '.load-profile', function (e) {
                 e.preventDefault();
                 let swarmProfileHash = $(this).attr('data-profile-id');
-                if (self.blogClass.isCorrectSwarmHash(swarmProfileHash)) {
-                    self.onAfterHashChange(swarmProfileHash)
-                        .then(function (response) {
-                            //reload();
-                        });
-
-                } else if (web3.isAddress(swarmProfileHash)) {
-                    // todo show load window
-                    self.blog.getSwarmHashByWallet(swarmProfileHash)
-                        .then(function (result) {
-                            self.onAfterHashChange(result)
-                                .then(function (response) {
-                                    //reload();
-                                });
-                        });
-                }
+                document.location.hash = swarmProfileHash;
+                document.location.reload();
             })
             .on('click', '.delete-i-follow', function (e) {
                 e.preventDefault();
