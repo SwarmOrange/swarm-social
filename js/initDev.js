@@ -32,6 +32,7 @@ new modules.ImportButtons(myMain);
 new modules.News(myMain);
 new modules.Messages(myMain);
 new modules.Wallet(myMain);
+window.Wallet = modules.Wallet;
 new modules.Settings(myMain);
 window.Utils = modules.Utils;
 new modules.Utils();

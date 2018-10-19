@@ -60,7 +60,7 @@ class Post {
         });
 
         $('#postBlock')
-            // todo where it used? different between '.delete-post-content' handler?
+        // todo where it used? different between '.delete-post-content' handler?
             .on('click', '.delete-post-attachment', function (e) {
                 e.preventDefault();
                 let url = $(this).attr('data-url');
@@ -315,8 +315,7 @@ class Post {
             .on('click', '.post-like', function (e) {
                 e.preventDefault();
                 let id = $(this).attr('data-id');
-                // todo send transaction or add transaction to list for save
-                alert('not implemented');
+                Wallet.sendEthToUser(0.01, self.main.blog.myProfile.ethereum_wallet);
             })
             .on('click', '.save-post', function (e) {
                 e.preventDefault();

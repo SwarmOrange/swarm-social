@@ -47,27 +47,25 @@ class Wallet {
                 return;
             }
 
-            // todo add wait animation
-            self.main.blog.getProfile()
-                .then(function (response) {
-                    // todo hide wait animation
-                    let data = response.data;
-                    if (data.ethereum_wallet && web3.isAddress(data.ethereum_wallet)) {
-                        web3.eth.sendTransaction({
-                            to: data.ethereum_wallet,
-                            value: web3.toWei(amount, "ether")
-                        }, function (error, result) {
-                            console.log([error, result]);
-                            if (error) {
-                                self.main.alert('Payment error or cancelled');
-                            } else {
-                                self.main.alert('Payment complete!');
-                            }
-                        });
-                    } else {
-                        self.main.alert('User not filled Ethereum wallet');
-                    }
-                });
+            Wallet.sendEthToUser(amount, self.main.blog.myProfile.ethereum_wallet);
+        });
+    }
+
+    static sendEthToUser(amount, toUserWallet) {
+        if (!toUserWallet) {
+            Utils.flashMessage('Sorry, you can\'t send Ethereum. User not filled Ethereum address');
+        }
+
+        web3.eth.sendTransaction({
+            to: toUserWallet,
+            value: web3.toWei(amount, "ether")
+        }, function (error, result) {
+            console.log([error, result]);
+            if (error) {
+                Utils.flashMessage('Payment error or cancelled', 'danger');
+            } else {
+                Utils.flashMessage('Payment complete!', 'success');
+            }
         });
     }
 }
