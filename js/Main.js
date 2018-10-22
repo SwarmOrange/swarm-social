@@ -167,7 +167,7 @@ class Main {
     }
 
     onAfterHashChange(newHash, notUpdateProfile) {
-        console.log([newHash, notUpdateProfile]);
+        //console.log([newHash, notUpdateProfile]);
         this.swarm.applicationHash = newHash;
         localStorage.setItem('applicationHash', newHash);
         this.isCheckHashChange = false;
@@ -184,7 +184,7 @@ class Main {
         //$('#v-pills-messages-tab').click();
         let self = this;
         $(window).on('hashchange', function (data) {
-            console.log([self.isCheckHashChange, data]);
+            //console.log([self.isCheckHashChange, data]);
             if (self.isCheckHashChange) {
                 let hashOrAddress = window.location.hash.substring(1);
                 $('.alerts').find('.alert').remove();
@@ -705,7 +705,9 @@ class Main {
                         .attr('style', '')
                         .attr('data-post-id', data.id)
                         .attr('data-attachment-id', v.id);
-                    content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
+                    content.find('.delete-post-content')
+                        .attr('data-post-id', data.id)
+                        .attr('data-attachment-id', v.id);
                     let fullUrl = self.swarm.getFullUrl(v.url, userHash);
                     let previewUrl = self.swarm.getFullUrl(v.url, userHash);
                     if ('previews' in v) {

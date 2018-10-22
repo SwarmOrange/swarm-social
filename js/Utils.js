@@ -119,10 +119,11 @@ class Utils {
     }
 
     static getTemplate(id, params) {
+        params = params || [];
         let element = $('#' + id)
             .clone()
-            .attr('id', '')
-            .attr('style', '');
+            .removeAttr('id')
+            .removeAttr('style');
         let elementHtml = element[0].outerHTML;
         Object.keys(params).forEach(function (key) {
             let value = params[key];

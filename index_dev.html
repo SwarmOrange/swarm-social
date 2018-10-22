@@ -617,6 +617,20 @@
         </div>
 
         <div class="templates" style="display: none">
+            <div id="loaderTemplate" class="d-flex justify-content-center" style="display: none">
+                <div class="loader-animation"></div>
+            </div>
+
+            <a id="photoAlbumPreviewTemplate"
+               style="display: none"
+               href="{{bigSrc}}"
+               data-toggle="lightbox"
+               data-title="View photo"
+               data-footer="<a target=_blank href='{{originalSrc}}'>Open full image</a><br>{{description}}"
+               data-gallery="gallery-{{albumId}}">
+                <img src="{{previewSrc}}" class="img-fluid preview-album-photo">
+            </a>
+
             <div id="userPost" class="wall-post col-sm-12" style="display: none">
                 <a href="#" class="delete-post float-right">
                     <img src="img/delete.png" alt="">
@@ -966,7 +980,8 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <button type="button" class="btn btn-sm btn-danger float-right btn-delete-album"
+                        <button type="button"
+                                class="btn btn-sm btn-danger float-right btn-delete-album"
                                 data-album-id="0">
                             Delete
                         </button>

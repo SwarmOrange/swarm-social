@@ -27,6 +27,7 @@ class Photoalbum {
                 $('.btn-delete-album').attr('data-album-id', albumId);
                 let shownModals = $('.modal.show');
                 if (shownModals.length) {
+                    // todo move this logic to function and check if exists more simple method show modals when other hidden
                     shownModals.one('hidden.bs.modal', function (e) {
                         $('#viewAlbumModal').modal('show');
                     });
@@ -35,26 +36,34 @@ class Photoalbum {
                     $('#viewAlbumModal').modal('show');
                 }
 
-                viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
+                viewAlbumContent.html(Utils.getTemplate('loaderTemplate'));
                 self.main.blog.getAlbumInfo(albumId)
                     .then(function (response) {
                         let data = response.data;
                         viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
                         data.photos.forEach(function (v) {
-                            let imgSrc = self.main.swarm.getFullUrl(v.file);
-                            let fullImage = self.main.swarm.getFullUrl(v.file);
-                            let image1200x800 = fullImage;
+                            let previewSrc = self.main.swarm.getFullUrl(v.file);
+                            let originalSrc = previewSrc;
+                            let bigSrc = previewSrc;
                             if ('previews' in v) {
                                 if ('250x250' in v.previews) {
-                                    imgSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
+                                    previewSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
                                 }
 
                                 if ('1200x800' in v.previews) {
-                                    image1200x800 = self.main.swarm.getFullUrl(v.previews['1200x800']);
+                                    bigSrc = self.main.swarm.getFullUrl(v.previews['1200x800']);
                                 }
                             }
 
-                            viewAlbumContent.append('<li class="list-inline-item"><a href="' + image1200x800 + '" data-toggle="lightbox" data-title="View photo" data-footer="<a target=_blank href=\'' + fullImage + '\'>Open full image</a><br>' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + imgSrc + '" class="img-fluid preview-album-photo"></a></li>');
+                            let template = Utils.getTemplate('photoAlbumPreviewTemplate', {
+                                bigSrc: bigSrc,
+                                originalSrc: originalSrc,
+                                description: v.description,
+                                albumId: albumId,
+                                previewSrc: previewSrc
+                            });
+                            template = $('<li class="list-inline-item"</li>').append(template);
+                            viewAlbumContent.append(template);
                         });
                         viewAlbumContent.append('</ul>');
                     });

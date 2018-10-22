@@ -922,7 +922,7 @@ class Main {
     }
 
     onAfterHashChange(newHash, notUpdateProfile) {
-        console.log([newHash, notUpdateProfile]);
+        //console.log([newHash, notUpdateProfile]);
         this.swarm.applicationHash = newHash;
         localStorage.setItem('applicationHash', newHash);
         this.isCheckHashChange = false;
@@ -939,7 +939,7 @@ class Main {
         //$('#v-pills-messages-tab').click();
         let self = this;
         $(window).on('hashchange', function (data) {
-            console.log([self.isCheckHashChange, data]);
+            //console.log([self.isCheckHashChange, data]);
             if (self.isCheckHashChange) {
                 let hashOrAddress = window.location.hash.substring(1);
                 $('.alerts').find('.alert').remove();
@@ -1460,7 +1460,9 @@ class Main {
                         .attr('style', '')
                         .attr('data-post-id', data.id)
                         .attr('data-attachment-id', v.id);
-                    content.find('.delete-post-content').attr('data-post-id', data.id).attr('data-attachment-id', v.id);
+                    content.find('.delete-post-content')
+                        .attr('data-post-id', data.id)
+                        .attr('data-attachment-id', v.id);
                     let fullUrl = self.swarm.getFullUrl(v.url, userHash);
                     let previewUrl = self.swarm.getFullUrl(v.url, userHash);
                     if ('previews' in v) {
@@ -2059,6 +2061,7 @@ class Photoalbum {
                 $('.btn-delete-album').attr('data-album-id', albumId);
                 let shownModals = $('.modal.show');
                 if (shownModals.length) {
+                    // todo move this logic to function and check if exists more simple method show modals when other hidden
                     shownModals.one('hidden.bs.modal', function (e) {
                         $('#viewAlbumModal').modal('show');
                     });
@@ -2067,26 +2070,34 @@ class Photoalbum {
                     $('#viewAlbumModal').modal('show');
                 }
 
-                viewAlbumContent.html('<div class="d-flex justify-content-center"><div class="loader-animation"></div></div>');
+                viewAlbumContent.html(Utils.getTemplate('loaderTemplate'));
                 self.main.blog.getAlbumInfo(albumId)
                     .then(function (response) {
                         let data = response.data;
                         viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
                         data.photos.forEach(function (v) {
-                            let imgSrc = self.main.swarm.getFullUrl(v.file);
-                            let fullImage = self.main.swarm.getFullUrl(v.file);
-                            let image1200x800 = fullImage;
+                            let previewSrc = self.main.swarm.getFullUrl(v.file);
+                            let originalSrc = previewSrc;
+                            let bigSrc = previewSrc;
                             if ('previews' in v) {
                                 if ('250x250' in v.previews) {
-                                    imgSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
+                                    previewSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
                                 }
 
                                 if ('1200x800' in v.previews) {
-                                    image1200x800 = self.main.swarm.getFullUrl(v.previews['1200x800']);
+                                    bigSrc = self.main.swarm.getFullUrl(v.previews['1200x800']);
                                 }
                             }
 
-                            viewAlbumContent.append('<li class="list-inline-item"><a href="' + image1200x800 + '" data-toggle="lightbox" data-title="View photo" data-footer="<a target=_blank href=\'' + fullImage + '\'>Open full image</a><br>' + v.description + '" data-gallery="gallery-' + albumId + '"><img src="' + imgSrc + '" class="img-fluid preview-album-photo"></a></li>');
+                            let template = Utils.getTemplate('photoAlbumPreviewTemplate', {
+                                bigSrc: bigSrc,
+                                originalSrc: originalSrc,
+                                description: v.description,
+                                albumId: albumId,
+                                previewSrc: previewSrc
+                            });
+                            template = $('<li class="list-inline-item"</li>').append(template);
+                            viewAlbumContent.append(template);
                         });
                         viewAlbumContent.append('</ul>');
                     });
@@ -2976,10 +2987,11 @@ class Utils {
     }
 
     static getTemplate(id, params) {
+        params = params || [];
         let element = $('#' + id)
             .clone()
-            .attr('id', '')
-            .attr('style', '');
+            .removeAttr('id')
+            .removeAttr('style');
         let elementHtml = element[0].outerHTML;
         Object.keys(params).forEach(function (key) {
             let value = params[key];
@@ -29016,11 +29028,42 @@ class Blog {
         return this.swarm.get(this.prefix + 'videoalbum/' + id + '/info.json');
     }
 
-    uploadFileToVideoalbum(albumId, file, onProgress) {
+    saveVideoAlbumInfo(id, info) {
+        return this.sendRawFile(this.prefix + "videoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json');
+    }
+
+    uploadFileToVideoalbum(albumId, file, onProgress, fileInfo) {
+        let self = this;
         let fileName = this.prefix + "videoalbum/" + albumId + "/" + file.name;
+
         return this.sendRawFile(fileName, file, file.type, null, null, onProgress)
             .then(function (response) {
-                return {fileName: fileName, response: response.data};
+                if (fileInfo) {
+                    return self.getAlbumInfo(albumId)
+                        .then(function (response) {
+                            let data = response.data;
+                            if (data.videos) {
+                                data.videos.push(fileInfo);
+                            } else {
+                                data.videos = [
+                                    fileInfo
+                                ];
+                            }
+
+                            return self.saveVideoAlbumInfo(albumId, data);
+                        })
+                        .then(function (response) {
+                            return {
+                                fileName: fileName,
+                                response: response.data
+                            };
+                        });
+                } else {
+                    return {
+                        fileName: fileName,
+                        response: response.data
+                    };
+                }
             });
     }
 
@@ -29061,11 +29104,11 @@ class Blog {
                     data.push(newAlbumInfo);
                     console.log('album info');
                     console.log(data);
-                    return self.saveAlbumsInfo(data).then(function (response) {
+                    return self.savePhotoAlbumsInfo(data).then(function (response) {
                         return navigateAndSaveProfile(response);
                     });
                 }).catch(function () {
-                    return self.saveAlbumsInfo([newAlbumInfo]).then(function (response) {
+                    return self.savePhotoAlbumsInfo([newAlbumInfo]).then(function (response) {
                         return navigateAndSaveProfile(response);
                     });
                 });
@@ -29093,7 +29136,7 @@ class Blog {
         return this.swarm.get(this.prefix + 'photoalbum/info.json');
     }
 
-    saveAlbumsInfo(data) {
+    savePhotoAlbumsInfo(data) {
         return this.sendRawFile(this.prefix + "photoalbum/info.json", JSON.stringify(data), 'application/json');
     }
 
@@ -29117,7 +29160,7 @@ class Blog {
                     });
                 }
 
-                return self.saveAlbumsInfo(newAlbums);
+                return self.savePhotoAlbumsInfo(newAlbums);
             });
     }
 
