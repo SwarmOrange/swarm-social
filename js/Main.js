@@ -99,6 +99,11 @@ class Main {
         };
 
         getAddress(address, function (address) {
+            if (!address) {
+                self.initByHash();
+                return;
+            }
+
             ensUtility.contract.getHash.call(address, function (error, result) {
                 console.log([error, result]);
                 if (error) {

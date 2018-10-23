@@ -838,6 +838,9 @@ class Main {
                         // metamask installed, but blocked
                         if (result.length === 0) {
                             Utils.flashMessage('Please, select main Ethereum account, unlock MetaMask and reload this page.');
+                            if (onComplete) {
+                                onComplete('');
+                            }
                         } else {
                             // metamask installed and accounts available
                             web3.eth.defaultAccount = result[0];
@@ -851,6 +854,11 @@ class Main {
         };
 
         getAddress(address, function (address) {
+            if (!address) {
+                self.initByHash();
+                return;
+            }
+            
             ensUtility.contract.getHash.call(address, function (error, result) {
                 console.log([error, result]);
                 if (error) {
