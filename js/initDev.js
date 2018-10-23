@@ -20,7 +20,7 @@ let modules = window.socialModules || {
 
 window.Blog = new modules.Blog();
 window.myMain = new modules.Main(modules.Blog, window.Blog);
-new modules.Photoalbum(myMain);
+window.photoalbum = new modules.Photoalbum(myMain);
 window.vkImport = new modules.VKImport(myMain);
 new modules.Videoplaylist(myMain);
 window.ensUtility = new modules.EnsUtility(myMain);

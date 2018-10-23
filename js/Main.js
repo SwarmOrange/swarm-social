@@ -701,8 +701,8 @@ class Main {
                 } else if (v.type === "photo") {
                     let content = photoAttachment
                         .clone()
-                        .attr('id', '')
-                        .attr('style', '')
+                        .removeAttr('id')
+                        .removeAttr('style')
                         .attr('data-post-id', data.id)
                         .attr('data-attachment-id', v.id);
                     content.find('.delete-post-content')
@@ -711,11 +711,12 @@ class Main {
                     let fullUrl = self.swarm.getFullUrl(v.url, userHash);
                     let previewUrl = self.swarm.getFullUrl(v.url, userHash);
                     if ('previews' in v) {
-                        previewUrl = self.swarm.getFullUrl(v.previews['250x250'], userHash);
+                        let photoTemplate = photoalbum.getPreviewTemplate(data.id, v, 'size-179');
                         content
                             .addClass('list-inline-item')
                             .find('.content')
-                            .html('<a href="' + fullUrl + '" data-toggle="lightbox" data-title="View photo" data-footer="" data-gallery="post-images-' + data.id + '"><img class="size-179" src="' + previewUrl + '"></a>');
+                            .append(photoTemplate);
+                        //.html('<a href="' + fullUrl + '" data-toggle="lightbox" data-title="View photo" data-footer="" data-gallery="post-images-' + data.id + '"><img class="size-179" src="' + previewUrl + '"></a>');
                     } else {
                         content.find('.content').html('<img src="' + fullUrl + '">');
                     }

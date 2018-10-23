@@ -1456,8 +1456,8 @@ class Main {
                 } else if (v.type === "photo") {
                     let content = photoAttachment
                         .clone()
-                        .attr('id', '')
-                        .attr('style', '')
+                        .removeAttr('id')
+                        .removeAttr('style')
                         .attr('data-post-id', data.id)
                         .attr('data-attachment-id', v.id);
                     content.find('.delete-post-content')
@@ -1466,11 +1466,12 @@ class Main {
                     let fullUrl = self.swarm.getFullUrl(v.url, userHash);
                     let previewUrl = self.swarm.getFullUrl(v.url, userHash);
                     if ('previews' in v) {
-                        previewUrl = self.swarm.getFullUrl(v.previews['250x250'], userHash);
+                        let photoTemplate = photoalbum.getPreviewTemplate(data.id, v, 'size-179');
                         content
                             .addClass('list-inline-item')
                             .find('.content')
-                            .html('<a href="' + fullUrl + '" data-toggle="lightbox" data-title="View photo" data-footer="" data-gallery="post-images-' + data.id + '"><img class="size-179" src="' + previewUrl + '"></a>');
+                            .append(photoTemplate);
+                        //.html('<a href="' + fullUrl + '" data-toggle="lightbox" data-title="View photo" data-footer="" data-gallery="post-images-' + data.id + '"><img class="size-179" src="' + previewUrl + '"></a>');
                     } else {
                         content.find('.content').html('<img src="' + fullUrl + '">');
                     }
@@ -2076,26 +2077,7 @@ class Photoalbum {
                         let data = response.data;
                         viewAlbumContent.html('<ul id="preview-album" class="list-inline">');
                         data.photos.forEach(function (v) {
-                            let previewSrc = self.main.swarm.getFullUrl(v.file);
-                            let originalSrc = previewSrc;
-                            let bigSrc = previewSrc;
-                            if ('previews' in v) {
-                                if ('250x250' in v.previews) {
-                                    previewSrc = self.main.swarm.getFullUrl(v.previews['250x250']);
-                                }
-
-                                if ('1200x800' in v.previews) {
-                                    bigSrc = self.main.swarm.getFullUrl(v.previews['1200x800']);
-                                }
-                            }
-
-                            let template = Utils.getTemplate('photoAlbumPreviewTemplate', {
-                                bigSrc: bigSrc,
-                                originalSrc: originalSrc,
-                                description: v.description,
-                                albumId: albumId,
-                                previewSrc: previewSrc
-                            });
+                            let template = self.getPreviewTemplate(albumId, v, 'img-fluid preview-album-photo');
                             template = $('<li class="list-inline-item"</li>').append(template);
                             viewAlbumContent.append(template);
                         });
@@ -2250,6 +2232,31 @@ class Photoalbum {
                         });
                 }
             });
+    }
+
+    getPreviewTemplate(albumId, previewObject, imgClasses) {
+        let self = this;
+        let previewSrc = self.main.swarm.getFullUrl(previewObject.file ? previewObject.file : previewObject.url);
+        let originalSrc = previewSrc;
+        let bigSrc = previewSrc;
+        if ('previews' in previewObject) {
+            if ('250x250' in previewObject.previews) {
+                previewSrc = self.main.swarm.getFullUrl(previewObject.previews['250x250']);
+            }
+
+            if ('1200x800' in previewObject.previews) {
+                bigSrc = self.main.swarm.getFullUrl(previewObject.previews['1200x800']);
+            }
+        }
+
+        return Utils.getTemplate('photoAlbumPreviewTemplate', {
+            bigSrc: bigSrc,
+            originalSrc: originalSrc,
+            description: previewObject.description ? previewObject.description : '',
+            albumId: albumId,
+            previewSrc: previewSrc,
+            imgClasses: imgClasses
+        });
     }
 }
 
@@ -3735,7 +3742,7 @@ let modules = window.socialModules || {
 
 window.Blog = new modules.Blog();
 window.myMain = new modules.Main(modules.Blog, window.Blog);
-new modules.Photoalbum(myMain);
+window.photoalbum = new modules.Photoalbum(myMain);
 window.vkImport = new modules.VKImport(myMain);
 new modules.Videoplaylist(myMain);
 window.ensUtility = new modules.EnsUtility(myMain);
