@@ -83,6 +83,9 @@ class Main {
                         // metamask installed, but blocked
                         if (result.length === 0) {
                             Utils.flashMessage('Please, select main Ethereum account, unlock MetaMask and reload this page.');
+                            if (onComplete) {
+                                onComplete('');
+                            }
                         } else {
                             // metamask installed and accounts available
                             web3.eth.defaultAccount = result[0];
