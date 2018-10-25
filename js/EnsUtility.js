@@ -1,7 +1,8 @@
 class EnsUtility {
     constructor(main) {
-        this.contractAddressRopsten = '0xbe4e53e1c334199c5e3bae2f82a4a11568a053fd';
-        this.contractAddressRinkeby = '0x717d30089a61876e085bdea87e8d4ae48fd267f6';
+        //this.contractAddressRopsten = '0xbe4e53e1c334199c5e3bae2f82a4a11568a053fd';
+        //this.contractAddressRopsten = '---';
+        this.contractAddressRinkeby = '0xde8c952b50dd6b490bc0ba1b7018cd2bac38994e';
         this.networkName = {
             '1': 'mainnet',
             '3': 'ropsten',
@@ -19,8 +20,8 @@ class EnsUtility {
 
     init() {
         let self = this;
-        this.contract = self.getUsersContract(self.contractAddressRinkeby);
-        if (this.contract) {
+        self.contract = self.getUsersContract(self.contractAddressRinkeby);
+        if (self.contract) {
             //$('.save-blockchain').removeAttr('disabled');
         } else {
             $('.save-blockchain').attr('disabled', 'disabled');
@@ -40,7 +41,8 @@ class EnsUtility {
         console.log(this.ens);
         web3.version.getNetwork(function (error, result) {
             if (error) {
-                console.error(error);
+                //console.error(error);
+                console.error('getNetwork error');
                 $('.save-ens').hide();
 
                 return;
@@ -93,6 +95,7 @@ class EnsUtility {
                     if (error) {
                         Utils.flashMessage('Transaction error or cancelled', 'danger');
                     } else {
+                        self.main.isCheckHashChange = false;
                         window.location.hash = '';
                         Utils.flashMessage('Transaction complete');
                     }
@@ -120,10 +123,48 @@ class EnsUtility {
                 "type": "function"
             },
             {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "username",
+                        "type": "string"
+                    }
+                ],
+                "name": "setUsername",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
                 "inputs": [],
                 "payable": false,
                 "stateMutability": "nonpayable",
                 "type": "constructor"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "username",
+                        "type": "string"
+                    }
+                ],
+                "name": "getAddressByUsername",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
             },
             {
                 "constant": true,
@@ -146,6 +187,39 @@ class EnsUtility {
             },
             {
                 "constant": true,
+                "inputs": [],
+                "name": "getMyUsername",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "wallet",
+                        "type": "address"
+                    }
+                ],
+                "name": "getUsername",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
                 "inputs": [
                     {
                         "name": "",
@@ -156,6 +230,10 @@ class EnsUtility {
                 "outputs": [
                     {
                         "name": "SwarmHash",
+                        "type": "string"
+                    },
+                    {
+                        "name": "Username",
                         "type": "string"
                     }
                 ],

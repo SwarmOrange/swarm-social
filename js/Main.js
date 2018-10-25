@@ -11,11 +11,11 @@ class Main {
         this.currentPhotosForAlbum = [];
         this.photoAlbumPhotoId = 0;
 
-        this.initDocument();
-        this.init();
+        this.setupJquery();
     }
 
-    initDocument() {
+    setupJquery() {
+        //$('#v-pills-messages-tab').click();
         let self = this;
         $(document).on('click', '[data-toggle="lightbox"]', function (event) {
             event.preventDefault();
@@ -26,171 +26,7 @@ class Main {
             let hashOrAddress = window.location.hash.substring(1);
             self.loadPageInfo(hashOrAddress);
         });
-    }
 
-    loadPageInfo(hashOrAddress) {
-        let self = this;
-        if (hashOrAddress) {
-            if (window.web3 && window.web3.isAddress(hashOrAddress)) {
-                self.getHashByAddress(hashOrAddress);
-            } else if (self.blogClass.isCorrectSwarmHash(hashOrAddress)) {
-                self.initByHash(hashOrAddress);
-            } else {
-                Utils.flashMessage('Incorrect hash after # in url. Fix it and reload page.');
-            }
-        } else {
-            // todo check with not only metamask but official client
-            // load profile by current Ethereum address
-            if (web3.currentProvider.isMetaMask) {
-                console.log('yes, metamask');
-                self.getHashByAddress();
-            } else {
-                console.log('not metamask');
-                self.initByHash();
-                Utils.flashMessage('Hi! Please install Metamask plugin, enter information about you and click "Save page to Blockchain"');
-            }
-        }
-    }
-
-    getHashByAddress(address) {
-        let self = this;
-        let getAddress = function (address, onComplete) {
-            web3.version.getNetwork(function (error, result) {
-                let networkId = result;
-                console.log('Network id: ' + networkId);
-                if (![3, 4].indexOf(networkId)) {
-                    alert('Please, change network in Metamask to Ropsten/Rinkeby and reload page');
-                    return;
-                }
-
-                if (networkId == 3) {
-                    ensUtility.contract = ensUtility.getUsersContract(ensUtility.contractAddressRopsten);
-                } else if (networkId == 4) {
-                    ensUtility.contract = ensUtility.getUsersContract(ensUtility.contractAddressRinkeby);
-                }
-
-                if (address) {
-                    if (onComplete) {
-                        onComplete(address);
-                    }
-                } else {
-                    web3.eth.getAccounts(function (error, result) {
-                        if (error) {
-                            console.error(error);
-                        }
-
-                        console.log(result);
-                        // metamask installed, but blocked
-                        if (result.length === 0) {
-                            Utils.flashMessage('Please, select main Ethereum account, unlock MetaMask and reload this page.');
-                            if (onComplete) {
-                                onComplete('');
-                            }
-                        } else {
-                            // metamask installed and accounts available
-                            web3.eth.defaultAccount = result[0];
-                            if (onComplete) {
-                                onComplete(web3.eth.defaultAccount);
-                            }
-                        }
-                    });
-                }
-            });
-        };
-
-        getAddress(address, function (address) {
-            if (!address) {
-                self.initByHash();
-                return;
-            }
-
-            ensUtility.contract.getHash.call(address, function (error, result) {
-                console.log([error, result]);
-                if (error) {
-                    // some error - try to init by current uploaded hash (empty user)
-                    console.log(error);
-                    self.initByHash();
-                } else if (result) {
-                    // user exists - init by swarm hash
-                    self.initByHash(result);
-                } else {
-                    // user has metamask but he is not registered
-                    self.initByHash();
-                    Utils.flashMessage('Hi! Please enter information about you and click "Save page to Blockchain"');
-                }
-            });
-        });
-    }
-
-    initByHash(hash) {
-        let self = this;
-        console.log('hash from window hash: ' + hash);
-        let swarmHost = window.location.protocol + "//" + window.location.host;
-        if (window.location.hostname === "mem.lt") {
-            swarmHost = "https://swarm-gateways.net";
-        } else if (window.location.hostname === "tut.bike") {
-            swarmHost = "http://beefree.me";
-        } else if (window.location.hostname === "localhost") {
-            swarmHost = "http://127.0.0.1:8500";
-        }
-
-        self.swarm = new SwarmApi(swarmHost, "");
-        self.blog.swarm = self.swarm;
-        let isValid = (hash || self.blog.uploadedSwarmHash).length > 0;
-        if (isValid) {
-            $('#userRegistration').hide();
-            $('#userInfo').show();
-        } else {
-            $('#userRegistration').show();
-            $('#userInfo').hide();
-        }
-
-        let initHash = hash ? hash : self.blog.uploadedSwarmHash;
-        console.log('selected hash: ' + initHash);
-        self.swarm.applicationHash = initHash;
-        //console.log(self.swarm.applicationHash);
-        if (self.swarm.applicationHash) {
-            self.updateProfile();
-        }
-
-    }
-
-    updateProfile() {
-        let self = this;
-        return this.blog.getMyProfile()
-            .then(function (response) {
-                let data = response.data;
-                console.log(data);
-                self.blog.setMyProfile(data);
-                self.updateInfo(data);
-            })
-            .catch(function (error) {
-                console.log(error);
-                // todo check is debug version. if debug - show message that Debug version not support create new user
-                Utils.flashMessage('User not found or swarm hash expired - ' + self.swarm.applicationHash, 'danger');
-            })
-            .then(function () {
-                // always executed
-            });
-    }
-
-    onAfterHashChange(newHash, notUpdateProfile) {
-        //console.log([newHash, notUpdateProfile]);
-        this.swarm.applicationHash = newHash;
-        localStorage.setItem('applicationHash', newHash);
-        this.isCheckHashChange = false;
-        window.location.hash = newHash;
-        $('.save-blockchain').removeAttr('disabled');
-        if (notUpdateProfile) {
-            return null;
-        } else {
-            return this.updateProfile();
-        }
-    }
-
-    init() {
-        //$('#v-pills-messages-tab').click();
-        let self = this;
         $(window).on('hashchange', function (data) {
             //console.log([self.isCheckHashChange, data]);
             if (self.isCheckHashChange) {
@@ -403,6 +239,191 @@ class Main {
         $('.import-instagram-cancel').click(function () {
             $('.import-insta-panel').hide('fast');
         });
+    }
+
+    loadPageInfo(hashOrAddress) {
+        let self = this;
+        if (hashOrAddress) {
+            if (window.web3 && window.web3.isAddress(hashOrAddress)) {
+                self.getHashByAddress(hashOrAddress);
+            } else if (self.blogClass.isCorrectSwarmHash(hashOrAddress)) {
+                self.initByHash(hashOrAddress);
+            } else {
+                Utils.flashMessage('Incorrect hash after # in url. Fix it and reload page.');
+            }
+        } else {
+            // todo check with not only metamask but official client
+            // load profile by current Ethereum address
+            if (web3.currentProvider.isMetaMask) {
+                console.log('yes, metamask');
+                self.getHashByAddress();
+            } else {
+                console.log('not metamask');
+                self.initByHash();
+                //Utils.flashMessage('Hi! Please install Metamask plugin, enter information about you and click "Save page to Blockchain"');
+            }
+        }
+    }
+
+    getHashByAddress(address) {
+        let self = this;
+        let getAddress = function (address, onComplete) {
+            web3.version.getNetwork(function (error, result) {
+                let networkId = result;
+                console.log([error, result]);
+                console.log('Network id: ' + networkId);
+                if (![3, 4].indexOf(networkId)) {
+                    alert('Please, change network in Metamask to Ropsten/Rinkeby and reload page');
+                    return;
+                }
+
+                /*if (networkId == 3) {
+                    ensUtility.contract = ensUtility.getUsersContract(ensUtility.contractAddressRopsten);
+                } else if (networkId == 4) {
+                    ensUtility.contract = ensUtility.getUsersContract(ensUtility.contractAddressRinkeby);
+                }*/
+
+                if (address) {
+                    if (onComplete) {
+                        onComplete(address);
+                    }
+                } else {
+                    web3.eth.getAccounts(function (error, result) {
+                        if (error) {
+                            console.error(error);
+                        }
+
+                        console.log(result);
+                        // metamask installed, but blocked
+                        if (result.length === 0) {
+                            console.log('result.length === 0');
+                            //Utils.flashMessage('Please, unlock MetaMask plugin (click by plugin icon and enter password) and reload this page.');
+                            if (onComplete) {
+                                onComplete('');
+                            }
+                        } else {
+                            console.log('result[0] === ' + result[0]);
+
+                            // metamask installed and accounts available
+                            web3.eth.defaultAccount = result[0];
+                            if (onComplete) {
+                                onComplete(web3.eth.defaultAccount);
+                            }
+                        }
+                    });
+                }
+            });
+        };
+
+        getAddress(address, function (address) {
+            if (!address) {
+                console.log('EEEE');
+                self.initByHash();
+                return;
+            }
+
+            console.log('WWWWW');
+
+            ensUtility.contract.getMyUsername.call(function (error, result) {
+                console.log('AAAAAZZZZ');
+                console.log([error, result]);
+                if (result) {
+                    self.showRegistration(false);
+                } else {
+                    self.showRegistration(true);
+                }
+            });
+
+            ensUtility.contract.getHash.call(address, function (error, result) {
+                console.log('ensUtility.contract.getHash.call');
+                //alert(error);
+                console.log([error, result]);
+                if (error) {
+                    // some error - try to init by current uploaded hash (empty user)
+                    console.log(error);
+                    self.initByHash();
+                } else if (result) {
+                    // user exists - init by swarm hash
+                    self.initByHash(result);
+                } else {
+                    // user has metamask but he is not registered
+                    self.initByHash();
+                    //Utils.flashMessage('Hi! Please enter information about you and click "Save page to Blockchain"');
+                }
+            });
+        });
+    }
+
+    initByHash(hash) {
+        let self = this;
+        console.log('passed hash: ' + hash);
+        let swarmHost = window.location.protocol + "//" + window.location.host;
+        if (window.location.hostname === "mem.lt") {
+            swarmHost = "https://swarm-gateways.net";
+        } else if (window.location.hostname === "tut.bike") {
+            swarmHost = "http://beefree.me";
+        } else if (window.location.hostname === "localhost") {
+            swarmHost = "http://127.0.0.1:8500";
+        }
+
+        self.swarm = new SwarmApi(swarmHost, "");
+        self.blog.swarm = self.swarm;
+        //let isValid = (hash || self.blog.uploadedSwarmHash).length > 0;
+        let initHash = hash ? hash : self.blog.uploadedSwarmHash;
+        console.log('selected hash: ' + initHash);
+        self.swarm.applicationHash = initHash;
+        //console.log(self.swarm.applicationHash);
+        //self.showRegistration(!isValid);
+        //self.showRegistration(!hash || hash.length === 0);
+        if (self.swarm.applicationHash) {
+            self.updateProfile();
+        }
+    }
+
+    showRegistration(isShow) {
+        console.log('SHOW REG: ' + isShow);
+        if (isShow) {
+            $('#userRegistration').show();
+            $('#userInfo').hide();
+            $('header').hide();
+        } else {
+            $('#userRegistration').hide();
+            $('#userInfo').show();
+            $('header').show();
+        }
+    }
+
+    updateProfile() {
+        let self = this;
+        return this.blog.getMyProfile()
+            .then(function (response) {
+                let data = response.data;
+                console.log(data);
+                self.blog.setMyProfile(data);
+                self.updateInfo(data);
+            })
+            .catch(function (error) {
+                console.log(error);
+                // todo check is debug version. if debug - show message that Debug version not support create new user
+                Utils.flashMessage('User not found or swarm hash expired - ' + self.swarm.applicationHash, 'danger');
+            })
+            .then(function () {
+                // always executed
+            });
+    }
+
+    onAfterHashChange(newHash, notUpdateProfile) {
+        //console.log([newHash, notUpdateProfile]);
+        this.swarm.applicationHash = newHash;
+        localStorage.setItem('applicationHash', newHash);
+        this.isCheckHashChange = false;
+        window.location.hash = newHash;
+        $('.save-blockchain').removeAttr('disabled');
+        if (notUpdateProfile) {
+            return null;
+        } else {
+            return this.updateProfile();
+        }
     }
 
     uploadAllInstaPhotos() {
