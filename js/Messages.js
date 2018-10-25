@@ -103,22 +103,13 @@ class Messages {
 
 
         $('.btn-send-message-current-user').click(function (e) {
-            // todo add user to dialog and show message input
-            // how to get current user wallet?
+            $('#v-pills-messages-tab').click();
+            self.addDialog(self.main.currentUserLogin);
         });
 
         $('.btn-messages-add-dialog').click(function (e) {
             let newUserWallet = $('.messages-new-dialog').val();
-            if (!newUserWallet || !web3.isAddress(newUserWallet)) {
-                self.main.alert('Enter correct Ethereum wallet');
-                return;
-            }
-
-            self.setDialogByWallet(newUserWallet)
-                .then(function (data) {
-                    $('.chat_list[data-user-hash="' + newUserWallet + '"]').click();
-                });
-            $('#addDialogModal').modal('hide');
+            self.addDialog(newUserWallet);
         });
 
         $('#v-pills-messages-tab').click(function (e) {
@@ -134,6 +125,20 @@ class Messages {
                     console.log(e);
                 });
         });
+    }
+
+    addDialog(newUserWallet) {
+        let self = this;
+        if (!newUserWallet || !web3.isAddress(newUserWallet)) {
+            self.main.alert('Enter correct Ethereum wallet');
+            return;
+        }
+
+        self.setDialogByWallet(newUserWallet)
+            .then(function (data) {
+                $('.chat_list[data-user-hash="' + newUserWallet + '"]').click();
+            });
+        $('#addDialogModal').modal('hide');
     }
 
     drawCorrespondence(myWallet, receiverWallet, myMsgInfo, receiverMsgInfo) {

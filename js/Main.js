@@ -10,8 +10,17 @@ class Main {
         this.currentPhotoAlbum = 0;
         this.currentPhotosForAlbum = [];
         this.photoAlbumPhotoId = 0;
+        this.currentUserLogin = null;
+        this.my = {
+            username: null
+        };
 
         this.setupJquery();
+    }
+
+    isMyPage() {
+        console.log([this.currentUserLogin, this.my, web3.eth.defaultAccount]);
+        return (this.currentUserLogin || this.my.username) && (this.currentUserLogin === this.my.username || this.currentUserLogin === web3.eth.defaultAccount);
     }
 
     setupJquery() {
@@ -258,6 +267,7 @@ class Main {
 
     loadPageInfo(hashOrAddress) {
         let self = this;
+        self.currentUserLogin = hashOrAddress;
         if (hashOrAddress) {
             if (window.web3 && window.web3.isAddress(hashOrAddress)) {
                 self.getHashByAddress(hashOrAddress);
@@ -271,7 +281,9 @@ class Main {
             // load profile by current Ethereum address
             if (web3.currentProvider.isMetaMask) {
                 console.log('yes, metamask');
-                self.getHashByAddress();
+                self.getHashByAddress(null, function (hashOrAddress) {
+                    self.currentUserLogin = hashOrAddress;
+                });
             } else {
                 console.log('not metamask');
                 self.initByHash();
@@ -280,7 +292,7 @@ class Main {
         }
     }
 
-    getHashByAddress(address) {
+    getHashByAddress(address, onReceiveAddress) {
         let self = this;
         let getAddress = function (address, onComplete) {
             web3.version.getNetwork(function (error, result) {
@@ -331,6 +343,10 @@ class Main {
         };
 
         getAddress(address, function (address) {
+            if (onReceiveAddress) {
+                onReceiveAddress(address);
+            }
+
             if (!address) {
                 console.log('EEEE');
                 self.initByHash();
@@ -410,6 +426,8 @@ class Main {
 
     updateProfile() {
         let self = this;
+        self.preparePage(self.isMyPage());
+
         return this.blog.getMyProfile()
             .then(function (response) {
                 let data = response.data;
@@ -425,6 +443,16 @@ class Main {
             .then(function () {
                 // always executed
             });
+    }
+
+    preparePage(isMy) {
+        if (isMy) {
+            $('.btn-send-message-current-user').hide();
+            $('#postBlock').show();
+        } else {
+            $('.btn-send-message-current-user').show();
+            $('#postBlock').hide();
+        }
     }
 
     onAfterHashChange(newHash, notUpdateProfile) {

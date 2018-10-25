@@ -843,8 +843,17 @@ class Main {
         this.currentPhotoAlbum = 0;
         this.currentPhotosForAlbum = [];
         this.photoAlbumPhotoId = 0;
+        this.currentUserLogin = null;
+        this.my = {
+            username: null
+        };
 
         this.setupJquery();
+    }
+
+    isMyPage() {
+        console.log([this.currentUserLogin, this.my, web3.eth.defaultAccount]);
+        return (this.currentUserLogin || this.my.username) && (this.currentUserLogin === this.my.username || this.currentUserLogin === web3.eth.defaultAccount);
     }
 
     setupJquery() {
@@ -998,21 +1007,36 @@ class Main {
         $('.add-follower').click(function (e) {
             e.preventDefault();
             let followerHash = $('#followerHash');
-            let swarmHash = followerHash.val();
-            console.log(swarmHash);
+            let walletOrNickname = followerHash.val();
+            //console.log(walletOrNickname);
             //if (self.blogClass.isCorrectSwarmHash(swarmHash)) {
-            if (web3.isAddress(swarmHash)) {
-                $('#addFollowerModal').modal('hide');
-                followerHash.val('');
+            let addFollower = function (walletOrNickname) {
                 try {
-                    self.blog.addIFollow(swarmHash).then(function (response) {
-                        self.onAfterHashChange(response.data);
-                    });
+                    self.blog.addIFollow(walletOrNickname)
+                        .then(function (response) {
+                            self.onAfterHashChange(response.data);
+                        });
                 } catch (e) {
                     self.alert(e);
                 }
+            };
+
+            if (web3.isAddress(walletOrNickname)) {
+                $('#addFollowerModal').modal('hide');
+                followerHash.val('');
+                addFollower(walletOrNickname);
             } else {
-                self.alert('Please, enter correct SWARM hash');
+                //self.alert('Please, enter correct SWARM hash');
+                ensUtility.contract.getAddressByUsername.call(walletOrNickname, function (error, result) {
+                    $('#addFollowerModal').modal('hide');
+                    console.log([error, result]);
+                    if (web3.isAddress(result)) {
+                        addFollower(result);
+                        followerHash.val('');
+                    } else {
+                        self.alert('User not found', []);
+                    }
+                });
             }
         });
 
@@ -1076,6 +1100,7 @@ class Main {
 
     loadPageInfo(hashOrAddress) {
         let self = this;
+        self.currentUserLogin = hashOrAddress;
         if (hashOrAddress) {
             if (window.web3 && window.web3.isAddress(hashOrAddress)) {
                 self.getHashByAddress(hashOrAddress);
@@ -1089,7 +1114,9 @@ class Main {
             // load profile by current Ethereum address
             if (web3.currentProvider.isMetaMask) {
                 console.log('yes, metamask');
-                self.getHashByAddress();
+                self.getHashByAddress(null, function (hashOrAddress) {
+                    self.currentUserLogin = hashOrAddress;
+                });
             } else {
                 console.log('not metamask');
                 self.initByHash();
@@ -1098,7 +1125,7 @@ class Main {
         }
     }
 
-    getHashByAddress(address) {
+    getHashByAddress(address, onReceiveAddress) {
         let self = this;
         let getAddress = function (address, onComplete) {
             web3.version.getNetwork(function (error, result) {
@@ -1149,6 +1176,10 @@ class Main {
         };
 
         getAddress(address, function (address) {
+            if (onReceiveAddress) {
+                onReceiveAddress(address);
+            }
+
             if (!address) {
                 console.log('EEEE');
                 self.initByHash();
@@ -1228,6 +1259,8 @@ class Main {
 
     updateProfile() {
         let self = this;
+        self.preparePage(self.isMyPage());
+
         return this.blog.getMyProfile()
             .then(function (response) {
                 let data = response.data;
@@ -1243,6 +1276,16 @@ class Main {
             .then(function () {
                 // always executed
             });
+    }
+
+    preparePage(isMy) {
+        if (isMy) {
+            $('.btn-send-message-current-user').hide();
+            $('#postBlock').show();
+        } else {
+            $('.btn-send-message-current-user').show();
+            $('#postBlock').hide();
+        }
     }
 
     onAfterHashChange(newHash, notUpdateProfile) {
@@ -1781,18 +1824,14 @@ class Messages {
             });
 
 
+        $('.btn-send-message-current-user').click(function (e) {
+            $('#v-pills-messages-tab').click();
+            self.addDialog(self.main.currentUserLogin);
+        });
+
         $('.btn-messages-add-dialog').click(function (e) {
             let newUserWallet = $('.messages-new-dialog').val();
-            if (!newUserWallet || !web3.isAddress(newUserWallet)) {
-                self.main.alert('Enter correct Ethereum wallet');
-                return;
-            }
-
-            self.setDialogByWallet(newUserWallet)
-                .then(function (data) {
-                    $('.chat_list[data-user-hash="' + newUserWallet + '"]').click();
-                });
-            $('#addDialogModal').modal('hide');
+            self.addDialog(newUserWallet);
         });
 
         $('#v-pills-messages-tab').click(function (e) {
@@ -1808,6 +1847,20 @@ class Messages {
                     console.log(e);
                 });
         });
+    }
+
+    addDialog(newUserWallet) {
+        let self = this;
+        if (!newUserWallet || !web3.isAddress(newUserWallet)) {
+            self.main.alert('Enter correct Ethereum wallet');
+            return;
+        }
+
+        self.setDialogByWallet(newUserWallet)
+            .then(function (data) {
+                $('.chat_list[data-user-hash="' + newUserWallet + '"]').click();
+            });
+        $('#addDialogModal').modal('hide');
     }
 
     drawCorrespondence(myWallet, receiverWallet, myMsgInfo, receiverMsgInfo) {
