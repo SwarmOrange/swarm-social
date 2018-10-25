@@ -118,7 +118,8 @@
             <div class="col-lg-7 my-auto">
                 <div class="header-content mx-auto">
                     <h1 class="mb-5">Decentralized social network where only you own your data!</h1>
-                    <a href="#" class="btn btn-outline btn-lg js-scroll-trigger btn-start-now">Register with Metamask</a>
+                    <a href="#" class="btn btn-outline btn-lg js-scroll-trigger btn-start-now">Register with
+                        Metamask</a>
                     <a href="#" class="btn btn-outline btn-lg js-scroll-trigger btn-start-now-login">Login</a>
                 </div>
             </div>
@@ -250,14 +251,20 @@
                                             data-target="#uploadAvatarModal" style="width: 100%">Upload avatar
                                     </button>
                                 </p>
-                                <p>
+                                <!--<p>
                                     <button id="sendCryptoButton" type="button" class="btn btn-primary"
                                             data-toggle="modal"
                                             data-target="#sendCryptoModal" style="width: 100%">
                                         Send crypto
                                     </button>
+                                </p>-->
+                                <p>
+                                    <button type="button"
+                                            class="btn btn-primary btn-send-message-current-user"
+                                            style="width: 100%">
+                                        Send message
+                                    </button>
                                 </p>
-
                             </li>
                             <li>
                                 <p>Import my data from</p>
@@ -872,7 +879,7 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <input type="text" class="form-control" id="followerHash"
-                                   placeholder="Follower Ethereum wallet">
+                                   placeholder="Username or Ethereum wallet">
                         </div>
                     </div>
                     <div class="modal-footer">

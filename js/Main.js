@@ -165,21 +165,36 @@ class Main {
         $('.add-follower').click(function (e) {
             e.preventDefault();
             let followerHash = $('#followerHash');
-            let swarmHash = followerHash.val();
-            console.log(swarmHash);
+            let walletOrNickname = followerHash.val();
+            //console.log(walletOrNickname);
             //if (self.blogClass.isCorrectSwarmHash(swarmHash)) {
-            if (web3.isAddress(swarmHash)) {
-                $('#addFollowerModal').modal('hide');
-                followerHash.val('');
+            let addFollower = function (walletOrNickname) {
                 try {
-                    self.blog.addIFollow(swarmHash).then(function (response) {
-                        self.onAfterHashChange(response.data);
-                    });
+                    self.blog.addIFollow(walletOrNickname)
+                        .then(function (response) {
+                            self.onAfterHashChange(response.data);
+                        });
                 } catch (e) {
                     self.alert(e);
                 }
+            };
+
+            if (web3.isAddress(walletOrNickname)) {
+                $('#addFollowerModal').modal('hide');
+                followerHash.val('');
+                addFollower(walletOrNickname);
             } else {
-                self.alert('Please, enter correct SWARM hash');
+                //self.alert('Please, enter correct SWARM hash');
+                ensUtility.contract.getAddressByUsername.call(walletOrNickname, function (error, result) {
+                    $('#addFollowerModal').modal('hide');
+                    console.log([error, result]);
+                    if (web3.isAddress(result)) {
+                        addFollower(result);
+                        followerHash.val('');
+                    } else {
+                        self.alert('User not found', []);
+                    }
+                });
             }
         });
 

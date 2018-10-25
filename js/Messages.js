@@ -102,6 +102,11 @@ class Messages {
             });
 
 
+        $('.btn-send-message-current-user').click(function (e) {
+            // todo add user to dialog and show message input
+            // how to get current user wallet?
+        });
+
         $('.btn-messages-add-dialog').click(function (e) {
             let newUserWallet = $('.messages-new-dialog').val();
             if (!newUserWallet || !web3.isAddress(newUserWallet)) {
