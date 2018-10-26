@@ -141,7 +141,8 @@ class Utils {
         let alertsBlock = $('.alerts');
         if (!alertsBlock.length || !alertsBlock.is(':visible')) {
             alertsBlock = $('<div class="alerts"></div>').insertAfter('header');
-        } else if (alertsBlock.is(':visible').length > 1) {
+        } else if (alertsBlock.length > 1 && $(alertsBlock[0]).is(':visible') && $(alertsBlock[1]).is(':visible')) {
+            // hide created after registration alerts block
             $(alertsBlock[0]).remove();
         }
 
