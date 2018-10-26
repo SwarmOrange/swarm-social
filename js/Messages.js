@@ -39,6 +39,7 @@ class Messages {
                     return;
                 }
 
+                console.log('Hash for messages: ' + self.main.blog.swarm.applicationHash);
                 self.main.blog.getMessageInfo()
                     .then(function (response) {
                         myMsgInfo = response.data;

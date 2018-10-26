@@ -4,7 +4,9 @@ class Main {
         this.isCheckHashChange = true;
         this.blogClass = blogClass;
         this.swarm = null;
+        this.loadedUserSwarm = null;
         this.blog = blog;
+        this.loadedUserBlog = null;
         this.cropper = null;
         this.lastLoadedPost = 0;
         this.currentPhotoAlbum = 0;
@@ -19,7 +21,7 @@ class Main {
     }
 
     isMyPage() {
-        console.log([this.currentUserLogin, this.my, web3.eth.defaultAccount]);
+        //console.log([this.currentUserLogin, this.my, web3.eth.defaultAccount]);
         return (this.currentUserLogin || this.my.username) && (this.currentUserLogin === this.my.username || this.currentUserLogin === web3.eth.defaultAccount);
     }
 
@@ -46,6 +48,11 @@ class Main {
 
             self.isCheckHashChange = true;
         });
+
+        /*$('#v-pills-home-tab').click(function (e) {
+            document.location.hash = '';
+            self.loadPageInfo(self.swarm.applicationHash);
+        });*/
 
         $('.additional-buttons').on('click', '.btn-share-item', function (e) {
             let itemType = $(this).attr('data-type');
@@ -191,16 +198,19 @@ class Main {
         $('#iFollowUsers')
             .on('click', '.load-profile', function (e) {
                 e.preventDefault();
-                document.location.hash = $(this).attr('data-profile-id');
-                document.location.reload();
+                const profileId = $(this).attr('data-profile-id');
+                document.location.hash = profileId;
+                self.loadPageInfo(profileId);
             })
             .on('click', '.delete-i-follow', function (e) {
                 e.preventDefault();
                 let id = $(this).attr('data-profile-id');
                 if (confirm('Really delete?')) {
-                    self.blog.deleteIFollow(id).then(function (response) {
-                        self.onAfterHashChange(response.data);
-                    });
+                    $(this).parent().hide();
+                    self.blog.deleteIFollow(id)
+                        .then(function (response) {
+                            self.onAfterHashChange(response.data, true);
+                        });
                 }
             });
 
@@ -248,14 +258,23 @@ class Main {
     addFollower(walletOrNickname, onClearInput) {
         const self = this;
         walletOrNickname = walletOrNickname.trim().replace('@', '').toLowerCase();
-        let addFollower = function (walletOrNickname) {
+        let addFollower = function (userWallet) {
             try {
-                self.blog.addIFollow(walletOrNickname)
-                    .then(function (response) {
-                        self.onAfterHashChange(response.data);
-                    });
+                ensUtility.contract.getHash.call(userWallet, function (error, result) {
+                    self.blog.addIFollow(userWallet)
+                        .then(function (response) {
+                            let template = Utils.getTemplate('iFollowTemplate', {
+                                userWallet: userWallet,
+                                userUrl: './' + userWallet,
+                                userAvatar: self.swarm.getFullUrl('social/file/avatar/original.jpg', result)
+                            });
+                            $('#iFollowUsers').append(template);
+                            self.onAfterHashChange(response.data, true);
+                        });
+                });
+
             } catch (e) {
-                self.alert(e);
+                Utils.flashMessage('User already added', 'warning');
             }
         };
 
@@ -279,7 +298,6 @@ class Main {
                     }
                 } else {
                     Utils.flashMessage('User not found', 'warning');
-
                 }
             });
         }
@@ -292,6 +310,7 @@ class Main {
             if (window.web3 && window.web3.isAddress(hashOrAddress)) {
                 self.getHashByAddress(hashOrAddress);
             } else if (self.blogClass.isCorrectSwarmHash(hashOrAddress)) {
+                self.showRegistration(false);
                 self.initByHash(hashOrAddress);
             } else {
                 Utils.flashMessage('Incorrect hash after # in url. Fix it and reload page.');
@@ -421,14 +440,19 @@ class Main {
 
         self.swarm = new SwarmApi(swarmHost, "");
         self.blog.swarm = self.swarm;
+        if (!self.isMyPage()) {
+            self.loadedUserSwarm = new SwarmApi(swarmHost, "");
+            self.loadedUserBlog = new self.blogClass(self.loadedUserSwarm, self.blog.ensUtility);
+            ensUtility.contract.getHash.call(web3.eth.defaultAccount, function (error, result) {
+                self.swarm.applicationHash = result;
+            });
+        }
+
         //let isValid = (hash || self.blog.uploadedSwarmHash).length > 0;
         let initHash = hash ? hash : self.blog.uploadedSwarmHash;
         console.log('selected hash: ' + initHash);
-        self.swarm.applicationHash = initHash;
-        //console.log(self.swarm.applicationHash);
-        //self.showRegistration(!isValid);
-        //self.showRegistration(!hash || hash.length === 0);
-        if (self.swarm.applicationHash) {
+        self.getLoadedUserSwarmInstance().applicationHash = initHash;
+        if (self.getLoadedUserSwarmInstance().applicationHash) {
             self.updateProfile();
         }
     }
@@ -446,22 +470,32 @@ class Main {
         }
     }
 
+    getLoadedUserBlogInstance() {
+        const self = this;
+        return (self.isMyPage() ? self.blog : self.loadedUserBlog);
+    }
+
+    getLoadedUserSwarmInstance() {
+        const self = this;
+        return (self.isMyPage() ? self.swarm : self.loadedUserSwarm);
+    }
+
     updateProfile() {
         const self = this;
         self.preparePage(self.isMyPage());
         $('.btn-add-to-friends').removeAttr('disabled');
 
-        return this.blog.getMyProfile()
+        return self.getLoadedUserBlogInstance().getMyProfile()
             .then(function (response) {
                 let data = response.data;
                 console.log(data);
-                self.blog.setMyProfile(data);
+                self.getLoadedUserBlogInstance().setMyProfile(data);
                 self.updateInfo(data);
             })
             .catch(function (error) {
                 console.log(error);
                 // todo check is debug version. if debug - show message that Debug version not support create new user
-                Utils.flashMessage('User not found or swarm hash expired - ' + self.swarm.applicationHash, 'danger');
+                Utils.flashMessage('User not found or swarm hash expired - ' + self.getLoadedUserSwarmInstance().applicationHash, 'danger');
             })
             .then(function () {
                 // always executed
@@ -479,8 +513,9 @@ class Main {
     }
 
     onAfterHashChange(newHash, notUpdateProfile) {
+        const self = this;
         //console.log([newHash, notUpdateProfile]);
-        this.swarm.applicationHash = newHash;
+        self.getLoadedUserSwarmInstance().applicationHash = newHash;
         localStorage.setItem('applicationHash', newHash);
         this.isCheckHashChange = false;
         window.location.hash = newHash;
@@ -501,7 +536,7 @@ class Main {
             let src = currentElement.attr('src');
             let downloadedFile = null;
             console.log(src);
-            self.swarm.axios.request({
+            self.getLoadedUserSwarmInstance().swarm.axios.request({
                 url: src,
                 method: 'GET',
                 responseType: 'blob',
@@ -559,7 +594,7 @@ class Main {
 
     updateInfo(data, isLoadOnlyProfile) {
         const self = this;
-        self.blog.myProfile = data;
+        self.getLoadedUserBlogInstance().myProfile = data;
         $('#firstName').text(data.first_name);
         $('#lastName').text(data.last_name);
         $('#birthDate').text(data.birth_date);
@@ -571,7 +606,7 @@ class Main {
 
         if (!isLoadOnlyProfile) {
             if (data.photo && data.photo.original) {
-                let url = self.swarm.getFullUrl(data.photo.original);
+                let url = self.getLoadedUserSwarmInstance().getFullUrl(data.photo.original);
                 $('#bigAvatar').attr('src', url);
             }
 
@@ -595,11 +630,11 @@ class Main {
         // todo move limits and sorting to api
         limit = limit || 'all';
         sorting = sorting || 'asc';
-        let data = self.blog.myProfile;
+        let data = self.getLoadedUserBlogInstance().myProfile;
         if (data.last_photoalbum_id && data.last_photoalbum_id > 0) {
             let photoAlbums = $('#photoAlbums');
             photoAlbums.html('');
-            self.blog.getPhotoAlbumsInfo().then(function (response) {
+            self.getLoadedUserBlogInstance().getPhotoAlbumsInfo().then(function (response) {
                 let data = response.data;
                 if (sorting === 'desc') {
                     data.reverse();
@@ -612,7 +647,7 @@ class Main {
                     }
 
                     let id = v.id;
-                    let previewUrl = self.swarm.getFullUrl('social/photoalbum/' + id + '/1_250x250.jpg');
+                    let previewUrl = self.getLoadedUserSwarmInstance().getFullUrl('social/photoalbum/' + id + '/1_250x250.jpg');
                     photoAlbums.append('<li class="list-inline-item col-sm-4 photoalbum-item">' +
                         '<a href="#" class="load-photoalbum" data-album-id="' + id + '"><img class="photoalbum-img" src="' + previewUrl + '" ></a></li>');
                     i++;
@@ -628,11 +663,11 @@ class Main {
         // todo move limits and sorting to api
         limit = limit || 'all';
         sorting = sorting || 'asc';
-        let data = self.blog.myProfile;
+        let data = self.getLoadedUserBlogInstance().myProfile;
         if (data.last_videoalbum_id && data.last_videoalbum_id > 0) {
             let videoPlaylists = $('#videoPlaylists');
             videoPlaylists.html('');
-            self.blog.getVideoAlbumsInfo().then(function (response) {
+            self.getLoadedUserBlogInstance().getVideoAlbumsInfo().then(function (response) {
                 let data = response.data;
                 console.log(data);
                 if (sorting === 'desc') {
@@ -654,7 +689,7 @@ class Main {
                             '<a href="#" class="load-videoalbum page-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-vk" src="' + v.cover_file + '"></a></li>');
                     } else {
                         videoPlaylists.append('<li class="list-unstyled">' +
-                            '<a data-type="video" href="#" class="load-videoalbum page-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.swarm.getFullUrl(v.cover_file) + '"></a></li>');
+                            '<a data-type="video" href="#" class="load-videoalbum page-videoalbum-item" data-album-id="' + id + '"><img class="videoalbum-img type-other" src="' + self.getLoadedUserSwarmInstance().getFullUrl(v.cover_file) + '"></a></li>');
                     }
 
                     i++;
@@ -667,19 +702,19 @@ class Main {
 
     loadIFollow() {
         const self = this;
-        let data = self.blog.myProfile;
+        let data = self.getLoadedUserBlogInstance().myProfile;
         let iFollowBlock = $('#iFollowUsers');
         if ('i_follow' in data && data.i_follow.length) {
             data.i_follow.forEach(function (v) {
-                //let avatarUrl = self.swarm.getFullUrl('social/file/avatar/original.jpg', v);
                 let avatarUrl = 'img/swarm-avatar.jpg';
-                let userUrl = self.swarm.getFullUrl('', v);
+                let userUrl = self.getLoadedUserSwarmInstance().getFullUrl('', v);
                 iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
                     '<a href="#" class="delete-i-follow permission-specific-owner" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
                     '<a onclick="return false;" href="' + userUrl + '" class="load-profile" data-profile-id="' + v + '"><img class="follower-user-avatar circle-element" data-profile-id="' + v + '" src="' + avatarUrl + '" style="width: 30px"></a></li>');
-                self.blog.getSwarmHashByWallet(v)
+                self.getLoadedUserBlogInstance().getSwarmHashByWallet(v)
                     .then(function (result) {
-                        let avatarUrl = self.swarm.getFullUrl('social/file/avatar/original.jpg', result);
+                        result = result ? result : 'img/swarm-avatar.png';
+                        let avatarUrl = self.getLoadedUserSwarmInstance().getFullUrl('social/file/avatar/original.jpg', result);
                         $('.follower-user-avatar[data-profile-id="' + v + '"]').attr('src', avatarUrl)
                     });
             });
@@ -689,7 +724,7 @@ class Main {
     loadPosts() {
         const self = this;
         let maxReceivedPosts = 10;
-        let data = self.blog.myProfile;
+        let data = self.getLoadedUserBlogInstance().myProfile;
         let meetPostId = data.last_post_id - self.lastLoadedPost;
         for (let i = meetPostId; i > meetPostId - maxReceivedPosts && i > 0; i--) {
             self.addPostTemplate(i);
@@ -701,12 +736,12 @@ class Main {
                 $('#loadMore').show();
             }
 
-            self.blog.getPost(i, self.swarm.applicationHash)
+            self.getLoadedUserBlogInstance().getPost(i, self.getLoadedUserSwarmInstance().applicationHash)
                 .then(function (response) {
                     let data = response.data;
                     self.addPostByData(data, {
-                        userProfile: self.blog.myProfile,
-                        userHash: self.swarm.applicationHash
+                        userProfile: self.getLoadedUserBlogInstance().myProfile,
+                        userHash: self.getLoadedUserBlogInstance().swarm.applicationHash
                     });
                 })
                 .catch(function () {
@@ -740,7 +775,7 @@ class Main {
         let userProfile = params.userProfile;
 
         const self = this;
-        userHash = userHash || self.swarm.applicationHash;
+        userHash = userHash || self.getLoadedUserSwarmInstance().applicationHash;
         prefix = prefix || '#userPost';
         let userPost = $(prefix + data.id);
         if (userPost.length <= 0) {
@@ -754,7 +789,7 @@ class Main {
         }
 
         if (userProfile) {
-            let userAvatar = self.swarm.getFullUrl('social/file/avatar/original.jpg', userHash);
+            let userAvatar = self.getLoadedUserSwarmInstance().getFullUrl('social/file/avatar/original.jpg', userHash);
             userPost.find('.post-owner-name').text(userProfile.first_name + ' ' + userProfile.last_name);
             userPost.find('.post-owner-avatar').attr('src', userAvatar);
         }
@@ -803,8 +838,8 @@ class Main {
                     content.find('.delete-post-content')
                         .attr('data-post-id', data.id)
                         .attr('data-attachment-id', v.id);
-                    let fullUrl = self.swarm.getFullUrl(v.url, userHash);
-                    let previewUrl = self.swarm.getFullUrl(v.url, userHash);
+                    let fullUrl = self.getLoadedUserSwarmInstance().getFullUrl(v.url, userHash);
+                    let previewUrl = self.getLoadedUserSwarmInstance().getFullUrl(v.url, userHash);
                     if ('previews' in v) {
                         let photoTemplate = photoalbum.getPreviewTemplate(data.id, v, 'size-179');
                         content
@@ -818,7 +853,7 @@ class Main {
 
                     appendContent = content;
                 } else if (v.type === "audio") {
-                    let source = self.swarm.getFullUrl(v.url, userHash);
+                    let source = self.getLoadedUserSwarmInstance().getFullUrl(v.url, userHash);
                     appendContent = Utils.getTemplate('audioAttachment', {
                         source: source,
                         postId: data.id,
@@ -830,10 +865,10 @@ class Main {
                         .clone()
                         .attr('id', '')
                         .attr('style', '')
-                        .html('<video width="100%" controls><source src="' + self.swarm.getFullUrl(v.url, userHash) + '" type="video/mp4">Your browser does not support the video tag.</video>');
+                        .html('<video width="100%" controls><source src="' + self.getLoadedUserSwarmInstance().getFullUrl(v.url, userHash) + '" type="video/mp4">Your browser does not support the video tag.</video>');
                 } else if (v.type === "photoalbum") {
                     // todo move to html
-                    let previewUrl = self.swarm.getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg", userHash);
+                    let previewUrl = self.getLoadedUserSwarmInstance().getFullUrl("social/photoalbum/" + v.url + "/1_250x250.jpg", userHash);
                     appendContent = photoalbumAttachment
                         .clone()
                         .attr('id', '')
@@ -847,12 +882,12 @@ class Main {
                     try {
                         info = JSON.parse(v.info);
                         if (info.type === "video") {
-                            cover = self.swarm.getFullUrl(info.cover_file, userHash);
+                            cover = self.getLoadedUserSwarmInstance().getFullUrl(info.cover_file, userHash);
                         } else {
                             cover = info.cover_file;
                         }
                     } catch (ex) {
-                        cover = self.swarm.getFullUrl('img/video-cover.jpg', userHash);
+                        cover = self.getLoadedUserSwarmInstance().getFullUrl('img/video-cover.jpg', userHash);
                     }
 
                     appendContent = videoalbumAttachment

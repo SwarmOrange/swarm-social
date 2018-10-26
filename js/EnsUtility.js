@@ -29,16 +29,16 @@ class EnsUtility {
 
         if (typeof web3 !== 'undefined') {
             window.web3 = new Web3(web3.currentProvider);
-            console.log('current provider');
-            console.log(web3.currentProvider);
+            //console.log('current provider');
+            //console.log(web3.currentProvider);
         } else {
             window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
         }
 
         console.log(web3);
         this.ens = new EthereumENS(window.web3.currentProvider);
-        console.log('ens');
-        console.log(this.ens);
+        //console.log('ens');
+        //console.log(this.ens);
         web3.version.getNetwork(function (error, result) {
             if (error) {
                 //console.error(error);

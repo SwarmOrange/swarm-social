@@ -267,13 +267,13 @@
                                         </button>
                                     </p>
 
-                                    <p>
+                                    <!--<p>
                                         <button type="button"
                                                 class="btn btn-primary btn-add-to-friends"
                                                 style="width: 100%; ">
                                             Add to friends
                                         </button>
-                                    </p>
+                                    </p>-->
                                 </div>
                             </li>
                             <li class="permission-specific-owner">
@@ -663,6 +663,15 @@
         </div>
 
         <div class="templates" style="display: none">
+            <li id="iFollowTemplate" class="list-inline-item i-follow-li" style="display: none;">
+                <a href="#" class="delete-i-follow permission-specific-owner" data-profile-id="{{userWallet}}">
+                    <img class="delete-img-i-follow" src="img/delete.png" alt="">
+                </a>
+                <a onclick="return false;" href="{{userUrl}}" class="load-profile" data-profile-id="{{userWallet}}">
+                    <img class="follower-user-avatar circle-element" data-profile-id="{{userWallet}}" src="{{userAvatar}}" style="width: 30px">
+                </a>
+            </li>
+
             <div id="loaderTemplate" class="d-flex justify-content-center" style="display: none">
                 <div class="loader-animation"></div>
             </div>
