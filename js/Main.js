@@ -171,40 +171,21 @@ class Main {
             self.loadPosts();
         });
 
+        $('.btn-add-to-friends').click(function (e) {
+            e.preventDefault();
+            $(this).attr('disabled', 'disabled');
+            self.addFollower(self.currentUserLogin, function () {
+
+            });
+        });
+
         $('.add-follower').click(function (e) {
             e.preventDefault();
             let followerHash = $('#followerHash');
             let walletOrNickname = followerHash.val();
-            //console.log(walletOrNickname);
-            //if (self.blogClass.isCorrectSwarmHash(swarmHash)) {
-            let addFollower = function (walletOrNickname) {
-                try {
-                    self.blog.addIFollow(walletOrNickname)
-                        .then(function (response) {
-                            self.onAfterHashChange(response.data);
-                        });
-                } catch (e) {
-                    self.alert(e);
-                }
-            };
-
-            if (web3.isAddress(walletOrNickname)) {
-                $('#addFollowerModal').modal('hide');
+            self.addFollower(walletOrNickname, function () {
                 followerHash.val('');
-                addFollower(walletOrNickname);
-            } else {
-                //self.alert('Please, enter correct SWARM hash');
-                ensUtility.contract.getAddressByUsername.call(walletOrNickname, function (error, result) {
-                    $('#addFollowerModal').modal('hide');
-                    console.log([error, result]);
-                    if (web3.isAddress(result)) {
-                        addFollower(result);
-                        followerHash.val('');
-                    } else {
-                        self.alert('User not found', []);
-                    }
-                });
-            }
+            });
         });
 
         $('#iFollowUsers')
@@ -263,6 +244,43 @@ class Main {
         $('.import-instagram-cancel').click(function () {
             $('.import-insta-panel').hide('fast');
         });
+    }
+
+    addFollower(walletOrNickname, onClearInput) {
+        let self = this;
+        let addFollower = function (walletOrNickname) {
+            try {
+                self.blog.addIFollow(walletOrNickname)
+                    .then(function (response) {
+                        self.onAfterHashChange(response.data);
+                    });
+            } catch (e) {
+                self.alert(e);
+            }
+        };
+
+        if (web3.isAddress(walletOrNickname)) {
+            $('#addFollowerModal').modal('hide');
+            if (onClearInput) {
+                onClearInput();
+            }
+
+            addFollower(walletOrNickname);
+        } else {
+            //self.alert('Please, enter correct SWARM hash');
+            ensUtility.contract.getAddressByUsername.call(walletOrNickname, function (error, result) {
+                $('#addFollowerModal').modal('hide');
+                console.log([error, result]);
+                if (web3.isAddress(result)) {
+                    addFollower(result);
+                    if (onClearInput) {
+                        onClearInput();
+                    }
+                } else {
+                    self.alert('User not found', []);
+                }
+            });
+        }
     }
 
     loadPageInfo(hashOrAddress) {
@@ -427,6 +445,7 @@ class Main {
     updateProfile() {
         let self = this;
         self.preparePage(self.isMyPage());
+        $('.btn-add-to-friends').removeAttr('disabled');
 
         return this.blog.getMyProfile()
             .then(function (response) {
@@ -447,11 +466,11 @@ class Main {
 
     preparePage(isMy) {
         if (isMy) {
-            $('.btn-send-message-current-user').hide();
-            $('#postBlock').show();
+            $('.permission-specific-other').hide();
+            $('.permission-specific-owner').show();
         } else {
-            $('.btn-send-message-current-user').show();
-            $('#postBlock').hide();
+            $('.permission-specific-other').show();
+            $('.permission-specific-owner').hide();
         }
     }
 
@@ -652,7 +671,7 @@ class Main {
                 let avatarUrl = 'img/swarm-avatar.jpg';
                 let userUrl = self.swarm.getFullUrl('', v);
                 iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
-                    '<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
+                    '<a href="#" class="delete-i-follow permission-specific-owner" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
                     '<a onclick="return false;" href="' + userUrl + '" class="load-profile" data-profile-id="' + v + '"><img class="follower-user-avatar circle-element" data-profile-id="' + v + '" src="' + avatarUrl + '" style="width: 30px"></a></li>');
                 self.blog.getSwarmHashByWallet(v)
                     .then(function (result) {

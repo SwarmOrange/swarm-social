@@ -92,7 +92,7 @@ class EnsUtility {
             if (self.contract) {
                 // todo is not filled user wallet - add it to profile
                 $('.save-blockchain').attr('disabled', 'disabled');
-                self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, function (error, result) {
+                self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, {gas: Utils.getRecommendedGas()}, function (error, result) {
                     if (error) {
                         Utils.flashMessage('Transaction error or cancelled', 'danger');
                     } else {
@@ -1004,40 +1004,21 @@ class Main {
             self.loadPosts();
         });
 
+        $('.btn-add-to-friends').click(function (e) {
+            e.preventDefault();
+            $(this).attr('disabled', 'disabled');
+            self.addFollower(self.currentUserLogin, function () {
+
+            });
+        });
+
         $('.add-follower').click(function (e) {
             e.preventDefault();
             let followerHash = $('#followerHash');
             let walletOrNickname = followerHash.val();
-            //console.log(walletOrNickname);
-            //if (self.blogClass.isCorrectSwarmHash(swarmHash)) {
-            let addFollower = function (walletOrNickname) {
-                try {
-                    self.blog.addIFollow(walletOrNickname)
-                        .then(function (response) {
-                            self.onAfterHashChange(response.data);
-                        });
-                } catch (e) {
-                    self.alert(e);
-                }
-            };
-
-            if (web3.isAddress(walletOrNickname)) {
-                $('#addFollowerModal').modal('hide');
+            self.addFollower(walletOrNickname, function () {
                 followerHash.val('');
-                addFollower(walletOrNickname);
-            } else {
-                //self.alert('Please, enter correct SWARM hash');
-                ensUtility.contract.getAddressByUsername.call(walletOrNickname, function (error, result) {
-                    $('#addFollowerModal').modal('hide');
-                    console.log([error, result]);
-                    if (web3.isAddress(result)) {
-                        addFollower(result);
-                        followerHash.val('');
-                    } else {
-                        self.alert('User not found', []);
-                    }
-                });
-            }
+            });
         });
 
         $('#iFollowUsers')
@@ -1096,6 +1077,43 @@ class Main {
         $('.import-instagram-cancel').click(function () {
             $('.import-insta-panel').hide('fast');
         });
+    }
+
+    addFollower(walletOrNickname, onClearInput) {
+        let self = this;
+        let addFollower = function (walletOrNickname) {
+            try {
+                self.blog.addIFollow(walletOrNickname)
+                    .then(function (response) {
+                        self.onAfterHashChange(response.data);
+                    });
+            } catch (e) {
+                self.alert(e);
+            }
+        };
+
+        if (web3.isAddress(walletOrNickname)) {
+            $('#addFollowerModal').modal('hide');
+            if (onClearInput) {
+                onClearInput();
+            }
+
+            addFollower(walletOrNickname);
+        } else {
+            //self.alert('Please, enter correct SWARM hash');
+            ensUtility.contract.getAddressByUsername.call(walletOrNickname, function (error, result) {
+                $('#addFollowerModal').modal('hide');
+                console.log([error, result]);
+                if (web3.isAddress(result)) {
+                    addFollower(result);
+                    if (onClearInput) {
+                        onClearInput();
+                    }
+                } else {
+                    self.alert('User not found', []);
+                }
+            });
+        }
     }
 
     loadPageInfo(hashOrAddress) {
@@ -1260,6 +1278,7 @@ class Main {
     updateProfile() {
         let self = this;
         self.preparePage(self.isMyPage());
+        $('.btn-add-to-friends').removeAttr('disabled');
 
         return this.blog.getMyProfile()
             .then(function (response) {
@@ -1280,11 +1299,11 @@ class Main {
 
     preparePage(isMy) {
         if (isMy) {
-            $('.btn-send-message-current-user').hide();
-            $('#postBlock').show();
+            $('.permission-specific-other').hide();
+            $('.permission-specific-owner').show();
         } else {
-            $('.btn-send-message-current-user').show();
-            $('#postBlock').hide();
+            $('.permission-specific-other').show();
+            $('.permission-specific-owner').hide();
         }
     }
 
@@ -1485,7 +1504,7 @@ class Main {
                 let avatarUrl = 'img/swarm-avatar.jpg';
                 let userUrl = self.swarm.getFullUrl('', v);
                 iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
-                    '<a href="#" class="delete-i-follow" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
+                    '<a href="#" class="delete-i-follow permission-specific-owner" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
                     '<a onclick="return false;" href="' + userUrl + '" class="load-profile" data-profile-id="' + v + '"><img class="follower-user-avatar circle-element" data-profile-id="' + v + '" src="' + avatarUrl + '" style="width: 30px"></a></li>');
                 self.blog.getSwarmHashByWallet(v)
                     .then(function (result) {
@@ -1748,14 +1767,15 @@ class Messages {
                 $('.type_msg').show();
                 $('.chat_list').removeClass('active_chat');
                 $(this).addClass('active_chat');
-                let userHash = $(this).attr('data-user-hash');
-                $('.messages-send-message').attr('data-user-id', userHash);
+                const userWallet = $(this).attr('data-user-hash').toLowerCase();
+                const myWallet = web3.eth.defaultAccount ? web3.eth.defaultAccount.toLowerCase() : null;
+                $('.messages-send-message').attr('data-user-id', userWallet);
                 let messageDialog = $('.msg_history');
                 messageDialog.html('');
                 self.showLoadingBar(true);
                 let myMsgInfo = null;
                 let receiverMsgInfo = null;
-                if (!web3.eth.defaultAccount) {
+                if (!myWallet) {
                     self.main.alert('To send messages - please, install Metamask');
                     return;
                 }
@@ -1763,17 +1783,18 @@ class Messages {
                 self.main.blog.getMessageInfo()
                     .then(function (response) {
                         myMsgInfo = response.data;
-                        return self.main.blog.getSwarmHashByWallet(userHash);
+                        console.log(myMsgInfo);
+                        return self.main.blog.getSwarmHashByWallet(userWallet);
                     })
                     .then(function (userHash) {
-                        console.log(userHash);
+                        console.log('Message receiver hash - ' + userHash);
                         return self.main.blog.getMessageInfo(userHash);
                     })
                     .then(function (response) {
                         receiverMsgInfo = response.data;
                         console.log(receiverMsgInfo);
                         self.showLoadingBar(false);
-                        self.drawCorrespondence(web3.eth.defaultAccount, userHash, myMsgInfo, receiverMsgInfo);
+                        self.drawCorrespondence(myWallet, userWallet, myMsgInfo, receiverMsgInfo);
                     })
                     .catch(function () {
                         self.showLoadingBar(false);
@@ -1865,6 +1886,8 @@ class Messages {
 
     drawCorrespondence(myWallet, receiverWallet, myMsgInfo, receiverMsgInfo) {
         console.log([myWallet, receiverWallet, myMsgInfo, receiverMsgInfo]);
+        myWallet = myWallet.toLowerCase();
+        receiverWallet = receiverWallet.toLowerCase();
         let self = this;
         let lastMessageId = 0;
         let receiverSwarmHash = null;
@@ -1914,6 +1937,7 @@ class Messages {
         let drawReceiver = function () {
             let promises = [];
             if (myWallet in receiverMsgInfo) {
+                console.log('yrs');
                 lastMessageId = receiverMsgInfo[myWallet].last_message_id;
                 if (lastMessageId <= 0) {
                     return;
@@ -3009,7 +3033,7 @@ class StartNow {
             }
 
             $(this).attr('disabled', 'disabled');
-            ensUtility.contract.setUsername.sendTransaction(username, function (error, result) {
+            ensUtility.contract.setUsername.sendTransaction(username, {gas: Utils.getRecommendedGas()}, function (error, result) {
                 console.log([error, result]);
                 // todo answer can be as tx hash
                 if (result === 'already registered') {
@@ -3229,6 +3253,8 @@ class Utils {
         let alertsBlock = $('.alerts');
         if (!alertsBlock.length || !alertsBlock.is(':visible')) {
             alertsBlock = $('<div class="alerts"></div>').insertAfter('header');
+        } else if (alertsBlock.is(':visible').length > 1) {
+            $(alertsBlock[0]).remove();
         }
 
         let html = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">\n' +
@@ -3253,6 +3279,10 @@ class Utils {
         } else {
             return '';
         }
+    }
+
+    static getRecommendedGas() {
+        return 51000;
     }
 }
 
@@ -3919,7 +3949,8 @@ class Wallet {
 
         web3.eth.sendTransaction({
             to: toUserWallet,
-            value: web3.toWei(amount, "ether")
+            value: web3.toWei(amount, "ether"),
+            gas: Utils.getRecommendedGas()
         }, function (error, result) {
             console.log([error, result]);
             if (error) {
@@ -18046,13 +18077,13 @@ $export($export.G + $export.B, {
 });
 },{"./_export":55,"./_task":65}],68:[function(require,module,exports){
 /*!
- * Cropper.js v1.4.2
+ * Cropper.js v1.4.3
  * https://fengyuanchen.github.io/cropperjs
  *
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2018-10-15T13:27:01.969Z
+ * Date: 2018-10-24T13:07:15.032Z
  */
 
 'use strict';
@@ -19042,69 +19073,74 @@ function arrayBufferToDataURL(arrayBuffer, mimeType) {
 
 function resetAndGetOrientation(arrayBuffer) {
   var dataView = new DataView(arrayBuffer);
-  var orientation;
-  var littleEndian;
-  var app1Start;
-  var ifdStart; // Only handle JPEG image (start by 0xFFD8)
+  var orientation; // Ignores range error when the image does not have correct Exif information
 
-  if (dataView.getUint8(0) === 0xFF && dataView.getUint8(1) === 0xD8) {
-    var length = dataView.byteLength;
-    var offset = 2;
+  try {
+    var littleEndian;
+    var app1Start;
+    var ifdStart; // Only handle JPEG image (start by 0xFFD8)
 
-    while (offset < length) {
-      if (dataView.getUint8(offset) === 0xFF && dataView.getUint8(offset + 1) === 0xE1) {
-        app1Start = offset;
-        break;
-      }
+    if (dataView.getUint8(0) === 0xFF && dataView.getUint8(1) === 0xD8) {
+      var length = dataView.byteLength;
+      var offset = 2;
 
-      offset += 1;
-    }
-  }
-
-  if (app1Start) {
-    var exifIDCode = app1Start + 4;
-    var tiffOffset = app1Start + 10;
-
-    if (getStringFromCharCode(dataView, exifIDCode, 4) === 'Exif') {
-      var endianness = dataView.getUint16(tiffOffset);
-      littleEndian = endianness === 0x4949;
-
-      if (littleEndian || endianness === 0x4D4D
-      /* bigEndian */
-      ) {
-          if (dataView.getUint16(tiffOffset + 2, littleEndian) === 0x002A) {
-            var firstIFDOffset = dataView.getUint32(tiffOffset + 4, littleEndian);
-
-            if (firstIFDOffset >= 0x00000008) {
-              ifdStart = tiffOffset + firstIFDOffset;
-            }
-          }
-        }
-    }
-  }
-
-  if (ifdStart) {
-    var _length = dataView.getUint16(ifdStart, littleEndian);
-
-    var _offset;
-
-    var i;
-
-    for (i = 0; i < _length; i += 1) {
-      _offset = ifdStart + i * 12 + 2;
-
-      if (dataView.getUint16(_offset, littleEndian) === 0x0112
-      /* Orientation */
-      ) {
-          // 8 is the offset of the current tag's value
-          _offset += 8; // Get the original orientation value
-
-          orientation = dataView.getUint16(_offset, littleEndian); // Override the orientation with its default value
-
-          dataView.setUint16(_offset, 1, littleEndian);
+      while (offset + 1 < length) {
+        if (dataView.getUint8(offset) === 0xFF && dataView.getUint8(offset + 1) === 0xE1) {
+          app1Start = offset;
           break;
         }
+
+        offset += 1;
+      }
     }
+
+    if (app1Start) {
+      var exifIDCode = app1Start + 4;
+      var tiffOffset = app1Start + 10;
+
+      if (getStringFromCharCode(dataView, exifIDCode, 4) === 'Exif') {
+        var endianness = dataView.getUint16(tiffOffset);
+        littleEndian = endianness === 0x4949;
+
+        if (littleEndian || endianness === 0x4D4D
+        /* bigEndian */
+        ) {
+            if (dataView.getUint16(tiffOffset + 2, littleEndian) === 0x002A) {
+              var firstIFDOffset = dataView.getUint32(tiffOffset + 4, littleEndian);
+
+              if (firstIFDOffset >= 0x00000008) {
+                ifdStart = tiffOffset + firstIFDOffset;
+              }
+            }
+          }
+      }
+    }
+
+    if (ifdStart) {
+      var _length = dataView.getUint16(ifdStart, littleEndian);
+
+      var _offset;
+
+      var i;
+
+      for (i = 0; i < _length; i += 1) {
+        _offset = ifdStart + i * 12 + 2;
+
+        if (dataView.getUint16(_offset, littleEndian) === 0x0112
+        /* Orientation */
+        ) {
+            // 8 is the offset of the current tag's value
+            _offset += 8; // Get the original orientation value
+
+            orientation = dataView.getUint16(_offset, littleEndian); // Override the orientation with its default value
+
+            dataView.setUint16(_offset, 1, littleEndian);
+            break;
+          }
+      }
+    }
+  } catch (e) {
+    orientation = 1;
   }
 
   return orientation;
@@ -28959,7 +28995,7 @@ class Blog {
     }
 
     getSwarmHashByWallet(walletAddress) {
-        let self = this;
+        const self = this;
         return new Promise((resolve, reject) => {
             self.ensUtility.contract.getHash.call(walletAddress, function (error, result) {
                 console.log([error, result]);
@@ -29044,7 +29080,7 @@ class Blog {
         return this.myProfile.i_follow ? this.myProfile.i_follow.slice(0) : [];
     }
 
-    addIFollow(swarmProfileHash) {
+    addIFollow(swarmProfileHash, userHash) {
         if ('i_follow' in this.myProfile) {
             if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
                 throw "Hash already exists";
@@ -29055,10 +29091,10 @@ class Blog {
             this.myProfile.i_follow = [swarmProfileHash];
         }
 
-        return this.saveProfile(this.myProfile);
+        return this.saveProfile(this.myProfile, userHash);
     }
 
-    deleteIFollow(swarmProfileHash) {
+    deleteIFollow(swarmProfileHash, userHash) {
         if ('i_follow' in this.myProfile) {
             if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
                 let index = this.myProfile.i_follow.indexOf(swarmProfileHash);
@@ -29070,7 +29106,7 @@ class Blog {
             this.myProfile.i_follow = [];
         }
 
-        return this.saveProfile(this.myProfile);
+        return this.saveProfile(this.myProfile, userHash);
     }
 
     sendRawFile(fileName, data, fileType, userHash, swarmProtocol, onProgress) {
@@ -29078,8 +29114,8 @@ class Blog {
     }
 
     uploadFilesForPost(id, filesFormData, onUploadProgress) {
-        let contentType = 'multipart/form-data';
-        let self = this;
+        const contentType = 'multipart/form-data';
+        const self = this;
         let url = this.prefix + "post/" + id + "/file/";
 
         return this.sendRawFile(url, filesFormData, contentType, null, null, onUploadProgress)
@@ -29094,7 +29130,7 @@ class Blog {
     }
 
     uploadAvatar(fileContent) {
-        let self = this;
+        const self = this;
         let url = this.prefix + "file/avatar/original.jpg";
 
         return this.sendRawFile(url, fileContent, 'image/jpeg')
@@ -29111,7 +29147,7 @@ class Blog {
     }
 
     createPost(id, description, attachments) {
-        let self = this;
+        const self = this;
         attachments = attachments || [];
         attachments.forEach(function (v, i) {
             v.id = i + 1;
@@ -29138,16 +29174,17 @@ class Blog {
     }
 
     deletePost(id) {
-        let self = this;
+        const self = this;
         let urlPath = this.prefix + 'post/' + id + '/';
-        return this.deleteFile(urlPath + 'info.json').then(function (response) {
-            self.swarm.applicationHash = response.data;
-            return self.deleteFile(urlPath);
-        });
+        return this.deleteFile(urlPath + 'info.json')
+            .then(function (response) {
+                self.swarm.applicationHash = response.data;
+                return self.deleteFile(urlPath);
+            });
     }
 
     deletePostAttachment(postId, attachmentId) {
-        let self = this;
+        const self = this;
         return self.getPost(postId).then(function (response) {
             let data = response.data;
             let newAttachments = [];
@@ -29174,7 +29211,7 @@ class Blog {
     }
 
     editPost(id, description, attachments) {
-        let self = this;
+        const self = this;
         return this.getPost(id)
             .then(function (response) {
                 let data = response.data;
@@ -29185,10 +29222,18 @@ class Blog {
             });
     }
 
-    createVideoAlbum(id, name, description, videos) {
-        let self = this;
+    createVideoAlbum(id, name, description, videos, coverOverride) {
+        const self = this;
+        let coverFile;
+
         videos = videos || [];
-        let coverFile = videos.length ? videos[0].cover_file : videos;
+
+        if (coverOverride) {
+            coverFile = this.prefix + "videoalbum/" + id + "/" + coverOverride;
+        } else {
+            coverFile = videos.length ? videos[0].cover_file : videos;
+        }
+
         let fileType = videos.length ? videos[0].type : videos;
         let info = {
             id: id,
@@ -29206,7 +29251,7 @@ class Blog {
                     self.swarm.applicationHash = response.data;
                     self.myProfile.last_videoalbum_id = id;
 
-                    return {response: self.saveProfile(self.myProfile), info: info};
+                    return {response: self.saveProfile(self.myProfile), info: info, hash: response.data};
                 });
         };
 
@@ -29252,8 +29297,73 @@ class Blog {
         return this.sendRawFile(this.prefix + "videoalbum/" + id + "/info.json", JSON.stringify(info), 'application/json');
     }
 
+    getLatestAlbumId() {
+        return this.getVideoAlbumsInfo().then(response => {
+            const ids = response.data.map(album => album.id);
+
+            return ids.pop() || 1;
+        });
+    }
+
+    /*
+        Concern:
+        If many services are trying to upload to the same albumId, they may generate the same new videoId before they are uploaded.
+    */
+    generateVideoEntry(albumId, name, description, cover_file, file, type) {
+        const self = this;
+
+        return this.getVideoAlbumInfo(albumId).then(function (response) {
+            const albumInfo = response.data;
+            const videos = albumInfo.videos;
+            const hasNoVideos = !videos || videos.length == 0;
+            const id = hasNoVideos ? 1 : videos.length + 1;
+
+            return {
+                id: id,
+                name: name,
+                description: description,
+                cover_file: self.prefix + "videoalbum/" + albumId + "/" + cover_file,
+                file: self.prefix + "videoalbum/" + albumId + "/" + file,
+                type: type
+            };
+        });
+    }
+
+    appendVideoEntry(albumId, fileInfo) {
+        const self = this;
+
+        return this.getVideoAlbumInfo(albumId)
+            .then(function (response) {
+                let data = response.data;
+
+                if (data.videos) {
+                    data.videos.push(fileInfo);
+                } else {
+                    data.videos = [fileInfo];
+                }
+
+                return self.saveVideoAlbumInfo(albumId, data);
+            })
+            .then(function (response) {
+                return {
+                    response: response.data
+                };
+            });
+    }
+
+    // I cannot use the browser API for new File(), and thus have to pass the data differently. We could perhaps also the existing function, but this edit gets me going for now and can open discussion.
+    uploadFileToVideoAlbumNodeJs(albumId, file, onProgress, data) {
+        const fileName = this.prefix + "videoalbum/" + albumId + "/" + file.name;
+
+        return this.sendRawFile(fileName, file.data, file.type, null, null, onProgress)
+            .then(function (response) {
+
+                return {fileName: fileName, response: response.data};
+            });
+    }
+
     uploadFileToVideoalbum(albumId, file, onProgress, fileInfo) {
-        let self = this;
+        const self = this;
         let fileName = this.prefix + "videoalbum/" + albumId + "/" + file.name;
 
         return this.sendRawFile(fileName, file, file.type, null, null, onProgress)
@@ -29288,7 +29398,7 @@ class Blog {
     }
 
     createPhotoAlbum(id, name, description, photos) {
-        let self = this;
+        const self = this;
         photos = photos || [];
         let coverFile = photos.length ? photos[0] : photos;
         let info = {
@@ -29318,20 +29428,22 @@ class Blog {
                     cover_file: coverFile
                 };
 
-                return self.getPhotoAlbumsInfo().then(function (response) {
-                    let data = response.data;
-                    data = Array.isArray(data) ? data : [];
-                    data.push(newAlbumInfo);
-                    console.log('album info');
-                    console.log(data);
-                    return self.savePhotoAlbumsInfo(data).then(function (response) {
-                        return navigateAndSaveProfile(response);
+                return self.getPhotoAlbumsInfo()
+                    .then(function (response) {
+                        let data = response.data;
+                        data = Array.isArray(data) ? data : [];
+                        data.push(newAlbumInfo);
+                        console.log('album info');
+                        console.log(data);
+                        return self.savePhotoAlbumsInfo(data).then(function (response) {
+                            return navigateAndSaveProfile(response);
+                        });
+                    })
+                    .catch(function () {
+                        return self.savePhotoAlbumsInfo([newAlbumInfo]).then(function (response) {
+                            return navigateAndSaveProfile(response);
+                        });
                     });
-                }).catch(function () {
-                    return self.savePhotoAlbumsInfo([newAlbumInfo]).then(function (response) {
-                        return navigateAndSaveProfile(response);
-                    });
-                });
             });
     }
 
@@ -29361,7 +29473,7 @@ class Blog {
     }
 
     deletePhotoAlbum(id) {
-        let self = this;
+        const self = this;
         return this.swarm.delete(this.prefix + 'photoalbum/' + id + '/')
             .then(function (response) {
                 self.swarm.applicationHash = response.data;
@@ -29385,7 +29497,7 @@ class Blog {
     }
 
     createMru(ownerAddress) {
-        let self = this;
+        const self = this;
         // todo save it to profile
         if (!ownerAddress) {
             throw "Empty owner address";
@@ -29399,13 +29511,14 @@ class Blog {
             "ownerAddr": ownerAddress
         };
 
-        return this.swarm.post(null, data, null, null, 'bzz-resource:').then(function (response) {
-            self.myProfile.mru = response.data;
-            return {
-                mru: response.data,
-                response: self.saveProfile(self.myProfile)
-            };
-        });
+        return this.swarm.post(null, data, null, null, 'bzz-resource:')
+            .then(function (response) {
+                self.myProfile.mru = response.data;
+                return {
+                    mru: response.data,
+                    response: self.saveProfile(self.myProfile)
+                };
+            });
     }
 
     saveMru(mru, rootAddress, swarmHash) {
@@ -29431,7 +29544,8 @@ class Blog {
     }
 
     saveMessage(receiverHash, message, afterReceiverMessage, afterMessageId, timestamp, isPrivate) {
-        let self = this;
+        receiverHash = receiverHash.toLowerCase();
+        const self = this;
         timestamp = timestamp || +new Date();
         if (isPrivate) {
             throw('Private messages not supported');
@@ -29485,11 +29599,115 @@ class Blog {
     }
 
     getMessageInfo(userHash) {
-        return this.swarm.get(this.prefix + 'message/public/info.json', userHash);
+        const self = this;
+        return this.swarm.get(this.prefix + 'message/public/info.json', userHash)
+            .then(function (response) {
+                if (response.data) {
+                    response.data = self.objectKeysToLowerCase(response.data);
+                }
+
+                return response;
+            });
     }
 
     saveMessageInfo(data) {
         return this.swarm.post(this.prefix + 'message/public/info.json', JSON.stringify(data));
+    }
+
+    objectKeysToLowerCase(input, deep, filter) {
+        var idx, key, keys, last, output, self, type, value;
+        self = this.objectKeysToLowerCase;
+        type = typeof deep;
+
+        // Convert "deep" to a number between 0 to Infinity or keep special object.
+        if (type === 'undefined' || deep === null || deep === 0 || deep === false) {
+            deep = 0; // Shallow copy
+        }
+        else if (type === 'object') {
+            if (!(deep instanceof self)) {
+                throw new TypeError('Expected "deep" to be a special object');
+            }
+        }
+        else if (deep === true) {
+            deep = Infinity; // Deep copy
+        }
+        else if (type === 'number') {
+            if (isNaN(deep) || deep < 0) {
+                throw new RangeError(
+                    'Expected "deep" to be a positive number, got ' + deep
+                );
+            }
+        }
+        else throw new TypeError(
+                'Expected "deep" to be a boolean, number or object, got "' + type + '"'
+            );
+
+
+        // Check type of input, and throw if null or not an object.
+        if (input === null || typeof input !== 'object') {
+            throw new TypeError('Expected "input" to be an object');
+        }
+
+        // Check type of filter
+        type = typeof filter;
+        if (filter === null || type === 'undefined' || type === 'function') {
+            filter = filter || null;
+        } else {
+            throw new TypeError('Expected "filter" to be a function');
+        }
+
+        keys = Object.keys(input); // Get own keys from object
+        last = keys.length - 1;
+        output = {}; // new object
+
+        if (deep) { // only run the deep copy if needed.
+            if (typeof deep === 'number') {
+                // Create special object to be used during deep copy
+                deep =
+                    Object.seal(
+                        Object.create(
+                            self.prototype,
+                            {
+                                input: {value: []},
+                                output: {value: []},
+                                level: {value: -1, writable: true},
+                                max: {value: deep, writable: false}
+                            }
+                        )
+                    );
+            } else {
+                // Circle detection
+                idx = deep.input.indexOf(input);
+                if (~idx) {
+                    return deep.output[idx];
+                }
+            }
+
+            deep.level += 1;
+            deep.input.push(input);
+            deep.output.push(output);
+
+            idx = last + 1;
+            while (idx--) {
+                key = keys[last - idx]; // Using [last - idx] to preserve order.
+                value = input[key];
+                if (typeof value === 'object' && value && deep.level < deep.max) {
+                    if (filter ? filter(value) : value.constructor === Object) {
+                        value = self(value, deep, filter);
+                    }
+                }
+                output[key.toLowerCase()] = value;
+            }
+            deep.level -= 1;
+        } else {
+            // Simple shallow copy
+            idx = last + 1;
+            while (idx--) {
+                key = keys[last - idx]; // Using [last - idx] to preserve order.
+                output[key.toLowerCase()] = input[key];
+            }
+        }
+        return output;
     }
 }
 

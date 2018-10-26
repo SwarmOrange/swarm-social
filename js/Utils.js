@@ -141,6 +141,8 @@ class Utils {
         let alertsBlock = $('.alerts');
         if (!alertsBlock.length || !alertsBlock.is(':visible')) {
             alertsBlock = $('<div class="alerts"></div>').insertAfter('header');
+        } else if (alertsBlock.is(':visible').length > 1) {
+            $(alertsBlock[0]).remove();
         }
 
         let html = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">\n' +
@@ -165,6 +167,10 @@ class Utils {
         } else {
             return '';
         }
+    }
+
+    static getRecommendedGas() {
+        return 51000;
     }
 }
 

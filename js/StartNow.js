@@ -15,7 +15,7 @@ class StartNow {
             }
 
             $(this).attr('disabled', 'disabled');
-            ensUtility.contract.setUsername.sendTransaction(username, function (error, result) {
+            ensUtility.contract.setUsername.sendTransaction(username, {gas: Utils.getRecommendedGas()}, function (error, result) {
                 console.log([error, result]);
                 // todo answer can be as tx hash
                 if (result === 'already registered') {

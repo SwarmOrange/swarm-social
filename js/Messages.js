@@ -26,14 +26,15 @@ class Messages {
                 $('.type_msg').show();
                 $('.chat_list').removeClass('active_chat');
                 $(this).addClass('active_chat');
-                let userHash = $(this).attr('data-user-hash');
-                $('.messages-send-message').attr('data-user-id', userHash);
+                const userWallet = $(this).attr('data-user-hash').toLowerCase();
+                const myWallet = web3.eth.defaultAccount ? web3.eth.defaultAccount.toLowerCase() : null;
+                $('.messages-send-message').attr('data-user-id', userWallet);
                 let messageDialog = $('.msg_history');
                 messageDialog.html('');
                 self.showLoadingBar(true);
                 let myMsgInfo = null;
                 let receiverMsgInfo = null;
-                if (!web3.eth.defaultAccount) {
+                if (!myWallet) {
                     self.main.alert('To send messages - please, install Metamask');
                     return;
                 }
@@ -41,17 +42,18 @@ class Messages {
                 self.main.blog.getMessageInfo()
                     .then(function (response) {
                         myMsgInfo = response.data;
-                        return self.main.blog.getSwarmHashByWallet(userHash);
+                        console.log(myMsgInfo);
+                        return self.main.blog.getSwarmHashByWallet(userWallet);
                     })
                     .then(function (userHash) {
-                        console.log(userHash);
+                        console.log('Message receiver hash - ' + userHash);
                         return self.main.blog.getMessageInfo(userHash);
                     })
                     .then(function (response) {
                         receiverMsgInfo = response.data;
                         console.log(receiverMsgInfo);
                         self.showLoadingBar(false);
-                        self.drawCorrespondence(web3.eth.defaultAccount, userHash, myMsgInfo, receiverMsgInfo);
+                        self.drawCorrespondence(myWallet, userWallet, myMsgInfo, receiverMsgInfo);
                     })
                     .catch(function () {
                         self.showLoadingBar(false);
@@ -143,6 +145,8 @@ class Messages {
 
     drawCorrespondence(myWallet, receiverWallet, myMsgInfo, receiverMsgInfo) {
         console.log([myWallet, receiverWallet, myMsgInfo, receiverMsgInfo]);
+        myWallet = myWallet.toLowerCase();
+        receiverWallet = receiverWallet.toLowerCase();
         let self = this;
         let lastMessageId = 0;
         let receiverSwarmHash = null;
@@ -192,6 +196,7 @@ class Messages {
         let drawReceiver = function () {
             let promises = [];
             if (myWallet in receiverMsgInfo) {
+                console.log('yrs');
                 lastMessageId = receiverMsgInfo[myWallet].last_message_id;
                 if (lastMessageId <= 0) {
                     return;

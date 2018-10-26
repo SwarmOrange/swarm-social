@@ -58,7 +58,8 @@ class Wallet {
 
         web3.eth.sendTransaction({
             to: toUserWallet,
-            value: web3.toWei(amount, "ether")
+            value: web3.toWei(amount, "ether"),
+            gas: Utils.getRecommendedGas()
         }, function (error, result) {
             console.log([error, result]);
             if (error) {

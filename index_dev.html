@@ -120,7 +120,7 @@
                     <h1 class="mb-5">Decentralized social network where only you own your data!</h1>
                     <a href="#" class="btn btn-outline btn-lg js-scroll-trigger btn-start-now">Register with
                         Metamask</a>
-                    <a href="#" class="btn btn-outline btn-lg js-scroll-trigger btn-start-now-login">Login</a>
+                    <!--<a href="#" class="btn btn-outline btn-lg js-scroll-trigger btn-start-now-login">Login</a>-->
                 </div>
             </div>
             <div class="col-lg-5 my-auto">
@@ -245,7 +245,7 @@
                                 <p>
                                     <img id="bigAvatar" src="img/no-photo.png" alt="">
                                 </p>
-                                <p>
+                                <p class="permission-specific-owner">
                                     <button id="uploadAvatarButton" type="button" class="btn btn-success"
                                             data-toggle="modal"
                                             data-target="#uploadAvatarModal" style="width: 100%">Upload avatar
@@ -258,15 +258,25 @@
                                         Send crypto
                                     </button>
                                 </p>-->
-                                <p>
-                                    <button type="button"
-                                            class="btn btn-primary btn-send-message-current-user"
-                                            style="width: 100%; display: none">
-                                        Send message
-                                    </button>
-                                </p>
+                                <div class="permission-specific-other" style="display: none">
+                                    <p>
+                                        <button type="button"
+                                                class="btn btn-primary btn-send-message-current-user"
+                                                style="width: 100%; ">
+                                            Send message
+                                        </button>
+                                    </p>
+
+                                    <p>
+                                        <button type="button"
+                                                class="btn btn-primary btn-add-to-friends"
+                                                style="width: 100%; ">
+                                            Add to friends
+                                        </button>
+                                    </p>
+                                </div>
                             </li>
-                            <li>
+                            <li class="permission-specific-owner">
                                 <p>Import my data from</p>
                                 <p>
                                     <button type="button" class="btn btn-primary btn-profile-import-instagram col-sm-5"
@@ -308,7 +318,7 @@
                             <li>
                                 <p class="float-left">I follow</p>
                                 <p class="float-right">
-                                    <a href="#" data-toggle="modal" data-target="#addFollowerModal">
+                                    <a href="#" data-toggle="modal" data-target="#addFollowerModal" class="permission-specific-owner">
                                         <img src="img/add.png" alt="" style="width: 20px">
                                     </a>
                                 </p>
@@ -322,7 +332,7 @@
                             <li>
                                 <p class="float-left"><a class="show-all-videoalbums" href="#">Video playlists</a></p>
                                 <p class="float-right">
-                                    <a href="#" class="upload-videos-preview">
+                                    <a href="#" class="upload-videos-preview permission-specific-owner">
                                         <img src="img/add.png" alt="" style="width: 20px">
                                     </a>
                                 </p>
@@ -343,7 +353,7 @@
                                     <h1>
                                         <span id="firstName">...</span>
                                         <span id="lastName">...</span>
-                                        <img class="edit-field-icon hide" src="img/edit.png" alt="">
+                                        <img class="edit-field-icon hide permission-specific-owner" src="img/edit.png" alt="">
                                     </h1>
                                     <h3>Birth: <span id="birthDate">...</span></h3>
                                     <h3>Location: <span id="locationName"></span></h3>
@@ -358,7 +368,7 @@
                                                 style="display: none">
                                             Save ENS
                                         </button>
-                                        <button type="submit" class="btn btn-primary mb-2 save-blockchain" disabled>
+                                        <button type="submit" class="btn btn-primary mb-2 save-blockchain permission-specific-owner" disabled>
                                             Save page to Blockchain
                                         </button>
                                     </p>
@@ -403,7 +413,7 @@
                                 </p>
 
                                 <p class="float-right">
-                                    <a href="#" class="create-album">
+                                    <a href="#" class="create-album permission-specific-owner">
                                         <img src="img/add.png" alt="" style="width: 20px">
                                     </a>
                                 </p>
@@ -415,7 +425,7 @@
                             </li>
 
 
-                            <li id="postBlock">
+                            <li id="postBlock" class="permission-specific-owner">
                                 <div class="row">
                                     <div class="col-sm-3">Create post</div>
                                 </div>
@@ -665,10 +675,10 @@
             </a>
 
             <div id="userPost" class="wall-post col-sm-12" style="display: none">
-                <a href="#" class="delete-post float-right">
+                <a href="#" class="delete-post float-right permission-specific-owner">
                     <img src="img/delete.png" alt="">
                 </a>
-                <a href="#" class="edit-post float-right">
+                <a href="#" class="edit-post float-right permission-specific-owner">
                     <img src="img/empty-black.png" alt="">
                 </a>
 
@@ -1014,7 +1024,7 @@
                     </div>
                     <div class="modal-body">
                         <button type="button"
-                                class="btn btn-sm btn-danger float-right btn-delete-album"
+                                class="btn btn-sm btn-danger float-right btn-delete-album permission-specific-owner"
                                 data-album-id="0">
                             Delete
                         </button>
