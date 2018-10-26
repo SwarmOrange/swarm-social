@@ -92,7 +92,7 @@ class EnsUtility {
             if (self.contract) {
                 // todo is not filled user wallet - add it to profile
                 $('.save-blockchain').attr('disabled', 'disabled');
-                self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, /*{gas: Utils.getRecommendedGas()},*/ function (error, result) {
+                self.contract.setHash.sendTransaction(self.main.swarm.applicationHash, {gas: Utils.getRecommendedGas()}, function (error, result) {
                     if (error) {
                         Utils.flashMessage('Transaction error or cancelled', 'danger');
                     } else {
@@ -3283,7 +3283,7 @@ class Utils {
     }
 
     static getRecommendedGas() {
-        return 51000;
+        return 100000;
     }
 }
 

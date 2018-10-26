@@ -171,7 +171,7 @@ class Utils {
     }
 
     static getRecommendedGas() {
-        return 51000;
+        return 100000;
     }
 }
 
