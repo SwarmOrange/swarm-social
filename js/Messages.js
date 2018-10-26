@@ -131,16 +131,26 @@ class Messages {
 
     addDialog(newUserWallet) {
         let self = this;
-        if (!newUserWallet || !web3.isAddress(newUserWallet)) {
-            self.main.alert('Enter correct Ethereum wallet');
-            return;
-        }
+        const setDialog = function (newUserWallet) {
+            self.setDialogByWallet(newUserWallet)
+                .then(function (data) {
+                    $('.chat_list[data-user-hash="' + newUserWallet + '"]').click();
+                });
+            $('#addDialogModal').modal('hide');
+        };
 
-        self.setDialogByWallet(newUserWallet)
-            .then(function (data) {
-                $('.chat_list[data-user-hash="' + newUserWallet + '"]').click();
+        if (!newUserWallet || !web3.isAddress(newUserWallet)) {
+            ensUtility.contract.getAddressByUsername.call(newUserWallet, function (error, result) {
+                console.log([error, result]);
+                if (web3.isAddress(result) && result !== '0x0000000000000000000000000000000000000000') {
+                    setDialog(result);
+                } else {
+                    self.main.alert('User not found', []);
+                }
             });
-        $('#addDialogModal').modal('hide');
+        } else {
+            setDialog(newUserWallet);
+        }
     }
 
     drawCorrespondence(myWallet, receiverWallet, myMsgInfo, receiverMsgInfo) {

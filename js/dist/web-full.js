@@ -98,7 +98,7 @@ class EnsUtility {
                     } else {
                         self.main.isCheckHashChange = false;
                         window.location.hash = '';
-                        Utils.flashMessage('Transaction complete');
+                        Utils.flashMessage('Transaction submited');
                     }
                 });
             } else {
@@ -858,7 +858,7 @@ class Main {
 
     setupJquery() {
         //$('#v-pills-messages-tab').click();
-        let self = this;
+        const self = this;
         $(document).on('click', '[data-toggle="lightbox"]', function (event) {
             event.preventDefault();
             $(this).ekkoLightbox();
@@ -898,7 +898,7 @@ class Main {
 
         $('.go-user-hash').click(function (e) {
             e.preventDefault();
-            let self = this;
+            const self = this;
 
             let userHash = $('#navigateUserHash').val();
             self.onAfterHashChange(userHash).then(function () {
@@ -1024,8 +1024,7 @@ class Main {
         $('#iFollowUsers')
             .on('click', '.load-profile', function (e) {
                 e.preventDefault();
-                let swarmProfileHash = $(this).attr('data-profile-id');
-                document.location.hash = swarmProfileHash;
+                document.location.hash = $(this).attr('data-profile-id');
                 document.location.reload();
             })
             .on('click', '.delete-i-follow', function (e) {
@@ -1080,7 +1079,8 @@ class Main {
     }
 
     addFollower(walletOrNickname, onClearInput) {
-        let self = this;
+        const self = this;
+        walletOrNickname = walletOrNickname.trim().replace('@', '').toLowerCase();
         let addFollower = function (walletOrNickname) {
             try {
                 self.blog.addIFollow(walletOrNickname)
@@ -1102,22 +1102,24 @@ class Main {
         } else {
             //self.alert('Please, enter correct SWARM hash');
             ensUtility.contract.getAddressByUsername.call(walletOrNickname, function (error, result) {
-                $('#addFollowerModal').modal('hide');
                 console.log([error, result]);
-                if (web3.isAddress(result)) {
+                $('#addFollowerModal').modal('hide');
+
+                if (web3.isAddress(result) && result !== '0x0000000000000000000000000000000000000000') {
                     addFollower(result);
                     if (onClearInput) {
                         onClearInput();
                     }
                 } else {
-                    self.alert('User not found', []);
+                    Utils.flashMessage('User not found', 'warning');
+
                 }
             });
         }
     }
 
     loadPageInfo(hashOrAddress) {
-        let self = this;
+        const self = this;
         self.currentUserLogin = hashOrAddress;
         if (hashOrAddress) {
             if (window.web3 && window.web3.isAddress(hashOrAddress)) {
@@ -1144,7 +1146,7 @@ class Main {
     }
 
     getHashByAddress(address, onReceiveAddress) {
-        let self = this;
+        const self = this;
         let getAddress = function (address, onComplete) {
             web3.version.getNetwork(function (error, result) {
                 let networkId = result;
@@ -1206,8 +1208,9 @@ class Main {
 
             console.log('WWWWW');
 
-            ensUtility.contract.getMyUsername.call(function (error, result) {
-                console.log('AAAAAZZZZ');
+            ensUtility.contract.getUsername.call(address, function (error, result) {
+                $('#username').text('@' + result);
+                console.log('AAAAAZZZZ my username: ' + result);
                 console.log([error, result]);
                 if (result) {
                     self.showRegistration(false);
@@ -1237,7 +1240,7 @@ class Main {
     }
 
     initByHash(hash) {
-        let self = this;
+        const self = this;
         console.log('passed hash: ' + hash);
         let swarmHost = window.location.protocol + "//" + window.location.host;
         if (window.location.hostname === "mem.lt") {
@@ -1245,7 +1248,8 @@ class Main {
         } else if (window.location.hostname === "tut.bike") {
             swarmHost = "http://beefree.me";
         } else if (window.location.hostname === "localhost") {
-            swarmHost = "http://127.0.0.1:8500";
+            //swarmHost = "http://127.0.0.1:8500";
+            swarmHost = "http://beefree.me";
         }
 
         self.swarm = new SwarmApi(swarmHost, "");
@@ -1276,7 +1280,7 @@ class Main {
     }
 
     updateProfile() {
-        let self = this;
+        const self = this;
         self.preparePage(self.isMyPage());
         $('.btn-add-to-friends').removeAttr('disabled');
 
@@ -1322,7 +1326,7 @@ class Main {
     }
 
     uploadAllInstaPhotos() {
-        let self = this;
+        const self = this;
         let photos = $('img[data-type=insta-photo]');
         if (photos.length) {
             let previewFileName = null;
@@ -1387,7 +1391,7 @@ class Main {
     }
 
     updateInfo(data, isLoadOnlyProfile) {
-        let self = this;
+        const self = this;
         self.blog.myProfile = data;
         $('#firstName').text(data.first_name);
         $('#lastName').text(data.last_name);
@@ -1420,7 +1424,7 @@ class Main {
     }
 
     loadPhotoAlbums(limit, sorting) {
-        let self = this;
+        const self = this;
         // todo move limits and sorting to api
         limit = limit || 'all';
         sorting = sorting || 'asc';
@@ -1453,7 +1457,7 @@ class Main {
     }
 
     loadVideoPlaylists(limit, sorting) {
-        let self = this;
+        const self = this;
         // todo move limits and sorting to api
         limit = limit || 'all';
         sorting = sorting || 'asc';
@@ -1495,7 +1499,7 @@ class Main {
     }
 
     loadIFollow() {
-        let self = this;
+        const self = this;
         let data = self.blog.myProfile;
         let iFollowBlock = $('#iFollowUsers');
         if ('i_follow' in data && data.i_follow.length) {
@@ -1516,7 +1520,7 @@ class Main {
     }
 
     loadPosts() {
-        let self = this;
+        const self = this;
         let maxReceivedPosts = 10;
         let data = self.blog.myProfile;
         let meetPostId = data.last_post_id - self.lastLoadedPost;
@@ -1568,7 +1572,7 @@ class Main {
         let userHash = params.userHash;
         let userProfile = params.userProfile;
 
-        let self = this;
+        const self = this;
         userHash = userHash || self.swarm.applicationHash;
         prefix = prefix || '#userPost';
         let userPost = $(prefix + data.id);
@@ -1872,16 +1876,26 @@ class Messages {
 
     addDialog(newUserWallet) {
         let self = this;
-        if (!newUserWallet || !web3.isAddress(newUserWallet)) {
-            self.main.alert('Enter correct Ethereum wallet');
-            return;
-        }
+        const setDialog = function (newUserWallet) {
+            self.setDialogByWallet(newUserWallet)
+                .then(function (data) {
+                    $('.chat_list[data-user-hash="' + newUserWallet + '"]').click();
+                });
+            $('#addDialogModal').modal('hide');
+        };
 
-        self.setDialogByWallet(newUserWallet)
-            .then(function (data) {
-                $('.chat_list[data-user-hash="' + newUserWallet + '"]').click();
+        if (!newUserWallet || !web3.isAddress(newUserWallet)) {
+            ensUtility.contract.getAddressByUsername.call(newUserWallet, function (error, result) {
+                console.log([error, result]);
+                if (web3.isAddress(result) && result !== '0x0000000000000000000000000000000000000000') {
+                    setDialog(result);
+                } else {
+                    self.main.alert('User not found', []);
+                }
             });
-        $('#addDialogModal').modal('hide');
+        } else {
+            setDialog(newUserWallet);
+        }
     }
 
     drawCorrespondence(myWallet, receiverWallet, myMsgInfo, receiverMsgInfo) {
@@ -3026,6 +3040,7 @@ class StartNow {
 
         $('.btn-register-user').click(function (e) {
             e.preventDefault();
+            // todo check spaces and other spec symbols
             let username = $('#regUsername').val().trim().toLowerCase();
             if (username.length < 3) {
                 alert('Too short username');
@@ -3033,6 +3048,7 @@ class StartNow {
             }
 
             $(this).attr('disabled', 'disabled');
+            $('#username').text('@' + username);
             ensUtility.contract.setUsername.sendTransaction(username, {gas: Utils.getRecommendedGas()}, function (error, result) {
                 console.log([error, result]);
                 // todo answer can be as tx hash
@@ -29082,6 +29098,7 @@ class Blog {
     }
 
     addIFollow(swarmProfileHash, userHash) {
+        swarmProfileHash = swarmProfileHash.toLowerCase();
         if ('i_follow' in this.myProfile) {
             if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
                 throw "Hash already exists";
@@ -29096,6 +29113,7 @@ class Blog {
     }
 
     deleteIFollow(swarmProfileHash, userHash) {
+        swarmProfileHash = swarmProfileHash.toLowerCase();
         if ('i_follow' in this.myProfile) {
             if (this.myProfile.i_follow.indexOf(swarmProfileHash) > -1) {
                 let index = this.myProfile.i_follow.indexOf(swarmProfileHash);
@@ -29117,7 +29135,7 @@ class Blog {
     uploadFilesForPost(id, filesFormData, onUploadProgress) {
         const contentType = 'multipart/form-data';
         const self = this;
-        let url = this.prefix + "post/" + id + "/file/";
+        const url = this.prefix + "post/" + id + "/file/";
 
         return this.sendRawFile(url, filesFormData, contentType, null, null, onUploadProgress)
             .then(function (response) {
@@ -29132,7 +29150,7 @@ class Blog {
 
     uploadAvatar(fileContent) {
         const self = this;
-        let url = this.prefix + "file/avatar/original.jpg";
+        const url = this.prefix + "file/avatar/original.jpg";
 
         return this.sendRawFile(url, fileContent, 'image/jpeg')
             .then(function (response) {

@@ -8,6 +8,7 @@ class StartNow {
 
         $('.btn-register-user').click(function (e) {
             e.preventDefault();
+            // todo check spaces and other spec symbols
             let username = $('#regUsername').val().trim().toLowerCase();
             if (username.length < 3) {
                 alert('Too short username');
@@ -15,6 +16,7 @@ class StartNow {
             }
 
             $(this).attr('disabled', 'disabled');
+            $('#username').text('@' + username);
             ensUtility.contract.setUsername.sendTransaction(username, {gas: Utils.getRecommendedGas()}, function (error, result) {
                 console.log([error, result]);
                 // todo answer can be as tx hash
