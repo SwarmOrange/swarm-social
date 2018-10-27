@@ -97,7 +97,7 @@ class EnsUtility {
                     } else {
                         self.main.isCheckHashChange = false;
                         window.location.hash = '';
-                        Utils.flashMessage('Transaction submited');
+                        Utils.flashMessage('Transaction submitted');
                     }
                 });
             } else {

@@ -50,7 +50,7 @@ npm -v
 
 Update NPM:
 ```
-npm install -g npm
+npm install npm -g
 ```
 
 Install dependencies
@@ -58,22 +58,13 @@ Install dependencies
 ```
 npm install
 npm install uglifycss -g
-npm install -g uglify-js
-npm install -g browserify
+npm install uglify-js -g
+npm install browserify -g
 npm install uglify-es -g
 ```
 
-After changing or adding JS libraries, run
-```
-browserify js/web-modules.js > js/dist/web-modules.js && browserify js/web-full.js > js/dist/web-full.js
-```
 
-... CSS libraries
-```
-node css/uglify.js > css/uglify.css
-```
-
-Compile all files to HTML
+Compile all files into HTML (index.html)
 ```
 npm run-script build
 ```

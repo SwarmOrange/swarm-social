@@ -536,7 +536,7 @@ class Main {
             let src = currentElement.attr('src');
             let downloadedFile = null;
             console.log(src);
-            self.getLoadedUserSwarmInstance().swarm.axios.request({
+            self.getLoadedUserSwarmInstance().axios.request({
                 url: src,
                 method: 'GET',
                 responseType: 'blob',
