@@ -22,7 +22,8 @@ class Main {
 
     isMyPage() {
         //console.log([this.currentUserLogin, this.my, web3.eth.defaultAccount]);
-        return (this.currentUserLogin || this.my.username) && (this.currentUserLogin === this.my.username || this.currentUserLogin === web3.eth.defaultAccount);
+        //return (this.currentUserLogin || this.my.username) && (this.currentUserLogin === this.my.username || this.currentUserLogin === web3.eth.defaultAccount);
+        return true;
     }
 
     setupJquery() {
@@ -260,25 +261,25 @@ class Main {
         walletOrNickname = walletOrNickname.trim().replace('@', '').toLowerCase();
         let addFollower = function (userWallet) {
             try {
-                ensUtility.contract.getHash.call(userWallet, function (error, result) {
-                    self.blog.addIFollow(userWallet)
-                        .then(function (response) {
-                            let template = Utils.getTemplate('iFollowTemplate', {
-                                userWallet: userWallet,
-                                userUrl: './' + userWallet,
-                                userAvatar: self.swarm.getFullUrl('social/file/avatar/original.jpg', result)
-                            });
-                            $('#iFollowUsers').append(template);
-                            self.onAfterHashChange(response.data, true);
+                //ensUtility.contract.getHash.call(userWallet, function (error, result) {
+                self.blog.addIFollow(userWallet)
+                    .then(function (response) {
+                        let template = Utils.getTemplate('iFollowTemplate', {
+                            userWallet: userWallet,
+                            userUrl: './' + userWallet,
+                            userAvatar: self.swarm.getFullUrl('social/file/avatar/original.jpg', userWallet)
                         });
-                });
+                        $('#iFollowUsers').append(template);
+                        self.onAfterHashChange(response.data, true);
+                    });
+                //});
 
             } catch (e) {
                 Utils.flashMessage('User already added', 'warning');
             }
         };
 
-        if (web3.isAddress(walletOrNickname)) {
+        if (self.blogClass.isCorrectSwarmHash(walletOrNickname)) {
             $('#addFollowerModal').modal('hide');
             if (onClearInput) {
                 onClearInput();
@@ -286,8 +287,12 @@ class Main {
 
             addFollower(walletOrNickname);
         } else {
+            $('#addFollowerModal').modal('hide');
+
+            Utils.flashMessage('Incorrect user hash', 'warning');
+
             //self.alert('Please, enter correct SWARM hash');
-            ensUtility.contract.getAddressByUsername.call(walletOrNickname, function (error, result) {
+            /*ensUtility.contract.getAddressByUsername.call(walletOrNickname, function (error, result) {
                 console.log([error, result]);
                 $('#addFollowerModal').modal('hide');
 
@@ -299,7 +304,7 @@ class Main {
                 } else {
                     Utils.flashMessage('User not found', 'warning');
                 }
-            });
+            });*/
         }
     }
 
@@ -401,7 +406,7 @@ class Main {
                 if (result) {
                     self.showRegistration(false);
                 } else {
-                    self.showRegistration(true);
+                    //self.showRegistration(true);
                 }
             });
 
@@ -594,6 +599,7 @@ class Main {
 
     updateInfo(data, isLoadOnlyProfile) {
         const self = this;
+
         self.getLoadedUserBlogInstance().myProfile = data;
         $('#firstName').text(data.first_name);
         $('#lastName').text(data.last_name);
@@ -711,12 +717,12 @@ class Main {
                 iFollowBlock.append('<li class="list-inline-item i-follow-li">' +
                     '<a href="#" class="delete-i-follow permission-specific-owner" data-profile-id="' + v + '"><img class="delete-img-i-follow" src="img/delete.png" alt=""></a>' +
                     '<a onclick="return false;" href="' + userUrl + '" class="load-profile" data-profile-id="' + v + '"><img class="follower-user-avatar circle-element" data-profile-id="' + v + '" src="' + avatarUrl + '" style="width: 30px"></a></li>');
-                self.getLoadedUserBlogInstance().getSwarmHashByWallet(v)
-                    .then(function (result) {
-                        result = result ? result : 'img/swarm-avatar.png';
-                        let avatarUrl = self.getLoadedUserSwarmInstance().getFullUrl('social/file/avatar/original.jpg', result);
-                        $('.follower-user-avatar[data-profile-id="' + v + '"]').attr('src', avatarUrl)
-                    });
+                /*self.getLoadedUserBlogInstance().getSwarmHashByWallet(v)
+                    .then(function (result) {*/
+                let result = v ? v : 'img/swarm-avatar.png';
+                let avatar = self.getLoadedUserSwarmInstance().getFullUrl('social/file/avatar/original.jpg', result);
+                $('.follower-user-avatar[data-profile-id="' + v + '"]').attr('src', avatar)
+                //});
             });
         }
     }

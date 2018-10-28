@@ -132,6 +132,9 @@ class Messages {
 
     addDialog(newUserWallet) {
         let self = this;
+        self.main.alert('Temporarily disabled',  []);
+        $('#addDialogModal').modal('hide');
+        return;
         const setDialog = function (newUserWallet) {
             self.setDialogByWallet(newUserWallet)
                 .then(function (data) {
@@ -141,14 +144,18 @@ class Messages {
         };
 
         if (!newUserWallet || !web3.isAddress(newUserWallet)) {
-            ensUtility.contract.getAddressByUsername.call(newUserWallet, function (error, result) {
-                console.log([error, result]);
-                if (web3.isAddress(result) && result !== '0x0000000000000000000000000000000000000000') {
-                    setDialog(result);
-                } else {
-                    self.main.alert('User not found', []);
-                }
-            });
+            try {
+                ensUtility.contract.getAddressByUsername.call(newUserWallet, function (error, result) {
+                    console.log([error, result]);
+                    if (web3.isAddress(result) && result !== '0x0000000000000000000000000000000000000000') {
+                        setDialog(result);
+                    } else {
+                        self.main.alert('User not found', []);
+                    }
+                });
+            } catch (e) {
+
+            }
         } else {
             setDialog(newUserWallet);
         }
@@ -236,6 +243,7 @@ class Messages {
             return promises;
         };
 
+
         self.main.blog.getSwarmHashByWallet(receiverWallet)
             .then(function (receiverHash) {
                 receiverSwarmHash = receiverHash;
@@ -257,6 +265,9 @@ class Messages {
                         //$('.mesgs .loader').hide();
                         self.scrollDownMessages();
                     });
+            })
+            .catch(function () {
+
             });
     }
 

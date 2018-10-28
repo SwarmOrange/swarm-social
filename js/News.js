@@ -49,11 +49,8 @@ class News {
         let currentUser = users.shift();
         let currentUserHash = null;
         let currentUserProfile = null;
-        return self.main.blog.getSwarmHashByWallet(currentUser)
-            .then(function (result) {
-                currentUserHash = result;
-                return self.main.blog.getProfile(currentUserHash);
-            })
+        return self.main.blog.getProfile(currentUser)
+
             .then(function (response) {
                 currentUserProfile = response.data;
                 let lastPostId = response.data.last_post_id;
