@@ -1,0 +1,1738 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Ihar Shaduryn">
+    <link rel="icon" href="img/logo.jpeg">
+
+    <title>Bee Free</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <!-- Custom styles for this template -->
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:700,900" rel="stylesheet">
+    
+       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" type="text/css"
+          rel="stylesheet">
+
+
+
+    <!-- CSS auto paste here -->
+    <link href="css/uglify.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" type="text/css"
+          rel="stylesheet">
+
+    <script src="https://vk.com/js/api/openapi.js?159" type="text/javascript"></script>
+
+    <style type="text/css">
+
+        @font-face {
+            font-family: SpaceGrotesk;
+            src: url(webfont/SpaceGrotesk-Regular.woff);
+        }
+        @font-face {
+            font-family: SpaceGrotesk-Regular;
+            src: url(webfont/SpaceGrotesk-Bold.woff);
+            font-weight: bold;
+        }
+        body {
+            font-family: SpaceGrotesk;
+        }                
+
+        .hexagon {
+            overflow: hidden;
+            visibility: hidden;
+            -webkit-transform: rotate(120deg);
+               -moz-transform: rotate(120deg);
+                -ms-transform: rotate(120deg);
+                 -o-transform: rotate(120deg);
+                    transform: rotate(120deg);
+            cursor: pointer;
+            }
+        .hexagon-in1 {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            -webkit-transform: rotate(-60deg);
+               -moz-transform: rotate(-60deg);
+                -ms-transform: rotate(-60deg);
+                 -o-transform: rotate(-60deg);
+                    transform: rotate(-60deg);
+            }
+        .hexagon-in2 {
+            width: 100%;
+            height: 100%;
+            background-repeat: no-repeat;
+            background-position: 50%;
+            visibility: visible;
+            -webkit-transform: rotate(-60deg);
+               -moz-transform: rotate(-60deg);
+                -ms-transform: rotate(-60deg);
+                 -o-transform: rotate(-60deg);
+                    transform: rotate(-60deg);
+            }
+        
+        .hexagon2 {
+            margin: 0 0 0 0px;
+            }
+
+        .comment-box {
+        margin-left:30px;
+        height: 50px;
+        width: 200px;;
+        background: white;
+        position: relative;
+        border:1px solid grey;
+        border-radius:10px;
+        }
+        .comment-box:before {
+        content: "";
+        position: absolute;
+        top: -webkit-calc(50% - 10px ); /*may require prefix for old browser support*/
+        top: calc(50% - 10px); /*i.e. half the height*/
+        left: -11px;
+        height: 20px;
+        width: 20px;
+        background: white;
+        transform: rotate(135deg);
+        border-bottom:inherit;
+        border-right:inherit;
+        box-shadow:inherit;
+        }            
+        
+        </style>    
+
+
+    <script>
+        let onSignResp = null;
+
+        /** Google Plus **/
+        /**
+         * Handler for the signin callback triggered after the user selects an account.
+         */
+        function onSignInCallback(resp) {
+            onSignResp = resp;
+            console.log('onSignInCallback');
+            console.log(resp);
+            $('.btn-save-google-plus-info').hide();
+            $('.google-plus-data').html('');
+            gapi.client.load('plus', 'v1', apiClientLoaded);
+        }
+
+        /**
+         * Sets up an API call after the Google API client loads.
+         */
+        function apiClientLoaded() {
+            console.log('apiClientLoaded');
+            $('.btn-save-google-plus-info').hide();
+            if (onSignResp.status && onSignResp.status.signed_in) {
+                $('.g-plus-loader').show();
+                gapi.client.plus.people.get({userId: 'me'}).execute(handleEmailResponse);
+            }
+        }
+
+        function strip(html) {
+            if (html) {
+                var tmp = document.createElement("DIV");
+                tmp.innerHTML = html;
+                return tmp.textContent || tmp.innerText || "";
+            } else {
+                return '';
+            }
+        }
+
+        /**
+         * Response callback for when the API client receives a response.
+         *
+         * @param resp The API response object with the user email and profile information.
+         */
+        function handleEmailResponse(resp) {
+            console.log('handleEmailResponse');
+            console.log(resp);
+            if (resp && resp.code && resp.code == 403) {
+                $('.google-plus-data').text(resp.message);
+            } else if (resp && resp.name) {
+                console.log('googlePlus.setInfo');
+                let img = resp.image ? resp.image.url : '';
+                let about = strip(resp.aboutMe);
+                googlePlus.setInfo(resp.name.givenName, resp.name.familyName, img, about);
+                $('.google-plus-data').html('<p>First name: ' + resp.name.givenName + '</p>' +
+                    '<p>Last name: ' + resp.name.familyName + '</p>' +
+                    '<p><img src="' + img + '"></p>' +
+                    '<p>About: ' + about + '</p>');
+
+                $('.btn-save-google-plus-info').show();
+            }
+
+            $('.g-plus-loader').hide();
+        }
+    </script>
+    <!--<script src="https://plus.google.com/js/client:platform.js" async defer></script>-->
+</head>
+<body>
+
+<script type="text/javascript">
+    VK.init({
+        apiId: 6670736
+    });
+</script>
+
+<div id="fb-root"></div>
+<script>(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = 'https://connect.facebook.net/ru_RU/sdk.js#xfbml=1&version=v3.1&appId=1804254456326979&autoLogAppEvents=1';
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<div class="container-fluid w-100 m-0 p-0" id="nav-container">
+        <header class="border-bottom border-light shadow-sm w-100 ">
+          <div class="row flex-nowrap justify-content-center align-items-center main-blocks nav"> <!--row 1 start //-->
+                   <div class="col-4"><a href="./"><img src="img/logo.jpg" height="60px"/></a></div>
+                   <div class="col-2"><a class="nav-link" id="v-pills-news-tab" data-toggle="tab" href="#v-pills-news"
+                    role="tab" style="color:black;" aria-controls="v-pills-profile" aria-selected="false">News</a></div>
+                    <div class="col-md-auto d-flex justify-content-end align-items-center">
+                                <div class="row flex-nowrap justify-content-end align-items-center" > <!--row 2 start //-->
+                                        
+                                        <div class="col-1 pr-4 justify-content-center"><a class="nav-link" id="v-pills-messages-tab"  style="color:black" data-toggle="tab" href="#v-pills-messages"
+                                            role="tab" aria-controls="v-pills-messages" aria-selected="false"><i class="fa fa-comment-o" aria-hidden="true"></i></a></div>
+                                        <div class="col-1 pr-4 justify-content-center" ><a class="nav-link" id="v-pills-wallet-tab" style="color:black" data-toggle="tab" href="#v-pills-wallet"
+                                            role="tab" aria-controls="v-pills-wallet" aria-selected="false"><i class="fa fa-money" aria-hidden="true"></i></a></div>
+                                        <div class="col-1 pr-4 justify-content-center "><a class="nav-link" id="v-pills-settings-tab" style="color:black" data-toggle="pill" href="#v-pills-settings"
+                                            role="tab" aria-controls="v-pills-settings" aria-selected="false"><i class="fa fa-gear" aria-hidden="true"></i></a></div>
+                                        <div class="col-md-auto" > 
+                                                            <div class="row no-gutter flex-nowrap justify-content-start align-items-center"  > <!--row 4 start //-->
+                                                            <div class="col"><span style="font-size:0.85em;" ><span id="firstName">...</span>
+                                                                <span id="lastName">...</span></span></div></div>
+                                                            <div class="row no-gutter flex-nowrap justify-content-start align-items-center"  >
+                                                            <div class="col"><span style="font-size:0.85em;color:#a5a5a5;">ETH 2.8465</span></div> 
+                                                            </div> <!--row 4 end //-->
+                                                            </div>
+                                           <div class="col-1">
+                                          <div class="hexagon hexagon2" style="width: 30px;height: 70px;"><div class="hexagon-in1"><div class="hexagon-in2" style="background-image:url(img/brandon-hayes-small.jpg);"></div></div></div>
+                                                 </div>
+                                </div> <!--row 2 end //-->
+              </div>
+             </div> <!--row 1 end //-->
+          
+        </header>
+    </div>
+<div id="userRegistration" class="masthead" style=" ">
+    <div class="container h-100">
+        <div class="row h-100">
+            <div class="col-lg-7 my-auto">
+                <div class="header-content mx-auto">
+                    <h1 class="mb-5">Decentralized social network where only you own your data!</h1>
+                    <a href="#" class="btn btn-outline btn-lg js-scroll-trigger btn-start-now">Register with
+                        Metamask</a>
+                    <!--<a href="#" class="btn btn-outline btn-lg js-scroll-trigger btn-start-now-login">Login</a>-->
+                </div>
+            </div>
+            <div class="col-lg-5 my-auto">
+                <!--<div class="device-container">
+                    <div class="device-mockup iphone6_plus portrait white">
+                        <div class="device">
+                            <div class="screen">
+                               <img src="img/demo-screen-1.jpg" class="img-fluid" alt="">
+                            </div>
+                            <div class="button">
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="device-wrapper">
+                    <div class="device" data-device="iPhone6" data-orientation="portrait" data-color="white">
+                        <div class="screen">
+                            <!-- PUT CONTENTS HERE -->
+                            <img src="img/swarm.png" class="img-fluid" alt="">
+
+                        </div>
+                        <div class="button">
+                            <!-- You can hook the "home button" to some JavaScript events or just remove it -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="importData" class="container" style="margin-top: 30px; text-align: center; display: none">
+    <h1>Import your data...</h1>
+    <button class="btn btn-primary mb-2 btn-import-instagram"><img src="img/instagram.png" alt="" style="width: 30px">
+        Import from Instagram
+    </button>
+    <h1>...or create empty page</h1>
+    <button class="btn btn-success mb-2 btn-create-empty"><img src="img/empty.png" alt="" style="width: 30px"> Create
+        empty page
+    </button>
+</div>
+
+<!-- Alert Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="messageBody" class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                <div class="additional-buttons">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-example-modal-lg" id="registrationModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registration</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="regUsername"
+                           placeholder="Username">
+                </div>
+
+                <button type="button" class="btn btn-success btn-register-user">
+                    Register
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="userInfo" class="container" style="margin-top: 30px; display: none">
+
+        <div class="row mt-4 d-flex justify-content-center align-items-center text-nowrap">
+                <div class="col-11 border rounded w-75 p-2 d-flex align-items-center justify-content-between " style="background-color: #0164ff;" >
+                        <button type="submit" class="btn btn-primary mb-2 save-blockchain permission-specific-owner">
+                            <img src="img/savetoblockchain.jpg" alt="Save to Blockchain">
+                        </button>
+                <span class="text-light h5">Hello! <span id="username">...</span></span> <small class="text-light" >Fill your personal data, create your first post and save it to the Blockchain.</small> <button class="btn btn-light btn-sm">Save to Blockchain</button>
+           
+                </div>
+                </div>
+
+
+        <div class="row mt-4 d-flex justify-content-center align-items-center ">
+                <div class="col-11 border rounded w-75 user-info-filled" >
+                
+                                                  <div class="row d-flex justify-content-left align-items-top user-info-filled">
+                                                  <div class="col-md-auto " >
+                        <div class="hexagon hexagon2" style="margin-top:-35px; width:90px;height: 210px;"><div class="hexagon-in1" ><div class="hexagon-in2" style="background-image:url(img/brandon-hayes.jpg);"></div></div></div>
+                                              
+                                              </div>   
+                                               <div class="col pt-3 flex-grow-1   " >
+                                              <span class="text-nowrap text-left"> <span class="h5"><span id="firstName">...</span>
+                                              <span id="lastName">...</span>
+                                              </span>&nbsp;&nbsp;<span class="h5 text-primary"><span id="username"/></span>
+                                              
+                                              <p class="mt-4 "><strong>264</strong> <span  class="text-muted">following</span> <span  ><strong>3.2</strong></span> <span  class="text-muted">following</span></p>
+                                              <p class="mt-4">Co-founder, CEO of @random.company</p>
+                                              <p class="mt-2 text-muted"><span id="birthDate">...</span> <i class="fa fa-circle"  style="font-size:0.001em;" aria-hidden="true"></i> <span id="locationName"></span></p>
+                                              
+                                                 </div>    
+                                                 <div class="col flex-shrink-1  justify-content-end align-items-top " ><i class="fa fa-pencil-square-o float-right edit-field-icon hide permission-specific-owner"></i> </div>
+                            </div>
+
+                        </div>
+
+                            <div class="col-11 border rounded w-75 user-info-edit hide">
+                                
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="firstNameEdit"
+                                               placeholder="First name">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="lastNameEdit"
+                                               placeholder="Last name">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="birthDateEdit"
+                                               placeholder="Birth date">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="locationEdit"
+                                               placeholder="Location">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <textarea class="form-control" id="aboutEdit" rows="3"
+                                                  placeholder="About"></textarea>
+                                    </div>
+
+                                    <p>
+                                        <button type="button" class="btn btn-primary save-info-changes">Save</button>
+                                        <button type="button" class="btn btn-danger save-info-changes-cancel">Cancel
+                                        </button>
+                                    </p>
+                                </div>
+
+
+                </div>
+
+
+                <div class="row d-flex justify-content-center align-items-top ">
+                        <div class="col-4" >
+                   
+                        <div class="row mt-4 d-flex justify-content-center align-items-top w-10 float-right border rounded">
+                        <div class="col-12 d-flex border-bottom  justify-content-left   " ><strong class="m-2"><i class="fa fa-archive" aria-hidden="true"></i> My Storage</strong></div>
+                        <div class="col-12 border-bottom   justify-content-left   " ><small class="m-2">Photo albums</small> <button type="button" class="btn btn-light btn-sm border round  bg-white float-right m-2"><small>Create Album</small></button><img src="img/photo-album.jpg"/> <br/><small>Import from <img src="img/social-import.jpg"/> </small></div>
+                        <div class="col-12    justify-content-left  " ><small  class="m-2">Videos <button type="button" class="btn btn-light btn-sm border round  bg-white float-right m-2"><small>Create Album</small></button></small> <br/><img src="img/video-album.jpg"/> <br/><small>Import from <img src="img/social-import.jpg"/> </small>  </div>
+                        
+                  </div>
+                   
+                        <div class="row mt-4 d-flex justify-content-center align-items-top w-10 float-right border rounded">
+                        <div class="col-8 d-flex  border-bottom  justify-content-left   " ><strong class="m-2"><i class="fa fa-users" aria-hidden="true"></i> Followings</strong>
+                        </div> <div class="col-4 d-flex  border-bottom  justify-content-right   " >
+                        <button type="button" class="btn btn-light border round   btn-sm bg-white m-2"><small>View All</small></button></div>
+                        <div class="col-12    justify-content-center    " ><p>Why not following some people?</p> </div>
+                        
+                        <div class="col-2 justify-content-left   " >   <div class="hexagon hexagon2" style="margin-top:-15px; width:30px;height: 70px;"><div class="hexagon-in1" ><div class="hexagon-in2" style="background-image:url(img/brandon-hayes-small.jpg);"></div></div></div></div>  <div class="col-10    justify-content-left   " >@jeanette.burke   <span class="float-right badge badge-primary">12</span></div>
+                        <div class="col-2 justify-content-left  " >   <div class="hexagon hexagon2" style="margin-top:-15px; width:30px;height: 70px;"><div class="hexagon-in1" ><div class="hexagon-in2" style="background-image:url(img/brandon-hayes-small.jpg);"></div></div></div></div> <div class="col-10    justify-content-left  " >@lester.hughes   <span class="float-right  badge badge-primary">5</span></div>
+                        
+                  </div>
+                   
+                                          <div class="row mt-4 d-flex justify-content-center align-items-top w-10 float-right border rounded">
+                        <div class="col-8 d-flex border-bottom  justify-content-left   " ><strong class="m-2"><i class="fa fa-money" aria-hidden="true"></i> My Wallet</strong>
+                        </div><div class="col-4 d-flex border-bottom  justify-content-left   " >
+                        <button type="button" class="btn btn-light border round float-right bg-white btn-sm m-2"><small>View</small></button></div>
+                        <div class="col-12   justify-content-left   " ><small>Balance</small></div>
+                        <div class="col-12   d-flex justify-content-center   " ><p class="float-none">Add your wallet.</p> </div>
+                      
+                        <div class="col-12   d-flex  justify-content-center   " ><p class="h4">ETH <strong>2.8465</strong></p> </div>
+                        <div class="col-12    d-flex  justify-content-center   " ><span class="text-muted">($560,20) </span></div>
+                        <div class="col-12   justify-content-left   " ><small>Daily Income</small></div>
+                        <div class="col-12    d-flex  justify-content-center   " ><p class="h4"><span class="text-primary">+</span>ETH 0.042</p> </div>
+                          <div class="col-12   justify-content-left   " ><small>Recent Transactions</small></div>
+                           <div class="col-2   d-flex  border-top justify-content-left   " ><div class="hexagon hexagon2" style="margin-top:0px; width:30px;height: 70px;"><div class="hexagon-in1" ><div class="hexagon-in2" style="background-image:url(brandon-hayes-small.jpg);"></div></div></div></div> <div class="col-1  d-flex align-items-center border-top justify-content-left   " ><span class="float-left"> <i class="fa fa-arrow-right"></i></span> </div> <div class="col-2  border-top justify-content-left   " ><div class="hexagon hexagon2" style="margin-top:0px; width:30px;height: 70px;"><div class="hexagon-in1" ><div class="hexagon-in2" style="background-image:url(img/brandon-hayes-small.jpg);"></div></div></div> </div> <div class="col-7  border-top justify-content-left   " >  <span class="float-right">-0.165 ETH <span class="text-muted">($100)</span></span> <span class="small text-muted">sent to <span class="text-primary">@lester.hughes</span></span></div>
+                  
+                      <div class="col-2   d-flex  border-top justify-content-left   " ><div class="hexagon hexagon2" style="margin-top:0px; width:30px;height: 70px;"><div class="hexagon-in1" ><div class="hexagon-in2" style="background-image:url(brandon-hayes-small.jpg);"></div></div></div></div> <div class="col-1  d-flex align-items-center border-top justify-content-left   " ><span class="float-left"> <i class="fa fa-arrow-right"></i></span> </div> <div class="col-2  border-top justify-content-left   " ><div class="hexagon hexagon2" style="margin-top:0px; width:30px;height: 70px;"><div class="hexagon-in1" ><div class="hexagon-in2" style="background-image:url(img/brandon-hayes-small.jpg);"></div></div></div> </div> <div class="col-7  border-top justify-content-left   " >  <span class="float-right">+1 ETH <span class="text-muted">($100)</span> </span><span class="small text-muted">from <span class="text-primary">@bryan.howell</span></span></div>
+                    
+                      <div class="col-2   d-flex  border-top justify-content-left   " ><div class="hexagon hexagon2" style="margin-top:0px; width:30px;height: 70px;"><div class="hexagon-in1" ><div class="hexagon-in2" style="background-image:url(brandon-hayes-small.jpg);"></div></div></div></div> <div class="col-1  d-flex align-items-center border-top justify-content-left   " ><span class="float-left"> <i class="fa fa-arrow-right"></i></span> </div> <div class="col-2  border-top justify-content-left   " ><div class="hexagon hexagon2" style="margin-top:0px; width:30px;height: 70px;"><div class="hexagon-in1" ><div class="hexagon-in2" style="background-image:url(img/brandon-hayes-small.jpg);"></div></div></div> </div> <div class="col-7  border-top justify-content-left   " >  <span class="float-right">+0.064 ETH <span class="text-muted">($100)</span></span> <span class="small text-muted">sent to <span class="text-primary">@jeanette.burke</span></span></div>
+                  
+                  </div>
+                   
+                   
+                   
+                   
+                   
+                    </div> <div class="col-7  w-60  " >
+                    
+                     <div class="row mt-4 ml-2 d-flex justify-content-left align-items-top w-75 float-left ">
+                        <div class="col-1   justify-content-left   " >
+                          <div class="hexagon hexagon2" style="margin-top:-35px; width:60px;height: 140px;"><div class="hexagon-in1" ><div class="hexagon-in2" style="background-image:url(brandon-hayes-small.jpg);"></div></div></div>    
+                       </div> <div class="col-11 justify-content-left   " >
+                       
+                         <div class="comment-box" style="width:510px;"> <input type="text" onfocus="alert('hi');document.getElementById('comment-box').style.border-color='blue'; " class="mt-2 ml-3 w-75" style="border:none;" placeholder="Create a post.." name="post" value="">
+                         <i class="fa fa-camera"></i> <i class="fa fa-video-camera"></i> 
+                         <button type="button" class="btn btn-primary ">Post</button></div>
+                        </div>
+                   
+                   
+                   
+                                          <div class="row mt-4 ml-5 shadow border rounded justify-content-left align-items-middle">
+                        <div class="col-2 border-bottom d-flex  justify-content-left   " >
+                        <div class="hexagon hexagon2" style="margin-top: -10px;width: 30px;height: 70px;"><div class="hexagon-in1"><div class="hexagon-in2" style="background-image:url(brandon-hayes-small.jpg);"></div></div></div>
+                                                    </div>
+                                                    <div class="col-8 border-bottom  d-flex  justify-content-left    " >
+                                                    <div class="row"><div class="col"><strong>Brandon Hayes</strong></div></div>
+                                                    <div class="row"><div class="col"><small class="text-muted">Yesterday - 13:46</small></div></div>
+                                                    </div> 
+                        <div class="col-2 border-bottom float-right " > <i class="fa fa-pencil-square-o"></i>&nbsp;&nbsp;<i class="fa fa-eye"></i></div>
+                        <div class="col-12 border-bottom   justify-content-left   " ><p>This is some text. This is some text.This is some text.This is some text.This is some text.This is some text.This is some text.This is some text.This is some text.This is some text.This is some text.This is some text.This is some text.This is some text.This is some text.This is some text.</p></div>
+                        <div class="col-12    justify-content-left  " > <i class="fa fa-thumbs-o-up"></i>&nbsp;&nbsp;8 &nbsp;&nbsp;&nbsp;<i class="fa fa-thumbs-o-down">&nbsp;&nbsp;0</i> <span class="float-right">Share&nbsp;&nbsp;<i class="fa fa-refresh"></i></span></div>
+                  </div>      
+                  </div>
+                   
+                   
+                      </div>
+                        </div>
+
+
+
+
+
+
+
+        <div class="tab-content col-sm-10" id="v-pills-tabContent">
+            <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+                <div class="alerts"></div>
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <ul class="main-blocks">
+                            <li>
+                                <p>
+                                    <img id="bigAvatar" src="img/no-photo.png" alt="">
+                                </p>
+                                <p class="permission-specific-owner">
+                                    <button id="uploadAvatarButton" type="button" class="btn btn-success"
+                                            data-toggle="modal"
+                                            data-target="#uploadAvatarModal" style="width: 100%">Upload avatar
+                                    </button>
+                                </p>
+                                <!--<p>
+                                    <button id="sendCryptoButton" type="button" class="btn btn-primary"
+                                            data-toggle="modal"
+                                            data-target="#sendCryptoModal" style="width: 100%">
+                                        Send crypto
+                                    </button>
+                                </p>-->
+                                <div class="permission-specific-other" style="display: none">
+                                    <p>
+                                        <button type="button"
+                                                class="btn btn-primary btn-send-message-current-user"
+                                                style="width: 100%; ">
+                                            Send message
+                                        </button>
+                                    </p>
+
+                                    <!--<p>
+                                        <button type="button"
+                                                class="btn btn-primary btn-add-to-friends"
+                                                style="width: 100%; ">
+                                            Add to friends
+                                        </button>
+                                    </p>-->
+                                </div>
+                            </li>
+                            <li class="permission-specific-owner">
+                                <p>Import my data from</p>
+                                <p>
+                                    <button type="button" class="btn btn-primary btn-profile-import-instagram col-sm-5"
+                                            style="">
+                                        <img src="img/instagram.png" alt="" style="width: 30px">
+                                        <!--<div class="img-instagram" style="margin-right: 8px"></div>-->
+
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-primary btn-profile-import-youtube float-right col-sm-5"
+                                            style="">
+                                        <img src="img/youtube-white.png" alt="" style="width: 30px">
+
+                                    </button>
+                                </p>
+                                <p>
+
+                                    <button type="button" class="btn btn-primary btn-profile-import-vk col-sm-5"
+                                            style="">
+                                        <img src="img/vk.png" alt="" style="width: 30px">
+
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-primary btn-profile-import-google-plus float-right col-sm-5"
+                                            style="">
+                                        <img src="img/google-plus.png" alt="" style="width: 30px">
+
+                                    </button>
+                                    <!--<button type="button"
+                                            class="btn btn-primary btn-profile-import-facebook float-right col-sm-5"
+                                            style="">
+                                        <img src="img/facebook.png" alt="" style="width: 30px">
+
+                                    </button>-->
+                                </p>
+                            </li>
+
+                            <li>
+                                <p class="float-left">I follow</p>
+                                <p class="float-right">
+                                    <a href="#" data-toggle="modal" data-target="#addFollowerModal" class="permission-specific-owner">
+                                        <img src="img/add.png" alt="" style="width: 20px">
+                                    </a>
+                                </p>
+                                <div class="clear-both"></div>
+
+                                <ul id="iFollowUsers" class="list-inline">
+
+                                </ul>
+                            </li>
+
+                            <li>
+                                <p class="float-left"><a class="show-all-videoalbums" href="#">Video playlists</a></p>
+                                <p class="float-right">
+                                    <a href="#" class="upload-videos-preview permission-specific-owner">
+                                        <img src="img/add.png" alt="" style="width: 20px">
+                                    </a>
+                                </p>
+                                <div class="clear-both"></div>
+
+                                <ul id="videoPlaylists" class="list-inline">
+
+                                </ul>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                    <div class="col-sm-8">
+                        <ul class="main-blocks">
+
+                            <li>
+                                <p class="float-left">
+                                    <a class="show-all-photoalbums" href="#">Photo albums</a>
+                                </p>
+
+                                <p class="float-right">
+                                    <a href="#" class="create-album permission-specific-owner">
+                                        <img src="img/add.png" alt="" style="width: 20px">
+                                    </a>
+                                </p>
+                                <div class="clear-both"></div>
+
+                                <ul id="photoAlbums" class="list-inline preview-wall-image">
+
+                                </ul>
+                            </li>
+
+
+                            <li id="postBlock" class="permission-specific-owner">
+                                <div class="row">
+                                    <div class="col-sm-3">Create post</div>
+                                </div>
+                                <p></p>
+
+                                <form>
+                                    <div class="form-group">
+                                        <textarea class="form-control" id="postContent" rows="3"></textarea>
+                                    </div>
+
+                                    <div id="attached-content">
+
+                                    </div>
+
+                                    <div id="postOrAttach" style="height: 30px">
+                                        <p class="float-left">
+                                            <button type="submit" class="btn btn-primary mb-2 publish-post">Post
+                                            </button>
+                                        </p>
+
+                                        <p class="float-right">
+                                            <input id="input-attach-file" type="file" style="display: none;"
+                                                   data-type="other"
+                                                   accept="">
+                                            <a href="#" class="attach-button attach-photo"><img src="img/photo.png"
+                                                                                                alt=""></a>
+                                            <a href="#" class="attach-button attach-video"><img src="img/video.png"
+                                                                                                alt=""></a>
+                                            <a href="#" class="attach-button attach-audio"><img src="img/audio.png"
+                                                                                                alt=""></a>
+                                            <a href="#" class="attach-button attach-youtube" data-toggle="modal"
+                                               data-target="#attachYoutubeModal"><img src="img/youtube.png"
+                                                                                      alt=""></a>
+                                        </p>
+
+                                    </div>
+                                    <div id="progressPanel" style="display:none;">
+                                        <div class="clear-both"></div>
+                                        <div class="progress" style="height: 20px;">
+                                            <div id="postProgress" class="progress-bar progress-bar-striped"
+                                                 role="progressbar"
+                                                 style="width: 0%"
+                                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </li>
+
+
+                            <li style="border: 0; padding: 0">
+                                <div id="userPosts" class="posts">
+
+                                </div>
+                                <p id="loadMore" class="text-center hide">
+                                    <a class="btn btn-primary load-more" href="#">
+                                        Load more..
+                                    </a>
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-news" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <div class="d-flex justify-content-center news-update">
+                            <div class="loader-animation"></div>
+                        </div>
+                        <div class="news-content"></div>
+                    </div>
+                    <div class="col-sm-3">
+                        <ul class="list-group news-users">
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <!--<div class="btn-group dropright">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">
+                                Write message to ..
+                            </button>
+                            <div class="dropdown-menu messages-users-list">
+                                <button class="dropdown-item" type="button">Action</button>
+                            </div>
+                        </div>-->
+
+                        <form id="send-message-to" style="display: none">
+                            <hr>
+                            <div class="form-group">
+                                <label for="messageUserHash">User hash</label>
+                                <div class="row">
+                                    <div class="col-sm-1">
+                                        <img id="message-to-avatar" src="img/swarm-avatar.jpg" alt="" class="size-36">
+                                    </div>
+                                    <div class="col-sm-11">
+                                        <input type="text" class="form-control" id="messageUserHash" placeholder="...">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="messageUserMessage">Message for user</label>
+                                <textarea class="form-control" id="messageUserMessage" rows="3"></textarea>
+                            </div>
+                            <p style="color: red">Currently all messages are public and not encrypted</p>
+                            <button type="button" class="btn btn-primary messages-send-message">Send</button>
+                        </form>
+
+
+                        <div class="messaging">
+                            <div class="inbox_msg">
+                                <div class="inbox_people">
+                                    <div class="headind_srch">
+                                        <div class="recent_heading">
+                                            <h4>Recent</h4>
+                                        </div>
+                                        <!--<div class="srch_bar">
+                                            <div class="stylish-input-group">
+                                                <input type="text" class="search-bar" placeholder="Search">
+                                                <span class="input-group-addon">
+                <button type="button"> <i class="fa fa-search" aria-hidden="true"></i> </button>
+                </span></div>
+                                        </div>-->
+
+                                        <i class="fa fa-plus-circle float-right messages-add-dialog" aria-hidden="true"
+                                           style="font-size: 25px; cursor: pointer;" data-toggle="modal"
+                                           data-target="#addDialogModal"></i>
+
+                                    </div>
+                                    <div class="inbox_chat">
+
+
+                                    </div>
+                                </div>
+
+                                <div class="mesgs">
+
+                                    <div class="d-flex justify-content-center loader" style="display: none;">
+                                        <div class="loader-animation loader" style="display: none;"></div>
+                                    </div>
+
+                                    <div class="msg_history">
+
+                                    </div>
+
+                                    <div class="type_msg" style="display: none;">
+                                        <div class="input_msg_write input-group">
+                                            <input type="text" class="write_msg form-control"
+                                                   placeholder="Type a message"
+                                                   aria-label="Type a message" aria-describedby="basic-addon2">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary messages-send-message"
+                                                        type="button">
+                                                    <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-wallet" role="tabpanel" aria-labelledby="v-pills-wallet-tab">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <form id="wallet-form">
+                            <div class="form-group">
+                                <label for="myEthereumWallet">My Ethereum wallet</label>
+                                <input type="text" class="form-control" id="myEthereumWallet" placeholder="0x...">
+                            </div>
+                            <button type="button" class="btn btn-primary wallet-save">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <p>
+                            <button type="button" class="btn btn-primary settings-export-all-data">
+                                Export all data
+                            </button>
+                        </p>
+                        <p class="export-status"></p>
+                        <p class="export-download-button hide">
+                            <button type="button" class="btn btn-success settings-export-download">
+                                Download
+                            </button>
+                        </p>
+                        <div id="exportDataProgress" class="hide">
+                            <div class="clear-both"></div>
+                            <div class="progress" style="height: 20px;">
+                                <div id="exportDataProgressBar" class="progress-bar progress-bar-striped"
+                                     role="progressbar"
+                                     style="width: 10%"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <p>
+                            <input id="settings-import-file" type="file" class="hide">
+                            <button type="button" class="btn btn-primary settings-import-data">
+                                Import data
+                            </button>
+                        </p>
+                        <p class="import-status"></p>
+                        <div id="importDataProgress" class="hide">
+                            <div class="clear-both"></div>
+                            <div class="progress" style="height: 20px;">
+                                <div id="importDataProgressBar" class="progress-bar progress-bar-striped"
+                                     role="progressbar"
+                                     style="width: 10%"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <button type="button" class="btn btn-danger settings-delete-all">
+                            Delete all
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="templates" style="display: none">
+            <li id="iFollowTemplate" class="list-inline-item i-follow-li" style="display: none;">
+                <a href="#" class="delete-i-follow permission-specific-owner" data-profile-id="{{userWallet}}">
+                    <img class="delete-img-i-follow" src="img/delete.png" alt="">
+                </a>
+                <a onclick="return false;" href="{{userUrl}}" class="load-profile" data-profile-id="{{userWallet}}">
+                    <img class="follower-user-avatar circle-element" data-profile-id="{{userWallet}}" src="{{userAvatar}}" style="width: 30px">
+                </a>
+            </li>
+
+            <div id="loaderTemplate" class="d-flex justify-content-center" style="display: none">
+                <div class="loader-animation"></div>
+            </div>
+
+            <a id="photoAlbumPreviewTemplate"
+               style="display: none"
+               href="{{bigSrc}}"
+               data-toggle="lightbox"
+               data-title="View photo"
+               data-footer="<a target=_blank href='{{originalSrc}}'>Open full image</a><br>{{description}}"
+               data-gallery="gallery-{{albumId}}">
+                <img src="{{previewSrc}}" class="{{imgClasses}}">
+            </a>
+
+            <div id="userPost" class="wall-post col-sm-12" style="display: none">
+                <a href="#" class="delete-post float-right permission-specific-owner">
+                    <img src="img/delete.png" alt="">
+                </a>
+                <a href="#" class="edit-post float-right permission-specific-owner">
+                    <img src="img/empty-black.png" alt="">
+                </a>
+
+                <div class="post-owner float-left">
+                    <img class="post-owner-avatar size-36 circle-element" src="img/swarm-avatar.jpg" alt="">
+                    <span class="post-owner-name">... ...</span>
+                </div>
+                <div class="clear-both"></div>
+                <div class="description"></div>
+                <div class="edit-post-block" style="display: none">
+                    <div class="form-group">
+                        <textarea class="form-control" rows="3"></textarea>
+                    </div>
+                    <p>
+                        <button type="button" class="btn btn-primary save-post">Save</button>
+                    </p>
+                </div>
+                <div class="post-content">
+
+                </div>
+                <div class="post-feedback" style="">
+                    <i class="fa fa-heart float-right post-like" aria-hidden="true"
+                       style="font-size: 25px; cursor: pointer;"></i>
+                </div>
+                <div class="clear-both"></div>
+            </div>
+
+            <div id="postAttachment" class="post-attachment" style="display: none">
+                <div class="content"></div>
+            </div>
+
+            <div id="wallYoutubeAttachment" class="wall-attachment" style="display: none">
+
+            </div>
+
+            <div id="photoAttachment" class="wall-attachment photo-attachment" style="display: none">
+                <div class="delete-post-content hide">&times;</div>
+                <div class="content"></div>
+            </div>
+
+            <div id="videoAttachment" class="wall-attachment" style="display: none">
+
+            </div>
+
+            <div id="audioAttachment"
+                 class="wall-attachment audio-attachment"
+                 data-post-id="{{postId}}"
+                 data-attachment-id="{{attachmentId}}"
+                 style="display: none">
+                <div class="row">
+                    <div class="col-sm-1 delete-post-content hide"
+                         data-post-id="{{postId}}"
+                         data-attachment-id="{{attachmentId}}"
+                         style="position: relative; color:black">
+                        &times;
+                    </div>
+                    <div class="col-sm-11">
+                        <audio controls style="display: block; width: 100%">
+                            <source src="{{source}}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+
+                    </div>
+                </div>
+            </div>
+
+            <div id="photoalbumAttachment" class="wall-attachment photoalbum-attachment" style="display: none">
+
+            </div>
+
+            <div id="videoalbumAttachment" class="wall-attachment videoalbum-attachment" style="display: none">
+
+            </div>
+
+            <div id="sendMessageTemplate" class="message-dialog-send-message" style="display: none">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Message" aria-label="Message"
+                           aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="messagesDialogItem" class="chat_list" data-user-id="" style="display: none">
+                <div class="chat_people">
+                    <div class="chat_img">
+                        <img class="messages-user-dialog-avatar circle-element" src="img/swarm-avatar.jpg" alt=""></div>
+                    <div class="chat_ib">
+                        <h5 class="chat_user_name">Ihar Shaduryn</h5>
+                        <p class="chat_message">Test, which is a new approach to have all solutions
+                            astrology under one roof.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="incomeMessageTemplate" class="chat-message incoming_msg" style="display: none">
+                <div class="incoming_msg_img">
+                    <img class="income-user-avatar circle-element"
+                         src="https://ptetutorials.com/images/user-profile.png" alt="">
+                </div>
+                <div class="received_msg">
+                    <div class="received_withd_msg">
+                        <p class="message-text">Test which is a new approach to have all
+                            solutions 1</p>
+                        <span class="time_date"> 11:01 AM    |    June 9</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="outgoingMessageTemplate" class="chat-message outgoing_msg" style="display: none">
+                <div class="sent_msg">
+                    <p class="message-text">Test which is a new approach to have all
+                        solutions 2</p>
+                    <!--<span class="time_date"> 11:01 AM    |    June 9</span>-->
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Avatar Modal -->
+        <div class="modal fade" id="uploadAvatarModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Upload avatar</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            <img id="avatarUpload">
+                        </p>
+                        <p>
+                            <input id="file-input" type="file">
+                        </p>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary save-avatar">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attach Youtube Modal -->
+        <div class="modal fade" id="attachYoutubeModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Attach Youtube Video</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="youtubeUrl" placeholder="Youtube Video URL">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary add-youtube-video">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Messages Dialog Modal -->
+        <div class="modal fade" id="addDialogModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Dialog</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="text" class="form-control messages-new-dialog"
+                                   placeholder="Ethereum wallet or nickname">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary btn-messages-add-dialog">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Follower Modal -->
+        <div class="modal fade" id="addFollowerModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add follower</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="followerHash"
+                                   placeholder="Username or Ethereum wallet">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary add-follower">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update ENS Modal -->
+        <div class="modal fade" id="updateEnsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update ENS domain with current hash</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="ensDomain" placeholder="Your ENS domain">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="currentHash" placeholder="Current page hash"
+                                   disabled>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary send-ens-transaction">Send transaction</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Send crypto Modal -->
+        <div class="modal fade" id="sendCryptoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Send crypto</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="sendCryptoAmount" placeholder="0.123"
+                                   aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="basic-addon2">ETH</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary send-crypto-ethereum">Send Ethereum</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load Modal -->
+        <div class="modal fade" id="loadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Transfer SWARM data</h5>
+                    </div>
+                    <div id="loadContent" class="modal-body">
+                        <div class="col-sm-4 offset-sm-4">
+                            <div class="loader-animation"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade bd-example-modal-lg" id="showAllPhotoalbumsModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">All photoalbums</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-center">
+                            <div class="loader-animation"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade bd-example-modal-lg" id="showAllVideoalbumsModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">All Video Playlists</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-center">
+                            <div class="loader-animation"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Album Modal -->
+        <div class="modal fade bd-example-modal-lg" id="viewAlbumModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">View Photo Album</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <button type="button"
+                                class="btn btn-sm btn-danger float-right btn-delete-album permission-specific-owner"
+                                data-album-id="0">
+                            Delete
+                        </button>
+
+                        <div class="clear-both"></div>
+                        <div id="viewAlbumContent" class="preview-images">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Video Modal -->
+        <div class="modal fade bd-example-modal-lg" id="viewVideoAlbumModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">View Video Playlist</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!--<button type="button" class="btn btn-sm btn-danger float-right btn-delete-album" data-album-id="0">
+                            Delete
+                        </button>-->
+
+                        <div class="clear-both"></div>
+                        <div id="viewVideoAlbumContent">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create/Edit Album Modal -->
+        <div class="modal fade bd-example-modal-lg" id="newAlbumModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create/Edit Album</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div id="newAlbumContent" class="modal-body">
+                        <!--<p class="float-left">Hello </p><button type="button" class="btn btn-sm btn-primary add-photo-album float-right">Add photos</button>-->
+                        <p>
+                            <input id="input-upload-photo-album" type="file" class="hide" accept="image/*" multiple>
+                            <button type="button" class="btn btn-primary upload-photos">Upload photos</button>
+                            <button type="button" class="btn btn-primary show-insta-panel">Import photos from
+                                Instagram
+                            </button>
+                            <button type="button" class="btn btn-success upload-all-insta">Upload all from Instagram
+                            </button>
+                        </p>
+                        <p>
+                        <div id="progressPanelAlbum" class="hide">
+                            <div class="clear-both"></div>
+                            <div class="progress" style="height: 20px;">
+                                <div id="postProgressAlbum" class="progress-bar progress-bar-striped"
+                                     role="progressbar"
+                                     style="width: 0%"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="import-insta-panel hide">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="instaNick"
+                                       placeholder="Instagram nickname">
+                            </div>
+                            <button type="button" class="btn btn-primary import-instagram">Import</button>
+                            <button type="button" class="btn btn-secondary import-instagram-cancel">Cancel</button>
+                        </div>
+                        <div class="clear-both"></div>
+                        <hr>
+                        <div id="uploaded-photos" class="preview-images">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create/Edit Video Album Modal -->
+        <div class="modal fade bd-example-modal-lg" id="newVideoModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create/Edit Album</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            <input id="input-upload-video-album" type="file" style="display: none;" accept="video/*"
+                                   multiple>
+                            <button type="button" class="btn btn-primary upload-videos">Upload videos</button>
+                        </p>
+                        <p>
+                        <div id="progressPanelVideoAlbum" style="display:none;">
+                            <div class="clear-both"></div>
+                            <div class="progress" style="height: 20px;">
+                                <div id="postProgressVideoAlbum" class="progress-bar progress-bar-striped"
+                                     role="progressbar"
+                                     style="width: 0%"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        <div class="clear-both"></div>
+                        <hr>
+                        <div id="uploaded-videos">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Youtube Import Modal -->
+        <div class="modal fade bd-example-modal-lg" id="youtubeImportModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import YouTube Videos</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="d-flex justify-content-center">
+                            <button id="execute-request-button" type="button" class="btn btn-primary">Authorize with
+                                YouTube
+                            </button>
+                        </div>
+
+                        <div id="youtubeImportContent" style="margin-top: 8px">
+
+                        </div>
+                        <hr>
+                        <div id="youtubePlaylistVideos" style="margin-top: 8px">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Google Plus Import Modal -->
+        <div class="modal fade bd-example-modal-lg" id="googlePlusImportModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import Google Plus</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-center">
+                            <div id="gConnect" class="button">
+                                <p>
+                                    <button class="g-signin"
+                                            data-scope="email"
+                                            data-clientid="69055588705-3504td09tlhvqpfns5li4udtt2ognqa8.apps.googleusercontent.com"
+                                            data-callback="onSignInCallback"
+                                            data-theme="dark"
+                                            data-cookiepolicy="single_host_origin">
+                                    </button>
+                                </p>
+
+                                <p class="google-plus-data"></p>
+
+                                <p>
+                                    <button class="btn btn-success btn-save-google-plus-info hide">
+                                        Save info to profile
+                                    </button>
+                                </p>
+
+                                <div class="loader-animation g-plus-loader hide"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Show all photoalbums Modal -->
+        <div class="modal fade bd-example-modal-lg" id="allPhotoalbumsModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import YouTube Videos</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="allPhotoAlbums">
+
+                        </div>
+                    </div>
+                    <!--<div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+
+        <!-- Import from Facebook Modal -->
+        <div class="modal fade bd-example-modal-lg" id="importFromFacebookModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import from Facebook</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="fb-login-button" data-max-rows="1" data-size="large"
+                             data-button-type="continue_with"
+                             data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="true"
+                             data-onlogin="fbCheckLoginState" data-scope="user_videos,user_posts,user_photos"></div>
+
+                        <div id="importFacebookContent">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import from VK Modal -->
+        <div class="modal fade bd-example-modal-lg" id="importFromVKModal" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import from VK</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-center">
+
+                            <button type="button" class="btn btn-primary btn-vk-authorize"
+                                    onclick="startVkAuth()">
+                                Authorize
+                            </button>
+
+                            <div class="vk-authorized hide">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="vkTransferPhoto"
+                                           value="option1"
+                                           checked>
+                                    <label class="form-check-label" for="vkTransferPhoto">Transfer photo albums <br>
+                                        <a href="#" class="vk-select-photos">Select albums</a></label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="vkTransferVideo"
+                                           value="option2"
+                                           checked>
+                                    <label class="form-check-label" for="vkTransferVideo">Transfer video <br>
+                                        <a href="#" class="vk-select-videos">Select videos</a></label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="vkTransferUserInfo"
+                                           value="option2"
+                                           checked>
+                                    <label class="form-check-label" for="vkTransferUserInfo">Transfer user
+                                        info</label>
+                                </div>
+
+                                <p class="text-center" style="margin-top: 16px">
+                                    <button type="button" class="btn btn-primary" onclick="startVkImport()">
+                                        Transfer
+                                    </button>
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="import-vk-content">
+                            <span id="receiveVkPhotos"></span>
+                            <ul class="list-inline vk-list-photos hide"></ul>
+                            <ul class="list-inline vk-list-videos hide"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="js/scripts.js"></script>
+        <script src="js/youtube-load.js"></script>
+        <script type="text/javascript">
+            function startVkImport() {
+                vkImport.transferAll();
+            }
+
+            function startVkAuth() {
+                VK.Auth.login(function (response) {
+                    vkImport.vkAuthInfo(response);
+                }, 20);
+            }
+        </script>
+        <script type="text/javascript">
+            // Global variables for GoogleAuth object, auth status.
+            var GoogleAuth;
+
+            /**
+             * Load the API's client and auth2 modules.
+             * Call the initClient function after the modules load.
+             */
+            function handleClientLoad() {
+                gapi.load('client:auth2', initClient);
+            }
+
+            function initClient() {
+                // Initialize the gapi.client object, which app uses to make API requests.
+                // Get API key and client ID from API Console.
+                // 'scope' field specifies space-delimited list of access scopes
+
+                gapi.client.init({
+                    'clientId': '840608930739-12c2gdat8sefu73ddbos0ci7i3dk0qa4.apps.googleusercontent.com',
+                    'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
+                    'scope': 'https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner'
+                }).then(function () {
+                    GoogleAuth = gapi.auth2.getAuthInstance();
+
+                    // Listen for sign-in state changes.
+                    GoogleAuth.isSignedIn.listen(updateSigninStatus);
+
+                    // Handle initial sign-in state. (Determine if user is already signed in.)
+                    setSigninStatus();
+
+                    // Call handleAuthClick function when user clicks on "Authorize" button.
+                    $('#execute-request-button').click(function () {
+                        $('#youtubeImportContent').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+                        handleAuthClick(event);
+                    });
+                });
+            }
+
+            function handleAuthClick(event) {
+                // Sign user in after click on auth button.
+                if (isAuthorized) {
+                    defineRequest();
+                } else {
+                    GoogleAuth.signIn();
+                }
+            }
+
+            function setSigninStatus() {
+                var user = GoogleAuth.currentUser.get();
+                isAuthorized = user.hasGrantedScopes('https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner');
+                // Toggle button text and displayed statement based on current auth status.
+                if (isAuthorized) {
+                    //defineRequest();
+                }
+            }
+
+            function updateSigninStatus(isSignedIn) {
+                setSigninStatus();
+            }
+
+            function createResource(properties) {
+                var resource = {};
+                var normalizedProps = properties;
+                for (var p in properties) {
+                    var value = properties[p];
+                    if (p && p.substr(-2, 2) == '[]') {
+                        var adjustedName = p.replace('[]', '');
+                        if (value) {
+                            normalizedProps[adjustedName] = value.split(',');
+                        }
+                        delete normalizedProps[p];
+                    }
+                }
+                for (var p in normalizedProps) {
+                    // Leave properties that don't have values out of inserted resource.
+                    if (normalizedProps.hasOwnProperty(p) && normalizedProps[p]) {
+                        var propArray = p.split('.');
+                        var ref = resource;
+                        for (var pa = 0; pa < propArray.length; pa++) {
+                            var key = propArray[pa];
+                            if (pa == propArray.length - 1) {
+                                ref[key] = normalizedProps[p];
+                            } else {
+                                ref = ref[key] = ref[key] || {};
+                            }
+                        }
+                    }
+                }
+
+                return resource;
+            }
+
+            function removeEmptyParams(params) {
+                for (var p in params) {
+                    if (!params[p] || params[p] == 'undefined') {
+                        delete params[p];
+                    }
+                }
+                return params;
+            }
+
+            function executeRequest(request, onSuccess) {
+                request.execute(function (response) {
+                    console.log(response);
+                    if (onSuccess) {
+                        onSuccess(response);
+                    }
+                });
+            }
+
+            function buildApiRequest(requestMethod, path, params, properties, onSuccess) {
+                params = removeEmptyParams(params);
+                var request;
+                if (properties) {
+                    var resource = createResource(properties);
+                    request = gapi.client.request({
+                        'body': resource,
+                        'method': requestMethod,
+                        'path': path,
+                        'params': params
+                    });
+                } else {
+                    request = gapi.client.request({
+                        'method': requestMethod,
+                        'path': path,
+                        'params': params
+                    });
+                }
+                executeRequest(request, onSuccess);
+            }
+
+            /***** END BOILERPLATE CODE *****/
+
+
+            function defineRequest() {
+                buildApiRequest('GET',
+                    '/youtube/v3/playlists',
+                    {
+                        'mine': 'true',
+                        'maxResults': '25',
+                        'part': 'snippet,contentDetails',
+                        'onBehalfOfContentOwner': '',
+                        'onBehalfOfContentOwnerChannel': ''
+                    }, null, function (response) {
+                        let youtubeImportContent = $('#youtubeImportContent');
+                        youtubeImportContent.html('<ul id="preview-youtube-playlists" class="list-inline">');
+                        response.items.forEach(function (v) {
+                            youtubeImportContent.append('<li class="list-inline-item"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
+                                '<p><button type="button" class="btn btn-primary receive-youtube-playlist-videos" data-id="' + v.id + '">Receive videos</button></p>' +
+                                '</li>');
+
+                        });
+                        youtubeImportContent.append('</ul>');
+                    });
+            }
+
+            $('#youtubeImportModal').on('click', '.receive-youtube-playlist-videos', function () {
+                let id = $(this).attr('data-id');
+                if (!id) {
+                    alert('Incorrect playlist id');
+
+                    return;
+                }
+
+                $('#youtubePlaylistVideos').html('<div class="col-sm-2 offset-sm-5"><div class="loader-animation"></div></div>');
+                buildApiRequest('GET',
+                    '/youtube/v3/playlistItems',
+                    {
+                        'maxResults': '25',
+                        'part': 'snippet,contentDetails',
+                        'playlistId': id
+                    }, null, function (response) {
+                        let videos = $('#youtubePlaylistVideos');
+                        videos.html('<p><button type="button" class="btn btn-success btn-import-all-videos">Import all videos</button></p>' +
+                            '<ul id="preview-youtube-videos" class="list-inline">');
+                        response.items.forEach(function (v) {
+                            videos.append('<li class="list-inline-item youtube-video-import" data-id="' + v.contentDetails.videoId + '" data-cover-file="' + v.snippet.thumbnails.medium.url + '"><p><img src="' + v.snippet.thumbnails.medium.url + '"></p>' +
+                                '</li>');
+
+                        });
+                        videos.append('</ul>');
+                    });
+            });
+        </script>
+</body>
+</html>

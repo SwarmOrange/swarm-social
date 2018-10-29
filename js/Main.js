@@ -28,10 +28,19 @@ class Main {
     setupJquery() {
         //$('#v-pills-messages-tab').click();
         const self = this;
-        $(document).on('click', '[data-toggle="lightbox"]', function (event) {
-            event.preventDefault();
-            $(this).ekkoLightbox();
+
+        $('#nav-container a').on('click', function(e) {
+        e.preventDefault();
+        $(this).tab('show');
+        var theThis = $(this);
+        $('#nav-container a').removeClass('active');
+        theThis.addClass('active');
         });
+
+        // $(document).on('click', '[data-toggle="lightbox"]', function (event) {
+        //     event.preventDefault();
+        //     $(this).ekkoLightbox();
+        // });
 
         $(document).ready(function () {
             let hashOrAddress = window.location.hash.substring(1);
@@ -536,7 +545,7 @@ class Main {
             let src = currentElement.attr('src');
             let downloadedFile = null;
             console.log(src);
-            self.getLoadedUserSwarmInstance().swarm.axios.request({
+            self.swarm.axios.request({
                 url: src,
                 method: 'GET',
                 responseType: 'blob',
@@ -595,8 +604,8 @@ class Main {
     updateInfo(data, isLoadOnlyProfile) {
         const self = this;
         self.getLoadedUserBlogInstance().myProfile = data;
-        $('#firstName').text(data.first_name);
-        $('#lastName').text(data.last_name);
+        $('span[id="firstName"]').text(data.first_name);
+        $('span[id="lastName"]').text(data.last_name);
         $('#birthDate').text(data.birth_date);
         if (data.location && data.location.name) {
             $('#locationName').text(data.location.name);
